@@ -10,7 +10,7 @@ import urllib.request
 from dataclasses import dataclass
 
 from .errors import APIError, BudgetExhausted, ExperimentError, InvalidAction
-from .protocol import parse_action, request_payload
+from .protocol import parse_action, parse_actions, request_payload
 
 
 @dataclass
@@ -46,6 +46,7 @@ class Client:
     def complete(self, payload, step):
         encoded = json.dumps(payload, allow_nan=False, separators=(",", ":")).encode()
         request_hash = hashlib.sha256(encoded).hexdigest()
+        request_file = self.store.request(step, encoded) if hasattr(self.store, "request") else None
         for retry in range(self.cfg.max_retries + 1):
             if self.attempts >= self.cfg.max_http_requests:
                 raise BudgetExhausted("HTTP request budget exhausted")
@@ -54,6 +55,10 @@ class Client:
             event = {"event": "api_attempt", "step": step, "attempt": self.attempts,
                      "retry": retry, "request_sha256": request_hash, "status_code": None,
                      "usage": None, "requested_model": self.cfg.model}
+            event["request_file"] = request_file
+            self.store.event({"event": "api_started", "step": step, "attempt": self.attempts,
+                              "request_sha256": request_hash})
+            print(f"API step={step} attempt={self.attempts} retry={retry} waiting (timeout={self.cfg.timeout_seconds}s)", flush=True)
             response = None
             network_error = None
             try:
@@ -80,6 +85,10 @@ class Client:
                     event["returned_model"] = data.get("model")
                     event["response_id"] = data.get("id")
                     event["usage"] = data.get("usage")
+                    event["system_fingerprint"] = data.get("system_fingerprint")
+                    choices = data.get("choices")
+                    if isinstance(choices, list) and choices and isinstance(choices[0], dict):
+                        event["finish_reason"] = choices[0].get("finish_reason")
             self.store.event(event)
             if response is not None and 200 <= response.status < 300:
                 if not isinstance(data, dict):
@@ -97,21 +106,32 @@ class Client:
 class ModelPolicy:
     def __init__(self, cfg, task, client, store):
         self.cfg, self.task, self.client, self.store = cfg, task, client, store
+        self.visual_history = []
 
     def act(self, obs, history, step, frame_refs):
         started = time.perf_counter()
         event = {"event": "decision", "step": step, "frames": frame_refs,
                  "proprioception": obs.state, "recent_history": history, "valid": False}
         try:
-            reply = self.client.complete(request_payload(self.cfg, self.task, obs, history, step), step)
+            event["visual_history_frames"] = [{"step": s, "frames": refs}
+                                               for s, _, refs in self.visual_history]
+            reply = self.client.complete(request_payload(self.cfg, self.task, obs, history, step,
+                [(s, o) for s, o, _ in self.visual_history]), step)
             try:
                 choice = reply["choices"][0]
                 content = choice["message"]["content"]
                 finish = choice["finish_reason"]
             except (KeyError, IndexError, TypeError) as exc:
                 raise InvalidAction("API response has no complete assistant choice") from exc
-            action = parse_action(content, finish)
-            event.update(valid=True, action=action, returned_model=reply.get("model"))
+            event.update(finish_reason=finish, content_characters=len(content) if isinstance(content, str) else None)
+            v2 = self.cfg.protocol_version == "ds-libero-direct-v2"
+            action = (parse_actions(content, finish, min(self.cfg.action_horizon, self.cfg.max_steps - step))
+                      if v2 else parse_action(content, finish))
+            event.update(valid=True, returned_model=reply.get("model"))
+            event["actions" if v2 else "action"] = action
+            if self.cfg.visual_history:
+                self.visual_history.append((step, obs, frame_refs))
+                self.visual_history = self.visual_history[-self.cfg.visual_history:]
             return action
         except ExperimentError as exc:
             event.update(error=str(exc), error_status=exc.status)

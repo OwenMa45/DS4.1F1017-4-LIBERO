@@ -72,9 +72,14 @@ def build_report(path, replay=True):
               {"status": "incomplete", "scored": False, "task_success": None})
     events, warnings = load_events(root / "events.jsonl")
     attempts = [e for e in events if e.get("event") == "api_attempt"]
+    completed_attempt_ids = {e.get("attempt") for e in attempts}
+    unfinished_attempts = [e for e in events if e.get("event") == "api_started"
+                           and e.get("attempt") not in completed_attempt_ids]
+    request_count = len(attempts) + len(unfinished_attempts)
     decisions = [e for e in events if e.get("event") == "decision"]
     model_outputs = [e for e in decisions if e.get("valid") or e.get("error_status") == "invalid_output"]
     valid = sum(bool(e.get("valid")) for e in model_outputs)
+    steps = [e for e in events if e.get("event") == "step"]
     usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0,
              "reasoning_tokens": 0, "prompt_cache_hit_tokens": 0, "prompt_cache_miss_tokens": 0}
     known_usage = 0
@@ -82,7 +87,8 @@ def build_report(path, replay=True):
         raw = attempt.get("usage")
         if not isinstance(raw, dict):
             continue
-        known_usage += 1
+        known_usage += all(type(raw.get(k)) is int and raw[k] >= 0
+                           for k in ("prompt_tokens", "completion_tokens", "total_tokens"))
         for key in usage:
             value = raw.get(key)
             if key == "reasoning_tokens":
@@ -93,12 +99,25 @@ def build_report(path, replay=True):
                "protocol": manifest["config"], "config_sha256": manifest["config_sha256"],
                "source_sha256": manifest["source_sha256"],
                "environment_sha256": manifest.get("environment_sha256"),
-               "scope": "single episode diagnostic; not an aggregate LIBERO benchmark score",
-               "http_requests": len(attempts), "decision_requests": len(decisions),
+               "scope": ("single benchmark episode; use the frozen plan for aggregate statistics"
+                         if manifest["config"].get("evaluation_scope") == "benchmark"
+                         else "single episode diagnostic; not an aggregate LIBERO benchmark score"),
+               "http_requests": request_count, "completed_http_requests": len(attempts),
+               "unfinished_http_attempts": [e["attempt"] for e in unfinished_attempts],
+               "decision_requests": len(decisions),
                "model_outputs": len(model_outputs), "valid_model_outputs": valid,
                "action_validity_rate": valid / len(model_outputs) if model_outputs else None,
+               "executed_action_count": len(steps),
+               "actions_per_valid_decision": distribution([
+                   len(e["actions"]) if "actions" in e else 1 for e in model_outputs if e.get("valid")]),
+               "truncated_outputs": sum(e.get("finish_reason") == "length" for e in attempts),
+               "finish_reasons": {reason: sum(e.get("finish_reason") == reason for e in attempts)
+                                  for reason in sorted({e["finish_reason"] for e in attempts
+                                                        if isinstance(e.get("finish_reason"), str)})},
+               "system_fingerprints": sorted({e["system_fingerprint"] for e in attempts
+                                              if isinstance(e.get("system_fingerprint"), str)}),
                "reported_usage": usage, "usage_available_attempts": known_usage,
-               "usage_incomplete": known_usage != len(attempts),
+               "usage_incomplete": known_usage != request_count,
                "usage_note": "Reasoning is a subset of completion tokens; unknown usage is not zero cost.",
                "returned_models": sorted({e["returned_model"] for e in attempts if isinstance(e.get("returned_model"), str)}),
                "http_latency_seconds": distribution([e["elapsed_seconds"] for e in attempts]),

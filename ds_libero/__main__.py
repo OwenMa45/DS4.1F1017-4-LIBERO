@@ -8,14 +8,14 @@ from pathlib import Path
 from .artifacts import Store, verify_gate
 from .calibration import calibrate
 from .client import Client, ModelPolicy
-from .config import Config
+from .config import Config, SUITE_HORIZONS
 from .errors import ExperimentError
 from .report import build_report
 from .runner import run_episode
 
 
 def parser():
-    p = argparse.ArgumentParser(description="Pinned DeepSeek / LIBERO single-episode experiment")
+    p = argparse.ArgumentParser(description="Reproducible DeepSeek / LIBERO direct-policy experiments")
     commands = p.add_subparsers(dest="command", required=True)
     for command in ("calibrate", "api-check", "run"):
         child = commands.add_parser(command)
@@ -28,11 +28,57 @@ def parser():
     report = commands.add_parser("report")
     report.add_argument("directory", type=Path)
     report.add_argument("--no-replay", action="store_true", help="Summarize using only the Python standard library")
+    replay = commands.add_parser("replay-request", help="Verified saved request; never starts the simulator")
+    replay.add_argument("directory", type=Path)
+    replay.add_argument("--step", type=int, required=True)
+    replay.add_argument("--max-tokens", type=int, default=16384)
+    replay.add_argument("--reasoning-effort", choices=("low", "high"))
+    replay.add_argument("--out", type=Path, required=True)
+    replay.add_argument("--dry-run", action="store_true", help="Verify and save the payload without calling API")
+    plan = commands.add_parser("plan", help="Predeclare a sample; no simulator or API calls")
+    plan.add_argument("--config", type=Path, required=True)
+    plan.add_argument("--suite", choices=tuple(SUITE_HORIZONS), required=True)
+    plan.add_argument("--task-ids", type=int, nargs="+", required=True)
+    plan.add_argument("--init-state-ids", type=int, nargs="+", required=True)
+    plan.add_argument("--seed", type=int, default=0)
+    plan.add_argument("--out", type=Path, required=True)
+    selected = commands.add_parser("run-plan-episode", help="Run one explicitly selected trial, including paid API calls")
+    selected.add_argument("directory", type=Path)
+    selected.add_argument("--episode", type=int, required=True, help="Zero-based plan episode index")
+    aggregate = commands.add_parser("report-plan", help="Summarize the fixed sample without model calls")
+    aggregate.add_argument("directory", type=Path)
     return p
 
 
 def main(argv=None):
     args = parser().parse_args(argv)
+    if args.command in ("plan", "run-plan-episode", "report-plan"):
+        from .benchmark import create_plan, run_plan_episode, report_plan
+        try:
+            if args.command == "plan":
+                plan = create_plan(Config.load(args.config), args.suite, args.task_ids,
+                                   args.init_state_ids, args.seed, args.out)
+                print(f"Prepared {len(plan['episodes'])} episodes; no API calls. Plan: {args.out / 'plan.json'}")
+            elif args.command == "run-plan-episode":
+                return run_plan_episode(args.directory, args.episode)
+            else:
+                report = report_plan(args.directory)
+                print(json.dumps({k: v for k, v in report.items() if k != "episodes"}, ensure_ascii=False, indent=2))
+        except (OSError, ValueError, KeyError, ExperimentError) as exc:
+            print(f"{args.command} failed: {exc}", file=sys.stderr)
+            return 2
+        return 0
+    if args.command == "replay-request":
+        from .replay import replay_request
+        try:
+            summary = replay_request(args.directory, args.step, args.max_tokens, args.out,
+                                     args.reasoning_effort, args.dry_run)
+        except (OSError, ValueError, KeyError, ExperimentError) as exc:
+            print(f"Replay failed: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps(summary, ensure_ascii=False, indent=2), flush=True)
+        print(f"RESULT: {summary['status']} | {args.out / 'summary.json'}", flush=True)
+        return 0 if summary["status"] in ("pass", "prepared", "invalid_output") else 2
     if args.command == "report":
         try:
             summary = build_report(args.directory, replay=not args.no_replay)

@@ -158,7 +158,12 @@ class LiberoEnvironment:
             stream = io.BytesIO()
             Image.fromarray(pixels[::-1].copy()).save(stream, format="PNG")
             images[camera] = stream.getvalue()
-        return Observation(state, images)
+        geometry = None
+        if self.cfg.camera_geometry:
+            from .geometry import observe_geometry
+            geometry = observe_geometry(self.env.sim, CAMERAS, self.cfg.image_size,
+                                        state["eef_position_world_m"])
+        return Observation(state, images, geometry)
 
     def reset(self):
         # Always discard calibration/API-check state and start from the official state.
