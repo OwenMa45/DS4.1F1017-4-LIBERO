@@ -13,12 +13,14 @@ def run_episode(env, policy, store, cfg):
     decisions = 0
     sim_seconds = 0.0
     reset_seconds = 0.0
+    task_start = None
     pending_step = False
     result = {"status": "incomplete", "scored": False, "task_success": None}
     try:
         reset_start = time.perf_counter()
         obs = env.reset()
         reset_seconds = time.perf_counter() - reset_start
+        task_start = time.perf_counter()
         refs = store.observe(0, obs)
         if env.check_success():
             raise ExperimentError("Initial state already satisfies the task; episode is not scoreable")
@@ -74,5 +76,6 @@ def run_episode(env, policy, store, cfg):
                   simulated_control_seconds=steps / cfg.control_freq,
                   simulation_step_seconds=sim_seconds, reset_and_settle_seconds=reset_seconds,
                   control_loop_wall_seconds=time.perf_counter() - start,
+                  task_execution_wall_seconds=(time.perf_counter() - task_start if task_start is not None else None),
                   last_step_may_have_executed=pending_step)
     return result

@@ -1,5 +1,7 @@
 # DS4.1F-1017 × LIBERO：当前证据与下一轮实验
 
+> 2026-10-29 更新：下文保留 10 月 28 日的实验设计记录。16K high 精确重放也发生 length 截断后，用户决定保持 high、取消客户端 token 限制。当前 v2 high 配置已改为 null / 1800 秒；最新命令和开销、latency 定义见 [新的运行说明](cost_latency_2026-10-29.md)。原 v1 / 16K / low 配置供历史对照。
+
 ## 已有证据
 
 本次核对了同项目旧会话、`D:/Code_Projects/dsh1017test/测试json/summary.json`、`第一次执行结果/events.jsonl`、`result.json`、`summary.json` 和两份原始响应。原始文件保留原位，不把分析文本当作环境真值。

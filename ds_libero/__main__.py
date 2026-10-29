@@ -31,8 +31,13 @@ def parser():
     replay = commands.add_parser("replay-request", help="Verified saved request; never starts the simulator")
     replay.add_argument("directory", type=Path)
     replay.add_argument("--step", type=int, required=True)
-    replay.add_argument("--max-tokens", type=int, default=16384)
+    budget = replay.add_mutually_exclusive_group()
+    budget.add_argument("--max-tokens", type=int, default=None,
+                        help="Optional explicit cap; default omits the API field (provider limit still applies)")
+    budget.add_argument("--no-token-limit", dest="max_tokens", action="store_const", const=None)
     replay.add_argument("--reasoning-effort", choices=("low", "high"))
+    replay.add_argument("--timeout-seconds", type=int, default=1800,
+                        help="HTTP socket timeout, independent of token budget (default 1800)")
     replay.add_argument("--out", type=Path, required=True)
     replay.add_argument("--dry-run", action="store_true", help="Verify and save the payload without calling API")
     plan = commands.add_parser("plan", help="Predeclare a sample; no simulator or API calls")
@@ -47,11 +52,22 @@ def parser():
     selected.add_argument("--episode", type=int, required=True, help="Zero-based plan episode index")
     aggregate = commands.add_parser("report-plan", help="Summarize the fixed sample without model calls")
     aggregate.add_argument("directory", type=Path)
+    campaign = commands.add_parser("report-campaign", help="All phase costs, including failed preflight checks")
+    campaign.add_argument("directory", type=Path)
     return p
 
 
 def main(argv=None):
     args = parser().parse_args(argv)
+    if args.command == "report-campaign":
+        from .report import build_campaign_report
+        try:
+            summary = build_campaign_report(args.directory)
+        except (OSError, ValueError, KeyError, ExperimentError) as exc:
+            print(f"Report failed: {exc}", file=sys.stderr)
+            return 2
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
+        return 0
     if args.command in ("plan", "run-plan-episode", "report-plan"):
         from .benchmark import create_plan, run_plan_episode, report_plan
         try:
@@ -72,7 +88,7 @@ def main(argv=None):
         from .replay import replay_request
         try:
             summary = replay_request(args.directory, args.step, args.max_tokens, args.out,
-                                     args.reasoning_effort, args.dry_run)
+                                     args.reasoning_effort, args.dry_run, args.timeout_seconds)
         except (OSError, ValueError, KeyError, ExperimentError) as exc:
             print(f"Replay failed: {exc}", file=sys.stderr)
             return 2

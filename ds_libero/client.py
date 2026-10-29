@@ -9,6 +9,7 @@ import urllib.error
 import urllib.request
 from dataclasses import dataclass
 
+from .artifacts import utc_now
 from .errors import APIError, BudgetExhausted, ExperimentError, InvalidAction
 from .protocol import parse_action, parse_actions, request_payload
 
@@ -53,11 +54,13 @@ class Client:
             self.attempts += 1
             started = time.perf_counter()
             event = {"event": "api_attempt", "step": step, "attempt": self.attempts,
+                     "started_utc": utc_now(),
                      "retry": retry, "request_sha256": request_hash, "status_code": None,
                      "usage": None, "requested_model": self.cfg.model}
             event["request_file"] = request_file
             self.store.event({"event": "api_started", "step": step, "attempt": self.attempts,
-                              "request_sha256": request_hash})
+                              "retry": retry, "requested_model": self.cfg.model, "request_file": request_file,
+                              "request_sha256": request_hash, "started_utc": event["started_utc"]})
             print(f"API step={step} attempt={self.attempts} retry={retry} waiting (timeout={self.cfg.timeout_seconds}s)", flush=True)
             response = None
             network_error = None
@@ -67,10 +70,12 @@ class Client:
                 network_error = str(exc).replace(self.api_key, "[REDACTED]")
                 event["error"] = network_error
             except KeyboardInterrupt:
-                event.update(error="interrupted", elapsed_seconds=time.perf_counter() - started)
+                event.update(error="interrupted", elapsed_seconds=time.perf_counter() - started,
+                             finished_utc=utc_now())
                 self.store.event(event)
                 raise
             event["elapsed_seconds"] = time.perf_counter() - started
+            event["finished_utc"] = utc_now()
             data = None
             if response is not None:
                 event["status_code"] = response.status
@@ -84,12 +89,17 @@ class Client:
                 if isinstance(data, dict):
                     event["returned_model"] = data.get("model")
                     event["response_id"] = data.get("id")
+                    event["response_created"] = data.get("created")
                     event["usage"] = data.get("usage")
                     event["system_fingerprint"] = data.get("system_fingerprint")
                     choices = data.get("choices")
                     if isinstance(choices, list) and choices and isinstance(choices[0], dict):
                         event["finish_reason"] = choices[0].get("finish_reason")
             self.store.event(event)
+            usage = event.get("usage") if isinstance(event.get("usage"), dict) else {}
+            print(f"API attempt={self.attempts} elapsed={event['elapsed_seconds']:.3f}s "
+                  f"status={event['status_code']} finish={event.get('finish_reason')} "
+                  f"total_tokens={usage.get('total_tokens', 'unknown')}", flush=True)
             if response is not None and 200 <= response.status < 300:
                 if not isinstance(data, dict):
                     raise InvalidAction("API returned non-JSON content on a successful HTTP response")
@@ -99,7 +109,12 @@ class Client:
             if not retryable or retry == self.cfg.max_retries:
                 detail = "transport error" if response is None else f"HTTP {response.status}"
                 raise APIError(f"{detail}; see redacted attempt log and response body")
-            self.sleep(2 ** (retry + 1))
+            backoff_start = time.perf_counter()
+            try:
+                self.sleep(2 ** (retry + 1))
+            finally:
+                self.store.event({"event": "retry_backoff", "step": step, "attempt": self.attempts,
+                                  "elapsed_seconds": time.perf_counter() - backoff_start})
         raise AssertionError("unreachable")
 
 

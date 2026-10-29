@@ -23,7 +23,7 @@ def checked_file(root, relative, expected_hash=None):
     return data
 
 
-def prepare_replay(directory, step, max_tokens, effort=None):
+def prepare_replay(directory, step, max_tokens=None, effort=None, timeout=None):
     root = Path(directory).resolve()
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
     cfg = Config.from_dict(manifest["config"])
@@ -57,22 +57,30 @@ def prepare_replay(directory, step, max_tokens, effort=None):
         encoded = json.dumps(payload, allow_nan=False, separators=(",", ":")).encode()
         if hashlib.sha256(encoded).hexdigest() != recorded["request_sha256"]:
             raise ExperimentError("Reconstructed request does not match original SHA256; refusing approximate replay")
-    if max_tokens <= 0 or max_tokens > 393216 or effort not in (None, "low", "high"):
+    if ((max_tokens is not None and (type(max_tokens) is not int or not 1 <= max_tokens <= 393216))
+            or effort not in (None, "low", "high")
+            or (timeout is not None and (type(timeout) is not int or timeout <= 0))):
         raise ExperimentError("Invalid replay max_tokens or reasoning effort")
-    changes = {"max_tokens": {"before": payload["max_tokens"], "after": max_tokens}}
-    payload["max_tokens"] = max_tokens
+    changes = {"max_tokens": {"before": payload.get("max_tokens"), "after": max_tokens}}
+    if max_tokens is None:
+        payload.pop("max_tokens", None)
+    else:
+        payload["max_tokens"] = max_tokens
     if effort is not None:
         changes["reasoning_effort"] = {"before": payload["reasoning_effort"], "after": effort}
         payload["reasoning_effort"] = effort
     # Original protocol label is retained; diagnostic overrides are explicit in the manifest.
-    cfg = replace(cfg, max_tokens=max_tokens, reasoning_effort=effort or cfg.reasoning_effort)
+    if timeout is not None:
+        changes["timeout_seconds"] = {"before": cfg.timeout_seconds, "after": timeout}
+    cfg = replace(cfg, max_tokens=max_tokens, reasoning_effort=effort or cfg.reasoning_effort,
+                  timeout_seconds=cfg.timeout_seconds if timeout is None else timeout)
     return cfg, payload, {"source_directory": str(root), "source_step": step,
                           "source_request_sha256": recorded["request_sha256"],
                           "verified_exact_original_request": True, "overrides": changes}
 
 
-def replay_request(directory, step, max_tokens, out, effort=None, dry_run=False):
-    cfg, payload, provenance = prepare_replay(directory, step, max_tokens, effort)
+def replay_request(directory, step, max_tokens, out, effort=None, dry_run=False, timeout=None):
+    cfg, payload, provenance = prepare_replay(directory, step, max_tokens, effort, timeout)
     store = Store(out, "replay-request", cfg)
     prompt = payload["messages"][0]["content"]
     (store.path / "prompt.txt").write_text(prompt, encoding="utf-8")
@@ -110,6 +118,7 @@ def replay_request(directory, step, max_tokens, out, effort=None, dry_run=False)
         decision.update(error_status="runtime_error", error=result["reason"])
     finally:
         decision["elapsed_seconds"] = time.perf_counter() - started
+        result["command_wall_seconds"] = decision["elapsed_seconds"]
         if not dry_run:
             store.event(decision)
         store.finish(result)

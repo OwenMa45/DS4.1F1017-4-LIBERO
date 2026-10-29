@@ -11,6 +11,17 @@ fi
 [[ -f "$config" && -f "$sim" ]] || { printf '%s\n' 'Config or simulation runner missing.' >&2; exit 2; }
 mkdir -p "$(dirname "$out")"
 mkdir "$out" # Refuse to overwrite an existing campaign.
+finish_report() {
+  local result=$?
+  trap - EXIT
+  # Runs even if a paid API-check failed; keep the pipeline's original exit status.
+  if ! bash "$sim" -B -m ds_libero report-campaign "$out" > "$out/campaign_report.console.log" 2>&1; then
+    printf 'Campaign report failed; inspect %s/campaign_report.console.log\n' "$out" >&2
+    if [[ $result -eq 0 ]]; then result=2; fi
+  fi
+  exit "$result"
+}
+trap finish_report EXIT
 check_pass() {
   bash "$sim" -B -c 'import json,sys; r=json.load(open(sys.argv[1])); sys.exit(0 if r.get("status")=="pass" else 2)' "$1/result.json"
 }

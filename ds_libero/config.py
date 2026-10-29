@@ -35,7 +35,7 @@ class Config:
     expected_release: str = "DeepSeek-V4.1-Flash-1017"
     endpoint: str = "https://api.deepseek.com/chat/completions"
     reasoning_effort: str = "high"
-    max_tokens: int = 8192
+    max_tokens: int | None = 8192
     timeout_seconds: int = 120
     max_retries: int = 2
     max_http_requests: int = 300
@@ -67,6 +67,8 @@ class Config:
             raise ExperimentError("Config must be a JSON object containing only documented fields")
         default = cls()
         for key, value in values.items():
+            if key == "max_tokens" and value is None:
+                continue
             if type(value) is not type(getattr(default, key)):
                 raise ExperimentError(f"Wrong type for config field {key}")
         cfg = cls(**values)
@@ -92,9 +94,9 @@ class Config:
             raise ExperimentError("Use low or high; medium maps to high in the DeepSeek API")
         if not 1 <= cfg.action_horizon <= 8 or not 0 <= cfg.visual_history <= 2:
             raise ExperimentError("action_horizon must be 1..8; visual_history must be 0..2")
-        for key in ("max_tokens", "timeout_seconds", "max_http_requests"):
+        for key in ("timeout_seconds", "max_http_requests"):
             if getattr(cfg, key) <= 0:
                 raise ExperimentError(f"{key} must be positive")
-        if cfg.max_tokens > 393216:
-            raise ExperimentError("max_tokens exceeds the documented API limit")
+        if cfg.max_tokens is not None and not 1 <= cfg.max_tokens <= 393216:
+            raise ExperimentError("max_tokens must be null (omit API field) or 1..393216")
         return cfg

@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .config import digest
+from .accounting import pricing_snapshot
 from .protocol import system_prompt
 
 
@@ -40,6 +41,7 @@ class Store:
         prompt = system_prompt(cfg)
         (self.path / "prompt.txt").write_text(prompt, encoding="utf-8")
         self.manifest = {"schema_version": 1, "command": command, "created_utc": utc_now(),
+                         "api_pricing": pricing_snapshot(),
                          "config": cfg.to_dict(), "config_sha256": cfg.fingerprint,
                          "source_sha256": source_fingerprint(),
                          "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),

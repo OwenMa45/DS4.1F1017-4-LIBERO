@@ -145,12 +145,16 @@ def request_payload(cfg, task, obs, history, step, visual_history=()):
         content.append({"type": "text", "text": json.dumps(state, allow_nan=False)})
         _append_images(content, old_obs, f"Historical step {old_step}")
     _append_images(content, obs, "Current")
-    return {"model": cfg.model, "messages": [
+    payload = {"model": cfg.model, "messages": [
                 {"role": "system", "content": system_prompt(cfg)},
                 {"role": "user", "content": content}],
             "thinking": {"type": "enabled"}, "reasoning_effort": cfg.reasoning_effort,
             "response_format": {"type": "json_object"},
             "max_tokens": cfg.max_tokens, "stream": False}
+    # Keep integer-budget v1 serialization byte-for-byte compatible with old replays.
+    if cfg.max_tokens is None:
+        del payload["max_tokens"]
+    return payload
 
 
 def _append_images(content, obs, label):

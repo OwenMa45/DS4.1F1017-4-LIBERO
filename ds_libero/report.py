@@ -1,8 +1,12 @@
+import csv
 import json
 import math
 from pathlib import Path
 
 from .artifacts import write_json
+from .accounting import TOKEN_FIELDS, account_attempts, aggregate_cost
+from .config import digest
+from .errors import ExperimentError
 from .protocol import CAMERAS
 
 
@@ -80,22 +84,14 @@ def build_report(path, replay=True):
     model_outputs = [e for e in decisions if e.get("valid") or e.get("error_status") == "invalid_output"]
     valid = sum(bool(e.get("valid")) for e in model_outputs)
     steps = [e for e in events if e.get("event") == "step"]
-    usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0,
-             "reasoning_tokens": 0, "prompt_cache_hit_tokens": 0, "prompt_cache_miss_tokens": 0}
-    known_usage = 0
-    for attempt in attempts:
-        raw = attempt.get("usage")
-        if not isinstance(raw, dict):
-            continue
-        known_usage += all(type(raw.get(k)) is int and raw[k] >= 0
-                           for k in ("prompt_tokens", "completion_tokens", "total_tokens"))
-        for key in usage:
-            value = raw.get(key)
-            if key == "reasoning_tokens":
-                value = (raw.get("completion_tokens_details") or {}).get("reasoning_tokens", value)
-            if type(value) is int and value >= 0:
-                usage[key] += value
-    summary = {"schema_version": 1, "command": manifest["command"], **result,
+    ledger, accounting = account_attempts(attempts, unfinished_attempts, manifest.get("api_pricing"))
+    http_times = [e["elapsed_seconds"] for e in attempts if e.get("elapsed_seconds") is not None]
+    decision_times = [e["elapsed_seconds"] for e in decisions if e.get("elapsed_seconds") is not None]
+    backoff = sum(e["elapsed_seconds"] for e in events if e.get("event") == "retry_backoff")
+    identity = {k: manifest["config"][k] for k in ("suite", "task_id", "task_order_index", "init_state_id", "seed")}
+    identity["task_name"] = manifest.get("environment", {}).get("task_name")
+    summary = {"schema_version": 2, "command": manifest["command"], **result,
+               "task_identity": identity,
                "protocol": manifest["config"], "config_sha256": manifest["config_sha256"],
                "source_sha256": manifest["source_sha256"],
                "environment_sha256": manifest.get("environment_sha256"),
@@ -116,12 +112,15 @@ def build_report(path, replay=True):
                                                         if isinstance(e.get("finish_reason"), str)})},
                "system_fingerprints": sorted({e["system_fingerprint"] for e in attempts
                                               if isinstance(e.get("system_fingerprint"), str)}),
-               "reported_usage": usage, "usage_available_attempts": known_usage,
-               "usage_incomplete": known_usage != request_count,
+               **accounting, "api_pricing": manifest.get("api_pricing"),
                "usage_note": "Reasoning is a subset of completion tokens; unknown usage is not zero cost.",
                "returned_models": sorted({e["returned_model"] for e in attempts if isinstance(e.get("returned_model"), str)}),
-               "http_latency_seconds": distribution([e["elapsed_seconds"] for e in attempts]),
-               "decision_latency_seconds": distribution([e["elapsed_seconds"] for e in decisions]),
+               "http_latency_seconds": distribution(http_times),
+               "http_latency_incomplete": len(http_times) != request_count,
+               "decision_latency_seconds": distribution(decision_times),
+               "decision_latency_incomplete": bool(unfinished_attempts) or len(decision_times) != len(decisions),
+               "retry_backoff_seconds": backoff,
+               "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
                "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
                "warnings": warnings}
     if replay:
@@ -129,5 +128,64 @@ def build_report(path, replay=True):
             summary["replay"] = make_replay(root, events, manifest["config"]["control_freq"])
         except Exception as exc:
             summary["warnings"].append(f"Replay generation failed; PNGs retained: {type(exc).__name__}: {exc}")
+    elif manifest["command"] == "run" and (root / "replay.gif").is_file():
+        summary["replay"] = "replay.gif"
     write_json(root / "summary.json", summary)
+    write_json(root / "api_calls.json", {"task_identity": identity, "api_pricing": manifest.get("api_pricing"),
+                                        "api_cost": accounting["api_cost"], "attempts": ledger})
+    rows = [{**identity, **r, "estimated_cost_min_cny": (r["estimated_cost_range_cny"] or [None, None])[0],
+             "estimated_cost_max_cny": (r["estimated_cost_range_cny"] or [None, None])[1]} for r in ledger]
+    fields = (*identity, "attempt", "step", "retry", "started_utc", "finished_utc", "response_created",
+              "response_id", "completed", "status_code", "finish_reason", "returned_model", "system_fingerprint",
+              "http_latency_seconds", *TOKEN_FIELDS, "usage_complete", "estimated_cost_min_cny", "estimated_cost_max_cny", "error")
+    with (root / "api_calls.csv").open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
+        writer.writeheader()
+        writer.writerows(rows)
     return summary
+
+
+def build_campaign_report(path, expected_config=None, expected_source=None):
+    """Include paid preflight even when it prevented a scored episode from starting."""
+    root = Path(path)
+    summaries = {}
+    configs, sources, identities = set(), set(), set()
+    for phase, command in (("calibration", "calibrate"), ("api-check", "api-check"), ("episode", "run")):
+        directory = root / phase
+        if not (directory / "manifest.json").is_file():
+            continue
+        manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+        if (manifest["command"] != command or digest(manifest["config"]) != manifest["config_sha256"]
+                or (expected_config is not None and manifest["config_sha256"] != expected_config)
+                or (expected_source is not None and manifest["source_sha256"] != expected_source)):
+            raise ExperimentError(f"Campaign {phase} differs from the expected experiment")
+        configs.add(manifest["config_sha256"])
+        sources.add(manifest["source_sha256"])
+        summaries[phase] = build_report(directory, replay=False)
+        identities.add(digest({k: v for k, v in summaries[phase]["task_identity"].items() if k != "task_name"}))
+    if len(configs) > 1 or len(sources) > 1 or len(identities) > 1:
+        raise ExperimentError("Campaign phases use different configs, code or task identities")
+    all_summaries = list(summaries.values())
+    usage = {k: sum(s["reported_usage"][k] for s in all_summaries) for k in TOKEN_FIELDS}
+    availability = {k: sum(s["usage_field_available_attempts"][k] for s in all_summaries) for k in TOKEN_FIELDS}
+    cost = aggregate_cost([s["api_cost"] for s in all_summaries],
+                          pricing_available=all(s["api_cost"]["pricing_available"] for s in all_summaries))
+    wall = [s.get("command_wall_seconds") for s in all_summaries]
+    report = {"schema_version": 1, "scope": "all recorded phases, including failed preflight and retries",
+              "task_identity": all_summaries[-1]["task_identity"] if all_summaries else None,
+              "phases": {p: {"status": s["status"], "http_requests": s["http_requests"],
+                             "reported_usage": s["reported_usage"], "api_cost": s["api_cost"],
+                             "usage_field_available_attempts": s["usage_field_available_attempts"],
+                             "command_wall_seconds": s.get("command_wall_seconds")}
+                         for p, s in summaries.items()},
+              "http_requests": sum(s["http_requests"] for s in all_summaries),
+              "reported_usage": usage, "usage_incomplete": any(s["usage_incomplete"] for s in all_summaries),
+              "usage_field_available_attempts": availability,
+              "api_cost": cost,
+              "api_wait_seconds": sum(s["http_latency_seconds"]["total"] for s in all_summaries),
+              "http_latency_incomplete": any(s["http_latency_incomplete"] for s in all_summaries),
+              "recorded_command_wall_seconds": sum(w for w in wall if w is not None),
+              "command_wall_incomplete": any(w is None for w in wall),
+              "note": "Command wall sum excludes shell gaps and report/GIF generation; episode task latency is in episode/summary.json. No score is assigned here."}
+    write_json(root / "campaign_summary.json", report)
+    return report

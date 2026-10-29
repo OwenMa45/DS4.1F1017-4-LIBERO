@@ -4,7 +4,9 @@
 
 **2026-10-28 更新：首轮已跑通动作链路，但第二次请求耗尽 8192 token，回合以 invalid_output 结束。** 真实标定已通过；目前没有完整任务成功成绩。
 
-已增加失败请求精确重放，以及相机几何、短视觉历史、1–8 步动作序列的 v2 direct-policy 实验。原 v1 配置和提示词保留。[问题总结、消融配置及下一轮远程命令](docs/experiment_status_2026-10-28.md)。以下为原 v1 使用说明。
+已增加失败请求精确重放，以及相机几何、短视觉历史、1–8 步动作序列的 v2 direct-policy 实验。原 v1 配置和提示词保留。[问题总结与消融设计](docs/experiment_status_2026-10-28.md)。
+
+**2026-10-29 更新：保持 high，取消客户端 token 上限，并按任务记录 API 开销和实际 latency。** 当前 v2 high 配置使用 `max_tokens: null`，请求省略该字段；HTTP socket timeout 延长至 1800 秒。API 仍有服务端默认限制，不表示无限输出。每个阶段新增 `api_calls.json/csv` 明细，任务流水线新增 `campaign_summary.json`，包含前置检查的费用。多任务报告按 task 汇总 token、人民币估算区间、API 等待与任务耗时。[当前运行命令与统计口径](docs/cost_latency_2026-10-29.md)。以下为保留的原 v1 使用说明；新实验请用当前命令。
 
 ## 1. 获取代码
 
