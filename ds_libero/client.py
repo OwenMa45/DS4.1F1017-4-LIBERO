@@ -1,12 +1,15 @@
 """No SDK dependency; transport retries never execute simulator actions."""
 
 import hashlib
+import getpass
 import json
 import os
 import socket
+import sys
 import time
 import urllib.error
 import urllib.request
+import warnings
 from dataclasses import dataclass
 
 from .artifacts import utc_now
@@ -18,6 +21,25 @@ from .protocol import parse_action, parse_actions, request_payload
 class HTTPResponse:
     status: int
     body: bytes
+
+
+def resolve_api_key(api_key=None, prompt=False):
+    key = api_key if api_key is not None else os.environ.get("DEEPSEEK_API_KEY", "")
+    if not key.strip() and prompt:
+        if not sys.stdin.isatty():
+            raise ExperimentError("Hidden key input requires an interactive terminal; export DEEPSEEK_API_KEY before running")
+        try:
+            # Never allow getpass's fallback to echoed input.
+            with warnings.catch_warnings():
+                warnings.simplefilter("error", getpass.GetPassWarning)
+                key = getpass.getpass("DeepSeek API key (hidden, this run only): ")
+        except (EOFError, KeyboardInterrupt, getpass.GetPassWarning) as exc:
+            raise ExperimentError("API key input cancelled or hidden input unavailable; no request was sent") from exc
+    if not key.strip():
+        raise ExperimentError("DEEPSEEK_API_KEY is missing or empty in this process. Export it in the current shell, "
+                              "or use replay-request --prompt-api-key in an interactive terminal. "
+                              "No API request was sent; never put the key in a command argument or file.")
+    return key.strip()
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -39,9 +61,7 @@ def transport(endpoint, payload, api_key, timeout):
 class Client:
     def __init__(self, cfg, store, api_key=None, send=transport, sleep=time.sleep):
         self.cfg, self.store, self.send, self.sleep = cfg, store, send, sleep
-        self.api_key = api_key if api_key is not None else os.environ.get("DEEPSEEK_API_KEY", "")
-        if not self.api_key.strip():
-            raise ExperimentError("Set DEEPSEEK_API_KEY in the remote shell (never in a file or command argument)")
+        self.api_key = resolve_api_key(api_key)
         self.attempts = 0
 
     def complete(self, payload, step):

@@ -40,6 +40,8 @@ def parser():
                         help="HTTP socket timeout, independent of token budget (default 1800)")
     replay.add_argument("--out", type=Path, required=True)
     replay.add_argument("--dry-run", action="store_true", help="Verify and save the payload without calling API")
+    replay.add_argument("--prompt-api-key", action="store_true",
+                        help="If the environment key is missing, read it without echo in this terminal; never save it")
     plan = commands.add_parser("plan", help="Predeclare a sample; no simulator or API calls")
     plan.add_argument("--config", type=Path, required=True)
     plan.add_argument("--suite", choices=tuple(SUITE_HORIZONS), required=True)
@@ -88,7 +90,8 @@ def main(argv=None):
         from .replay import replay_request
         try:
             summary = replay_request(args.directory, args.step, args.max_tokens, args.out,
-                                     args.reasoning_effort, args.dry_run, args.timeout_seconds)
+                                     args.reasoning_effort, args.dry_run, args.timeout_seconds,
+                                     args.prompt_api_key)
         except (OSError, ValueError, KeyError, ExperimentError) as exc:
             print(f"Replay failed: {exc}", file=sys.stderr)
             return 2

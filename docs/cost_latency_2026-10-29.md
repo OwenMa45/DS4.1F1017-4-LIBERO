@@ -8,7 +8,7 @@
 
 ## 下一次远程执行
 
-在已有 `DEEPSEEK_API_KEY` 的远程终端中更新分支：
+在远程交互式终端中更新分支：
 
 ```bash
 cd /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO
@@ -21,11 +21,15 @@ git pull --ff-only origin codex/direct-policy-v2
 ```bash
 bash /mnt/cpfs/users/mrq/libero_cpu/run_cpu.sh -u -B \
   -m ds_libero replay-request outputs/episode-001 \
-  --step 1 --reasoning-effort high --no-token-limit \
-  --out outputs/replay-step1-high-default-001
+  --step 1 --reasoning-effort high --no-token-limit --prompt-api-key \
+  --out outputs/replay-step1-high-default-002
 ```
 
 默认已不指定 token 上限，`--no-token-limit` 用于让命令意图更清楚。可加 `--dry-run` 仅验证旧请求 SHA256 和保存修改后的请求。新 replay 报告也记录本次实际耗时与开销，`scored=false`，不能作为任务成功率样本。
+
+`--prompt-api-key` 会优先复用进程已有的 `DEEPSEEK_API_KEY`；缺失时在交互式终端提示隐藏输入。输入只保存在本次 Python 进程内存中，不写文件、命令历史或报告，也不会设置父 shell 的环境变量。取消、空输入或无法隐藏输入时停止。自动化/非交互执行应先在父 shell `export DEEPSEEK_API_KEY`。`--dry-run` 完全不读取或索取密钥。
+
+若报告为 `configuration_error` 且 reason 提示缺少 `DEEPSEEK_API_KEY`、`http_requests=0`，说明调用前就失败，没有产生 API 费用；不是 token 配置不被接受。修复后的入口会在创建输出目录之前检查密钥，不把这类启动失败计入决策 latency。此前的 `...-001` 失败目录保留，改用 `...-002`，避免覆盖记录。
 
 有效输出验证后，可执行一个 v2 high 正式回合：
 

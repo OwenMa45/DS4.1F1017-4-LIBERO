@@ -8,6 +8,8 @@
 
 **2026-10-29 更新：保持 high，取消客户端 token 上限，并按任务记录 API 开销和实际 latency。** 当前 v2 high 配置使用 `max_tokens: null`，请求省略该字段；HTTP socket timeout 延长至 1800 秒。API 仍有服务端默认限制，不表示无限输出。每个阶段新增 `api_calls.json/csv` 明细，任务流水线新增 `campaign_summary.json`，包含前置检查的费用。多任务报告按 task 汇总 token、人民币估算区间、API 等待与任务耗时。[当前运行命令与统计口径](docs/cost_latency_2026-10-29.md)。以下为保留的原 v1 使用说明；新实验请用当前命令。
 
+重放命令现支持 `--prompt-api-key`：环境变量缺失时可在远程终端隐藏输入，本次使用后不保存。缺少密钥会在创建实验目录前退出，不计为模型决策或 API latency；已有失败目录请保留并换新目录重跑。
+
 ## 1. 获取代码
 
 在远程节点执行。实验仓库与已有仿真环境分开存放：

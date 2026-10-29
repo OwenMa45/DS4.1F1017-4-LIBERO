@@ -6,7 +6,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from .artifacts import Store, write_json
-from .client import Client
+from .client import Client, resolve_api_key
 from .config import Config
 from .errors import ExperimentError, InvalidAction
 from .protocol import CAMERAS, Observation, parse_action, parse_actions, request_payload
@@ -79,8 +79,13 @@ def prepare_replay(directory, step, max_tokens=None, effort=None, timeout=None):
                           "verified_exact_original_request": True, "overrides": changes}
 
 
-def replay_request(directory, step, max_tokens, out, effort=None, dry_run=False, timeout=None):
+def replay_request(directory, step, max_tokens, out, effort=None, dry_run=False, timeout=None,
+                   prompt_api_key=False):
     cfg, payload, provenance = prepare_replay(directory, step, max_tokens, effort, timeout)
+    if Path(out).exists():
+        raise ExperimentError(f"Output directory already exists: {out}; choose a new directory")
+    # Fail before creating artifacts; a missing credential is not a model decision.
+    api_key = None if dry_run else resolve_api_key(prompt=prompt_api_key)
     store = Store(out, "replay-request", cfg)
     prompt = payload["messages"][0]["content"]
     (store.path / "prompt.txt").write_text(prompt, encoding="utf-8")
@@ -91,12 +96,15 @@ def replay_request(directory, step, max_tokens, out, effort=None, dry_run=False,
     decision = {"event": "decision", "step": step, "valid": False, "elapsed_seconds": 0.}
     import time
     started = time.perf_counter()
+    decision_started = None
     try:
         if dry_run:
             store.request(step, json.dumps(payload, allow_nan=False, separators=(",", ":")).encode())
             result["status"] = "prepared"
         else:
-            reply = Client(cfg, store).complete(payload, step)
+            client = Client(cfg, store, api_key=api_key)
+            decision_started = time.perf_counter()
+            reply = client.complete(payload, step)
             try:
                 choice = reply["choices"][0]
                 finish, content = choice["finish_reason"], choice["message"]["content"]
@@ -117,9 +125,9 @@ def replay_request(directory, step, max_tokens, out, effort=None, dry_run=False,
         result.update(status="runtime_error", reason=f"{type(exc).__name__}: {exc}")
         decision.update(error_status="runtime_error", error=result["reason"])
     finally:
-        decision["elapsed_seconds"] = time.perf_counter() - started
-        result["command_wall_seconds"] = decision["elapsed_seconds"]
-        if not dry_run:
+        result["command_wall_seconds"] = time.perf_counter() - started
+        if decision_started is not None:
+            decision["elapsed_seconds"] = time.perf_counter() - decision_started
             store.event(decision)
         store.finish(result)
     return build_report(store.path, replay=False)
