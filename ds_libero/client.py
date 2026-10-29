@@ -11,6 +11,7 @@ import urllib.error
 import urllib.request
 import warnings
 from dataclasses import dataclass
+from pathlib import Path
 
 from .artifacts import utc_now
 from .errors import APIError, BudgetExhausted, ExperimentError, InvalidAction
@@ -25,6 +26,14 @@ class HTTPResponse:
 
 def resolve_api_key(api_key=None, prompt=False):
     key = api_key if api_key is not None else os.environ.get("DEEPSEEK_API_KEY", "")
+    if api_key is None and not key.strip():
+        key_file = Path(__file__).resolve().parent.parent / "ds_API.txt"
+        try:
+            key = key_file.read_text(encoding="utf-8-sig").strip()
+        except FileNotFoundError:
+            pass
+        except OSError:
+            raise ExperimentError("Cannot read project ds_API.txt; check file permissions") from None
     if not key.strip() and prompt:
         if not sys.stdin.isatty():
             raise ExperimentError("Hidden key input requires an interactive terminal; export DEEPSEEK_API_KEY before running")
@@ -38,7 +47,7 @@ def resolve_api_key(api_key=None, prompt=False):
     if not key.strip():
         raise ExperimentError("DEEPSEEK_API_KEY is missing or empty in this process. Export it in the current shell, "
                               "or use replay-request --prompt-api-key in an interactive terminal. "
-                              "No API request was sent; never put the key in a command argument or file.")
+                              "Alternatively put only the key in project ds_API.txt (Git ignored). No API request was sent.")
     return key.strip()
 
 

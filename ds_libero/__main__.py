@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .artifacts import Store, verify_gate
 from .calibration import calibrate
-from .client import Client, ModelPolicy
+from .client import Client, ModelPolicy, resolve_api_key
 from .config import Config, SUITE_HORIZONS
 from .errors import ExperimentError
 from .report import build_report
@@ -108,8 +108,8 @@ def main(argv=None):
         return 0
     try:
         cfg = Config.load(args.config)
-        if args.command in ("api-check", "run") and not os.environ.get("DEEPSEEK_API_KEY", "").strip():
-            raise ExperimentError("DEEPSEEK_API_KEY is not set; enter it in the remote shell")
+        if args.command in ("api-check", "run"):
+            resolve_api_key()
         # Check gates' existence before spending time constructing the simulator.
         for gate in (getattr(args, "calibration", None), getattr(args, "api_check", None)):
             if gate is not None and not (gate / "result.json").is_file():

@@ -4,8 +4,9 @@ set -euo pipefail
 config=${1:-configs/direct_v2_high.json}
 out=${2:?Usage: bash scripts/run_pilot.sh CONFIG NEW_OUTPUT_DIRECTORY}
 sim=${LIBERO_SIM_RUNNER:-/mnt/cpfs/users/mrq/libero_cpu/run_cpu.sh}
-if [[ -z ${DEEPSEEK_API_KEY:-} ]]; then
-  printf '%s\n' 'Cannot start: export DEEPSEEK_API_KEY in this shell first.' >&2
+project_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+if [[ -z ${DEEPSEEK_API_KEY:-} && ! -s "$project_root/ds_API.txt" ]]; then
+  printf '%s\n' 'Cannot start: export DEEPSEEK_API_KEY or fill project ds_API.txt first.' >&2
   exit 2
 fi
 [[ -f "$config" && -f "$sim" ]] || { printf '%s\n' 'Config or simulation runner missing.' >&2; exit 2; }
