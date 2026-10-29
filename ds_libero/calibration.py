@@ -63,17 +63,22 @@ def calibrate(env, store):
             print(f"{label}: {'PASS' if passed else 'FAIL'} measured={measured}", flush=True)
     before = env.reset()
     opened_initially = aperture(before)
-    for _ in range(20):
+    close_trace = []
+    for index in range(20):
         closed, done = env.step([0.] * 6 + [1.])
+        close_trace.append({"steps": index + 1, "joint_separation_m": aperture(closed)})
         if done:
             raise ExperimentError("Environment ended during gripper calibration")
     store.observe("gripper_closed", closed)
-    for _ in range(20):
+    open_trace = []
+    for index in range(20):
         opened, done = env.step([0.] * 6 + [-1.])
+        open_trace.append({"steps": index + 1, "joint_separation_m": aperture(opened)})
         if done:
             raise ExperimentError("Environment ended during gripper calibration")
     store.observe("gripper_open", opened)
     probe = {"name": "gripper_close_then_open", "initial_aperture_m": opened_initially,
+             "close_trace": close_trace, "open_trace": open_trace,
              "closed_aperture_m": aperture(closed), "opened_aperture_m": aperture(opened),
              "passed": opened_initially - aperture(closed) > .001 and aperture(opened) - aperture(closed) > .001}
     probes.append(probe)

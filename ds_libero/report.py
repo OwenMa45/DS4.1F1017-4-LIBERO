@@ -7,6 +7,7 @@ from .artifacts import write_json
 from .accounting import TOKEN_FIELDS, account_attempts, aggregate_cost
 from .config import digest
 from .errors import ExperimentError
+from .feedback import gripper_motion_diagnostics
 from .protocol import CAMERAS
 
 
@@ -104,6 +105,12 @@ def build_report(path, replay=True):
                "model_outputs": len(model_outputs), "valid_model_outputs": valid,
                "action_validity_rate": valid / len(model_outputs) if model_outputs else None,
                "executed_action_count": len(steps),
+               "gripper_motion_diagnostics": gripper_motion_diagnostics(events),
+               "feedback_boundaries": sum(e.get("event") == "chunk_feedback_boundary" for e in events),
+               "discarded_actions_at_feedback_boundaries": sum(e["discarded_actions"] for e in events
+                                                                if e.get("event") == "chunk_feedback_boundary"),
+               "executed_actions_per_decision": distribution([
+                   sum(s.get("decision_step", s["step"]) == d["step"] for s in steps) for d in decisions]),
                "actions_per_valid_decision": distribution([
                    len(e["actions"]) if "actions" in e else 1 for e in model_outputs if e.get("valid")]),
                "truncated_outputs": sum(e.get("finish_reason") == "length" for e in attempts),

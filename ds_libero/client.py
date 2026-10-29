@@ -151,16 +151,22 @@ class ModelPolicy:
     def __init__(self, cfg, task, client, store):
         self.cfg, self.task, self.client, self.store = cfg, task, client, store
         self.visual_history = []
+        self.previous_decision = None
 
     def act(self, obs, history, step, frame_refs):
         started = time.perf_counter()
         event = {"event": "decision", "step": step, "frames": frame_refs,
                  "proprioception": obs.state, "recent_history": history, "valid": False}
         try:
+            feedback = None
+            if self.cfg.grasp_feedback:
+                from .feedback import decision_feedback
+                feedback = decision_feedback(obs, step, self.previous_decision, self.cfg.control_freq)
+                event["control_feedback"] = feedback
             event["visual_history_frames"] = [{"step": s, "frames": refs}
                                                for s, _, refs in self.visual_history]
             reply = self.client.complete(request_payload(self.cfg, self.task, obs, history, step,
-                [(s, o) for s, o, _ in self.visual_history]), step)
+                [(s, o) for s, o, _ in self.visual_history], feedback), step)
             try:
                 choice = reply["choices"][0]
                 content = choice["message"]["content"]
@@ -173,6 +179,8 @@ class ModelPolicy:
                       if v2 else parse_action(content, finish))
             event.update(valid=True, returned_model=reply.get("model"))
             event["actions" if v2 else "action"] = action
+            if self.cfg.grasp_feedback:
+                self.previous_decision = (step, obs, action)
             if self.cfg.visual_history:
                 self.visual_history.append((step, obs, frame_refs))
                 self.visual_history = self.visual_history[-self.cfg.visual_history:]

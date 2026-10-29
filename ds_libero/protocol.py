@@ -80,7 +80,7 @@ def parse_action(content, finish_reason="stop"):
 def system_prompt(cfg):
     if cfg.protocol_version == "ds-libero-direct-v1":
         return SYSTEM_PROMPT
-    return SYSTEM_PROMPT.split('Return exactly one json object')[0] + f'''Return only a json object with the sole key "actions", containing 1 to {cfg.action_horizon}
+    prompt = SYSTEM_PROMPT.split('Return exactly one json object')[0] + f'''Return only a json object with the sole key "actions", containing 1 to {cfg.action_horizon}
 seven-number actions, for example {{"actions":[[0,0,0,0,0,0,-1]]}}.
 The first three numbers are normalized WORLD-frame position deltas in [-1,1],
 scaled to 0.05 metres. The next three are WORLD-frame axis-angle rotation-vector
@@ -104,6 +104,34 @@ No object locations, depth, segmentation, demonstrations or scripted skills are
 provided. Use measured motion and visual feedback; do not assume a fixed mapping
 between world axes and image directions. Return actions, no explanations or keys.
 '''
+    if cfg.grasp_feedback:
+        prompt += '''\nGripper feedback protocol:
+Panda gripper commands change an actuator target gradually. +1 is NOT an instant
+grasp. 0 preserves the actuator target; it does NOT keep incrementing it closed.
+Opening and closing require multiple simulation steps, often more than one chunk.
+Use gripper-only sequences (zero arm deltas) while closing, then inspect the new
+joint separation and images. If still closing, you may choose another such sequence.
+Do not combine approach, closure, lift and transport into a single blind sequence.
+Align the fingerpads with the visible grasp region before closing; the wrist camera
+image centre is not the grasp point. robot_gripper_geometry gives only your own
+fingerpad centres and their projected pixels. It does not locate target objects.
+Avoid descending far while still misaligned; use short corrections near contact.
+After closure, choose a small vertical test lift and inspect both views before
+transport. A nonzero separation alone cannot establish a grasp; an almost empty
+closure or an object staying behind during lift is evidence to reassess/re-align.
+Use measured EEF displacement instead of summing nominal deltas as actual motion.
+Do not claim a grasp or continue transport merely because you commanded close.
+'''
+    if cfg.gripper_feedback_barrier:
+        prompt = prompt.replace(
+            "The entire sequence runs before another API call, except on task success or the\ncontrol-step limit.",
+            "A validated prefix runs before another API call, stopping at the feedback boundary\ndescribed below, task success or the control-step limit.")
+        prompt += '''\nExecution uses a feedback boundary: only the prefix before the first gripper
+open/close reversal or switch between arm motion and gripper-only commands runs.
+The remaining suffix is discarded. You receive a fresh observation and choose
+again. Prefer one phase per response. No automatic grasp or recovery is executed.
+'''
+    return prompt
 
 
 def validate_actions(actions, limit):
@@ -127,7 +155,7 @@ def parse_actions(content, finish_reason, limit):
     return validate_actions(obj["actions"], limit)
 
 
-def request_payload(cfg, task, obs, history, step, visual_history=()):
+def request_payload(cfg, task, obs, history, step, visual_history=(), control_feedback=None):
     observation = {"task": task, "control_step": step, "max_control_steps": cfg.max_steps,
                    "proprioception": obs.state, "recent_history": history}
     if cfg.protocol_version == "ds-libero-direct-v2":
@@ -137,6 +165,11 @@ def request_payload(cfg, task, obs, history, step, visual_history=()):
                 from .errors import ExperimentError
                 raise ExperimentError("Camera geometry requested but missing from observation")
             observation["camera_geometry"] = obs.geometry
+        if cfg.grasp_feedback:
+            if control_feedback is None:
+                from .feedback import decision_feedback
+                control_feedback = decision_feedback(obs, step, None, cfg.control_freq)
+            observation["control_feedback"] = control_feedback
     content = [{"type": "text", "text": json.dumps(observation, allow_nan=False)}]
     for old_step, old_obs in visual_history:
         state = {"historical_control_step": old_step, "proprioception": old_obs.state}

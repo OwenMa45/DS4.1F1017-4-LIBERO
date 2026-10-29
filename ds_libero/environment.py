@@ -163,6 +163,10 @@ class LiberoEnvironment:
             from .geometry import observe_geometry
             geometry = observe_geometry(self.env.sim, CAMERAS, self.cfg.image_size,
                                         state["eef_position_world_m"])
+            if self.cfg.grasp_feedback:
+                from .geometry import observe_gripper_geometry
+                geometry["robot_gripper_geometry"] = observe_gripper_geometry(
+                    self.env.sim, self.env.robots[0].gripper, geometry)
         return Observation(state, images, geometry)
 
     def reset(self):

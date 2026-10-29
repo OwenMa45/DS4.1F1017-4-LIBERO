@@ -32,6 +32,14 @@ def run_episode(env, policy, store, cfg):
             proposed = policy.act(obs, copy.deepcopy(history), steps, refs)
             actions = (validate_actions(proposed, min(cfg.action_horizon, cfg.max_steps - steps))
                        if cfg.protocol_version == "ds-libero-direct-v2" else [validate_action(proposed)])
+            if cfg.gripper_feedback_barrier:
+                from .feedback import feedback_prefix
+                count, reason = feedback_prefix(actions)
+                if reason:
+                    store.event({"event": "chunk_feedback_boundary", "step": steps,
+                                 "proposed_actions": len(actions), "scheduled_actions": count,
+                                 "discarded_actions": len(actions) - count, "reason": reason})
+                    actions = actions[:count]
             for chunk_index, action in enumerate(actions):
                 step = steps
                 before = copy.deepcopy(obs.state)
