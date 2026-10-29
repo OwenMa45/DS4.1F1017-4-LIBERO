@@ -45,11 +45,12 @@ class Config:
     evaluation_scope: str = "pilot"
     grasp_feedback: bool = False
     gripper_feedback_barrier: bool = False
+    geometry_contract: bool = False
 
     def to_dict(self):
         values = asdict(self)
         # Old profile hashes must remain replayable.
-        for key in ("grasp_feedback", "gripper_feedback_barrier"):
+        for key in ("grasp_feedback", "gripper_feedback_barrier", "geometry_contract"):
             if not values[key]:
                 values.pop(key)
         # Preserve the original v1 fingerprint and request contract.
@@ -93,9 +94,11 @@ class Config:
             raise ExperimentError("Benchmark config requires a supported suite/horizon, task 0..9, init 0..49 and uint32 seed")
         if cfg.protocol_version == "ds-libero-direct-v1":
             locked += ("reasoning_effort", "action_horizon", "visual_history", "camera_geometry", "evaluation_scope",
-                       "grasp_feedback", "gripper_feedback_barrier")
+                       "grasp_feedback", "gripper_feedback_barrier", "geometry_contract")
         if cfg.grasp_feedback and not cfg.camera_geometry:
             raise ExperimentError("grasp_feedback requires camera_geometry for fingerpad projection")
+        if cfg.geometry_contract and not (cfg.camera_geometry and cfg.grasp_feedback):
+            raise ExperimentError("geometry_contract requires camera_geometry and grasp_feedback")
         for key in locked:
             if getattr(cfg, key) != getattr(default, key):
                 raise ExperimentError(f"This pilot fixes {key}={getattr(default, key)!r}")

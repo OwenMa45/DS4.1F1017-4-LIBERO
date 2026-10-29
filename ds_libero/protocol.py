@@ -131,6 +131,40 @@ open/close reversal or switch between arm motion and gripper-only commands runs.
 The remaining suffix is discarded. You receive a fresh observation and choose
 again. Prefer one phase per response. No automatic grasp or recovery is executed.
 '''
+    if cfg.geometry_contract:
+        prompt = prompt.replace(
+            "Proprioception is end-effector position in world metres, end-effector quaternion\nin [x,y,z,w] order,",
+            "Proprioception uses the Panda grip_site for BOTH world position and orientation\n(unit quaternion in [x,y,z,w] order),")
+        prompt = prompt.replace(
+            "Each action sets a NEW target relative to the actual EEF pose at that control step\nand runs for 0.05 seconds.",
+            "Each action sets a NEW position target relative to the actual grip_site position\nand runs for 0.05 seconds. Nonzero rotation deltas left-multiply the actual site\nrotation about WORLD axes; zero rotation deltas retain the previous orientation goal.")
+        prompt += '''\nGeometry contract (camera_geometry.control_frame):
+The controlled point is the Panda grip_site near the fingerpads, NOT the mounting
+flange. R_world_from_control maps site-local vectors into world coordinates.
+The adapter corrects the legacy hand-body quaternion to the controller site frame;
+legacy_hand_quaternion_xyzw is retained only for audit, not the action reference.
+
+Gripper geometry (camera_geometry.robot_gripper_geometry):
+points_control_frame_m and points_world_m give the SAME robot geom centres in two
+frames. p_world = eef_position_world_m + R_world_from_control * p_control.
+The pads oppose along site-local X; site-local +Z extends toward the fingertips.
+Use the measured pad_midpoint, jaw_axis_world_left_to_right and matching pixels_uv
+to align with the visible grasp region. Do not add a flange-length offset to the
+grip_site position. Joint separation, pad-centre distance and inner-face clearance
+are different quantities; these fields do not detect contacts or a successful grasp.
+
+Camera geometry (camera_geometry.cameras):
+K uses pixels of each individual upright image, not a side-by-side replay mosaic.
+For a world point p, optical coordinates are R^T*(p-t), using R,t from
+T_world_from_camera. With optical Z>0: u=fx*X/Z+cx, v=fy*Y/Z+cy.
+position_control_frame_m, R_control_from_camera_optical and view_direction_world
+describe the actual camera mounting/view; do not assume the wrist image centre is
+the grasp point or import another robot's camera tilt. Use each historical image's
+own calibration. A pixel gives a ray, not depth; compare both views and observed
+motion. Pixel references outside the image are off-screen; null is behind the camera.
+Choose corrections only in the existing 7D world-delta format, then check the new
+observation. Geometry references are not object locations or absolute action targets.
+'''
     return prompt
 
 
@@ -156,6 +190,13 @@ def parse_actions(content, finish_reason, limit):
 
 
 def request_payload(cfg, task, obs, history, step, visual_history=(), control_feedback=None):
+    if cfg.geometry_contract:
+        from .errors import ExperimentError
+        from .geometry_contract import SCHEMA
+        for candidate in [obs] + [old_obs for _, old_obs in visual_history]:
+            if (not candidate.geometry
+                    or candidate.geometry.get("control_frame", {}).get("schema") != SCHEMA):
+                raise ExperimentError("Current and historical observations require the checked Panda grip-site geometry")
     observation = {"task": task, "control_step": step, "max_control_steps": cfg.max_steps,
                    "proprioception": obs.state, "recent_history": history}
     if cfg.protocol_version == "ds-libero-direct-v2":

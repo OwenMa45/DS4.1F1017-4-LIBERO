@@ -35,13 +35,24 @@ def aperture(obs):
 
 def calibrate(env, store):
     probes = []
+    geometry_checks = []
+    def record(label, obs):
+        store.observe(label, obs)
+        frame = (obs.geometry or {}).get("control_frame")
+        if frame:
+            from .geometry_overlay import draw_geometry_overlay
+            folder = store.path / "geometry_overlays"
+            folder.mkdir(exist_ok=True)
+            for camera in obs.images:
+                (folder / f"{label}_{camera}.png").write_bytes(draw_geometry_overlay(obs, camera))
+            geometry_checks.append({"frame": label, **frame["checks"]})
     for axis in range(6):
         for sign in (1, -1):
             label = f"{'xyz'[axis % 3]}_{'position' if axis < 3 else 'rotation'}_{'positive' if sign > 0 else 'negative'}"
             before = env.reset()
             if env.check_success():
                 raise ExperimentError("Official initial state already succeeds")
-            store.observe(label + "_before", before)
+            record(label + "_before", before)
             action = [0.] * 6 + [-1.]
             action[axis] = sign * .1
             after = before
@@ -49,7 +60,7 @@ def calibrate(env, store):
                 after, done = env.step(action)
                 if done:
                     raise ExperimentError("Environment ended during calibration")
-            store.observe(label + "_after", after)
+            record(label + "_after", after)
             translation = [b - a for a, b in zip(before.state["eef_position_world_m"], after.state["eef_position_world_m"])]
             rotation = rotation_delta(before.state["eef_quaternion_xyzw"], after.state["eef_quaternion_xyzw"])
             measured = translation if axis < 3 else rotation
@@ -69,14 +80,14 @@ def calibrate(env, store):
         close_trace.append({"steps": index + 1, "joint_separation_m": aperture(closed)})
         if done:
             raise ExperimentError("Environment ended during gripper calibration")
-    store.observe("gripper_closed", closed)
+    record("gripper_closed", closed)
     open_trace = []
     for index in range(20):
         opened, done = env.step([0.] * 6 + [-1.])
         open_trace.append({"steps": index + 1, "joint_separation_m": aperture(opened)})
         if done:
             raise ExperimentError("Environment ended during gripper calibration")
-    store.observe("gripper_open", opened)
+    record("gripper_open", opened)
     probe = {"name": "gripper_close_then_open", "initial_aperture_m": opened_initially,
              "close_trace": close_trace, "open_trace": open_trace,
              "closed_aperture_m": aperture(closed), "opened_aperture_m": aperture(opened),
@@ -84,6 +95,10 @@ def calibrate(env, store):
     probes.append(probe)
     store.event({"event": "calibration_probe", **probe})
     passed = all(p["passed"] for p in probes)
-    return {"status": "pass" if passed else "calibration_failed", "scored": False, "task_success": None,
+    result = {"status": "pass" if passed else "calibration_failed", "scored": False, "task_success": None,
             "probes": probes, "controller": env.contract,
             "note": "Diagnostic probes only; sign thresholds test motion, not target-position accuracy."}
+    if geometry_checks:
+        result["geometry_contract_checks"] = geometry_checks
+        result["geometry_overlays"] = "geometry_overlays/ (diagnostic images only; not policy inputs)"
+    return result

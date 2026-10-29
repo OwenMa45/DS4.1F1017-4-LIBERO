@@ -134,11 +134,33 @@ class LiberoEnvironment:
                       control_freq=self.env.env.control_freq, gripper=type(robot.gripper).__name__,
                       controller_source_sha256=hashlib.sha256(Path(inspect.getfile(type(controller))).read_bytes()).hexdigest(),
                       gripper_source_sha256=hashlib.sha256(Path(inspect.getfile(type(robot.gripper))).read_bytes()).hexdigest())
+        if self.cfg.geometry_contract:
+            from robosuite import macros
+            from .geometry_contract import SCHEMA, check_image_convention
+            try:
+                check_image_convention(macros.IMAGE_CONVENTION)
+            except ValueError as exc:
+                raise ExperimentError(str(exc)) from exc
+            site = robot.gripper.important_sites["grip_site"]
+            if controller.eef_name != site or robot.eef_site_id != self.env.sim.model.site_name2id(site):
+                raise ExperimentError("Controller and observable must use the same Panda grip_site")
+            actual.update(geometry_schema=SCHEMA, eef_position_source=site, eef_orientation_source=site,
+                          legacy_orientation_source=robot.robot_model.eef_name,
+                          raw_image_convention=macros.IMAGE_CONVENTION,
+                          observation_refresh="sim.forward then force_update; no simulation step")
         return actual
 
     def _observe(self, raw):
         from PIL import Image
         np = self.np
+        if self.cfg.geometry_contract:
+            # robosuite observables are sampled/cached. Align image, proprioception
+            # and direct MuJoCo geometry at one current state without taking a step.
+            simulation_time = float(self.env.sim.data.time)
+            self.env.sim.forward()
+            raw = self.env.env._get_observations(force_update=True)
+            if float(self.env.sim.data.time) != simulation_time:
+                raise SimulationError("Geometry observation refresh unexpectedly advanced simulation time")
         state = {}
         for source, target, size in (("robot0_eef_pos", "eef_position_world_m", 3),
                                      ("robot0_eef_quat", "eef_quaternion_xyzw", 4),
@@ -167,6 +189,12 @@ class LiberoEnvironment:
                 from .geometry import observe_gripper_geometry
                 geometry["robot_gripper_geometry"] = observe_gripper_geometry(
                     self.env.sim, self.env.robots[0].gripper, geometry)
+            if self.cfg.geometry_contract:
+                from .geometry_contract import observe_control_frame
+                try:
+                    state, geometry = observe_control_frame(self.env.sim, self.env.robots[0], state, geometry)
+                except (ValueError, KeyError) as exc:
+                    raise SimulationError(f"Robot/camera geometry contract failed: {exc}") from exc
         return Observation(state, images, geometry)
 
     def reset(self):
