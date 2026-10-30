@@ -14,6 +14,8 @@
 
 **EEF 几何核对：旧观测的位置来自 grip_site，姿态来自 hand body，二者相差绕 Z 轴 -90°。** 新配置 `configs/direct_v2_geometry_high.json` 统一控制参考系，校验指垫与相机关系，完善几何提示词并生成独立标定投影图。high、不显式限制 token、逐任务开销及 latency 记录保留。[几何核对、验证范围与最新实验命令](docs/geometry_contract.md)。
 
+**2026-10-30 更新：几何配置已通过远程标定，第二个完整回合在 220 步耗尽时仍未成功。** 下一轮使用 `configs/direct_v2_geometry_chunk16_high.json`：每次最多 16 条动作，总计最多 2048 步，每组执行后重新观察和推理。同步扩大底层仿真时限及 HTTP 请求额度，保留 high、几何校验、抓取反馈和逐任务费用/latency。[回合复核与下一轮命令](docs/chunk16_2026-10-30.md)。
+
 ## 1. 获取代码
 
 在远程节点执行。实验仓库与已有仿真环境分开存放：

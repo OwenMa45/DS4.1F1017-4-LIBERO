@@ -165,6 +165,18 @@ motion. Pixel references outside the image are off-screen; null is behind the ca
 Choose corrections only in the existing 7D world-delta format, then check the new
 observation. Geometry references are not object locations or absolute action targets.
 '''
+    if cfg.action_horizon > 8:
+        prompt += f'''\nAction chunk scheduling:
+Choose 1..{cfg.action_horizon} explicit 7D actions per response (at most
+{cfg.action_horizon / cfg.control_freq:g} simulated seconds). This is a maximum, not a required length.
+Each array entry executes once, in order; repeated commands need repeated entries.
+No new reasoning or visual correction occurs inside the executed chunk. Its end
+provides fresh images, measured state and executed-action feedback for your next
+decision. Use longer chunks for predictable free-space motion or gripper-only
+actuation within one phase; use shorter chunks for alignment, contact and test
+lifts. Never pad a chunk to its maximum length when fresh feedback is needed.
+Respect max_actions_this_response, which shrinks near the total control-step limit.
+'''
     return prompt
 
 

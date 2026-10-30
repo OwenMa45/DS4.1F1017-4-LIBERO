@@ -86,10 +86,7 @@ class LiberoEnvironment:
             raise ExperimentError("Official initial-state index is unavailable")
         self.initial_state = np.asarray(states[cfg.init_state_id], dtype=np.float64).copy()
         try:
-            self.env = OffScreenRenderEnv(
-                bddl_file_name=str(bddl), robots=["Panda"], controller="OSC_POSE",
-                camera_names=list(CAMERAS), camera_heights=cfg.image_size, camera_widths=cfg.image_size,
-                control_freq=cfg.control_freq, horizon=1000, ignore_done=False)
+            self.env = self._create_simulator(OffScreenRenderEnv, bddl)
             self.contract = self._controller_contract()
             renderer = GL.glGetString(GL.GL_RENDERER)
             self.provenance = {
@@ -103,10 +100,23 @@ class LiberoEnvironment:
                 "task": self.task, "task_name": task.name, "bddl_sha256": hashlib.sha256(bddl.read_bytes()).hexdigest(),
                 "official_init_state_sha256": hashlib.sha256(self.initial_state.tobytes()).hexdigest(),
                 "initial_state_count": len(states), "controller": self.contract,
+                "simulator_horizon": self.env.env.horizon,
+                "simulator_ignore_done": self.env.env.ignore_done,
             }
         except BaseException:
             self.close()
             raise
+
+    def _create_simulator(self, factory, bddl):
+        # Settling consumes simulator steps too. Keep its time limit beyond the
+        # runner's final action so a budget failure is scored by run_episode.
+        # Preserve the original simulator horizon for all existing profiles.
+        return factory(
+            bddl_file_name=str(bddl), robots=["Panda"], controller="OSC_POSE",
+            camera_names=list(CAMERAS), camera_heights=self.cfg.image_size,
+            camera_widths=self.cfg.image_size, control_freq=self.cfg.control_freq,
+            horizon=max(1000, self.cfg.settle_steps + self.cfg.max_steps + 1),
+            ignore_done=False)
 
     def _controller_contract(self):
         np = self.np
