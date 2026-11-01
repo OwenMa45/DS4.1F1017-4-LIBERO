@@ -46,11 +46,12 @@ class Config:
     grasp_feedback: bool = False
     gripper_feedback_barrier: bool = False
     geometry_contract: bool = False
+    expected_task_name: str = ""
 
     def to_dict(self):
         values = asdict(self)
         # Old profile hashes must remain replayable.
-        for key in ("grasp_feedback", "gripper_feedback_barrier", "geometry_contract"):
+        for key in ("grasp_feedback", "gripper_feedback_barrier", "geometry_contract", "expected_task_name"):
             if not values[key]:
                 values.pop(key)
         # Preserve the original v1 fingerprint and request contract.
@@ -84,19 +85,21 @@ class Config:
             raise ExperimentError("Unknown protocol_version")
         locked = ("task_order_index", "settle_steps", "image_size", "history_steps",
                   "control_freq", "model", "endpoint", "max_retries")
-        if cfg.evaluation_scope not in ("pilot", "benchmark"):
-            raise ExperimentError("evaluation_scope must be pilot or benchmark")
+        if cfg.evaluation_scope not in ("pilot", "benchmark", "diagnostic"):
+            raise ExperimentError("evaluation_scope must be pilot, benchmark or diagnostic")
         if cfg.evaluation_scope == "pilot":
             locked += ("suite", "task_id", "init_state_id", "seed")
             if not 1 <= cfg.max_steps <= 2048:
                 raise ExperimentError("Pilot max_steps must be 1..2048")
-        elif (cfg.suite not in SUITE_HORIZONS or cfg.max_steps != SUITE_HORIZONS[cfg.suite]
+        elif (cfg.suite not in SUITE_HORIZONS
+              or (cfg.evaluation_scope == "benchmark" and cfg.max_steps != SUITE_HORIZONS[cfg.suite])
+              or (cfg.evaluation_scope == "diagnostic" and not 1 <= cfg.max_steps <= 2048)
               or not 0 <= cfg.task_id < 10 or not 0 <= cfg.init_state_id < 50
               or not 0 <= cfg.seed < 2 ** 32):
-            raise ExperimentError("Benchmark config requires a supported suite/horizon, task 0..9, init 0..49 and uint32 seed")
+            raise ExperimentError("Evaluation requires a supported suite, task 0..9, init 0..49, uint32 seed, and a standard benchmark horizon or diagnostic horizon 1..2048")
         if cfg.protocol_version == "ds-libero-direct-v1":
             locked += ("max_steps", "reasoning_effort", "action_horizon", "visual_history", "camera_geometry", "evaluation_scope",
-                       "grasp_feedback", "gripper_feedback_barrier", "geometry_contract")
+                       "grasp_feedback", "gripper_feedback_barrier", "geometry_contract", "expected_task_name")
         if cfg.grasp_feedback and not cfg.camera_geometry:
             raise ExperimentError("grasp_feedback requires camera_geometry for fingerpad projection")
         if cfg.geometry_contract and not (cfg.camera_geometry and cfg.grasp_feedback):

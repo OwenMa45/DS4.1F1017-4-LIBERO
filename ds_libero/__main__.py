@@ -49,6 +49,11 @@ def parser():
     plan.add_argument("--init-state-ids", type=int, nargs="+", required=True)
     plan.add_argument("--seed", type=int, default=0)
     plan.add_argument("--out", type=Path, required=True)
+    five = commands.add_parser("plan-five", help="Prepare five fixed tasks with a custom control horizon; no API calls")
+    five.add_argument("--config", type=Path, required=True)
+    five.add_argument("--out", type=Path, required=True)
+    batch = commands.add_parser("run-plan", help="Run unstarted planned tasks sequentially, including paid API calls")
+    batch.add_argument("directory", type=Path)
     selected = commands.add_parser("run-plan-episode", help="Run one explicitly selected trial, including paid API calls")
     selected.add_argument("directory", type=Path)
     selected.add_argument("--episode", type=int, required=True, help="Zero-based plan episode index")
@@ -70,13 +75,18 @@ def main(argv=None):
             return 2
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return 0
-    if args.command in ("plan", "run-plan-episode", "report-plan"):
-        from .benchmark import create_plan, run_plan_episode, report_plan
+    if args.command in ("plan", "plan-five", "run-plan", "run-plan-episode", "report-plan"):
+        from .benchmark import create_plan, create_five_plan, run_plan_all, run_plan_episode, report_plan
         try:
             if args.command == "plan":
                 plan = create_plan(Config.load(args.config), args.suite, args.task_ids,
                                    args.init_state_ids, args.seed, args.out)
                 print(f"Prepared {len(plan['episodes'])} episodes; no API calls. Plan: {args.out / 'plan.json'}")
+            elif args.command == "plan-five":
+                plan = create_five_plan(Config.load(args.config), args.out)
+                print(f"Prepared {len(plan['episodes'])} diagnostic tasks; no API calls. Plan: {args.out / 'plan.json'}")
+            elif args.command == "run-plan":
+                return run_plan_all(args.directory)
             elif args.command == "run-plan-episode":
                 return run_plan_episode(args.directory, args.episode)
             else:

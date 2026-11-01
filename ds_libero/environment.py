@@ -16,6 +16,11 @@ from .errors import ExperimentError, SimulationError
 from .protocol import CAMERAS, Observation
 
 
+def verify_task_name(cfg, actual_name):
+    if cfg.expected_task_name and actual_name != cfg.expected_task_name:
+        raise ExperimentError(f"Task ID/name mismatch: expected {cfg.expected_task_name!r}, got {actual_name!r}")
+
+
 def git_output(root, *args):
     try:
         process = subprocess.run(["git", "-C", str(root), *args], capture_output=True,
@@ -77,6 +82,7 @@ class LiberoEnvironment:
         torch.manual_seed(cfg.seed)
         self.suite = benchmark.get_benchmark_dict()[cfg.suite](task_order_index=cfg.task_order_index)
         task = self.suite.get_task(cfg.task_id)
+        verify_task_name(cfg, task.name)
         self.task = task.language
         bddl = Path(get_libero_path("bddl_files")) / task.problem_folder / task.bddl_file
         if not bddl.is_file():

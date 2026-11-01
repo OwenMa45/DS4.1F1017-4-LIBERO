@@ -50,6 +50,29 @@ def create_plan(base, suite, task_ids, init_state_ids, seed, out):
     return plan
 
 
+def create_five_plan(base, out):
+    from .five_tasks import five_configs
+    configs = five_configs(base)
+    entries = [{"index": i, "config": cfg.to_dict(), "config_sha256": cfg.fingerprint,
+                "config_file": f"configs/episode-{i:04d}.json", "run_directory": f"runs/episode-{i:04d}"}
+               for i, cfg in enumerate(configs)]
+    root = Path(out).resolve()
+    root.mkdir(parents=True, exist_ok=False)
+    (root / "configs").mkdir()
+    for entry in entries:
+        write_json(root / entry["config_file"], entry["config"])
+    plan = {"schema_version": 2, "created_utc": utc_now(), "source_sha256": source_fingerprint(),
+            "suite": "mixed", "task_order_index": 0, "seed": 0, "episodes": entries,
+            "scope": "five-task diagnostic with custom control horizon; one initial state per task; not a standard LIBERO benchmark score",
+            "execution": "sequential tasks, or one selected episode; no API during plan creation",
+            "initial_states_note": "Official initial state 0 for each task, checked by the runtime",
+            "max_control_steps_per_episode": base.max_steps,
+            "max_http_requests_per_episode_including_api_check": base.max_http_requests + min(base.max_http_requests, base.max_retries + 1)}
+    plan["plan_sha256"] = digest(plan)
+    write_json(root / "plan.json", plan)
+    return plan
+
+
 def child_path(root, relative):
     path = (root / relative).resolve()
     if not path.is_relative_to(root):
@@ -60,7 +83,7 @@ def child_path(root, relative):
 def load_plan(directory):
     root = Path(directory).resolve()
     plan = json.loads((root / "plan.json").read_text(encoding="utf-8"))
-    if plan.get("schema_version") != 1 or plan.get("plan_sha256") != digest({
+    if plan.get("schema_version") not in (1, 2) or plan.get("plan_sha256") != digest({
             k: v for k, v in plan.items() if k != "plan_sha256"}):
         raise ExperimentError("Plan hash/schema mismatch; create a new plan for changes")
     if not plan.get("episodes"):
@@ -68,15 +91,20 @@ def load_plan(directory):
     identities = set()
     paths = set()
     profiles = set()
+    diagnostic = plan["schema_version"] == 2
     for index, entry in enumerate(plan["episodes"]):
         cfg = Config.from_dict(entry["config"])
         identity = (cfg.suite, cfg.task_order_index, cfg.task_id, cfg.init_state_id, cfg.seed)
-        if entry["index"] != index or identity in identities or cfg.evaluation_scope != "benchmark":
+        if entry["index"] != index or identity in identities or cfg.evaluation_scope != ("diagnostic" if diagnostic else "benchmark"):
             raise ExperimentError("Plan has invalid or repeated episode identities")
         identities.add(identity)
-        if cfg.suite != plan["suite"] or cfg.seed != plan["seed"] or cfg.task_order_index != plan["task_order_index"]:
+        if ((not diagnostic and cfg.suite != plan["suite"]) or cfg.seed != plan["seed"]
+                or cfg.task_order_index != plan["task_order_index"]):
             raise ExperimentError("Episode does not match the declared suite, order and seed")
-        profiles.add(digest({k: v for k, v in cfg.to_dict().items() if k not in ("task_id", "init_state_id")}))
+        varying = {"task_id", "init_state_id"} | ({"suite", "expected_task_name"} if diagnostic else set())
+        profiles.add(digest({k: v for k, v in cfg.to_dict().items() if k not in varying}))
+        if diagnostic and cfg.max_steps != plan["max_control_steps_per_episode"]:
+            raise ExperimentError("Diagnostic horizon differs from the declared plan")
         config_path = child_path(root, entry["config_file"])
         run_path = child_path(root, entry["run_directory"])
         if run_path in paths:
@@ -86,6 +114,12 @@ def load_plan(directory):
             raise ExperimentError("Plan configuration changed; create a new plan")
     if len(profiles) != 1:
         raise ExperimentError("A plan must contain one frozen policy configuration")
+    if diagnostic:
+        from .five_tasks import FIVE_TASKS
+        selected = [(e["config"]["suite"], e["config"]["task_id"], e["config"].get("expected_task_name")) for e in plan["episodes"]]
+        if selected != list(FIVE_TASKS) or plan["suite"] != "mixed" or any(
+                e["config"]["init_state_id"] != 0 or e["config"]["seed"] != 0 for e in plan["episodes"]):
+            raise ExperimentError("Five-task selection, names or initial states changed")
     return root, plan
 
 
@@ -100,6 +134,37 @@ def run_plan_episode(directory, index):
     return subprocess.run(["bash", str(script), str(child_path(root, entry["config_file"])),
                            str(child_path(root, entry["run_directory"]))],
                           cwd=script.parent.parent).returncode
+
+
+def run_plan_all(directory):
+    """Continue only unstarted tasks; never silently retry an already paid trial."""
+    root, plan = load_plan(directory)
+    if source_fingerprint() != plan["source_sha256"]:
+        raise ExperimentError("Code changed since plan creation; create a new plan")
+
+    def completed(campaign):
+        result = campaign / "episode" / "result.json"
+        if result.is_file():
+            return json.loads(result.read_text(encoding="utf-8"))["status"] in (
+                "success", "failure", "invalid_output", "budget_exhausted")
+        result = campaign / "api-check" / "result.json"
+        return result.is_file() and json.loads(result.read_text(encoding="utf-8"))["status"] == "invalid_output"
+
+    for entry in plan["episodes"]:
+        campaign = child_path(root, entry["run_directory"])
+        if completed(campaign):
+            print(f"Episode {entry['index']} already recorded; skipping", flush=True)
+            continue
+        if campaign.exists():
+            raise ExperimentError(f"Episode {entry['index']} has incomplete/infrastructure-error artifacts; inspect it or select a later unstarted episode explicitly")
+        try:
+            code = run_plan_episode(root, entry["index"])
+        finally:
+            report_plan(root)
+        if not completed(campaign):
+            return code or 2
+    report_plan(root)
+    return 0
 
 
 def wilson(successes, total):
@@ -140,6 +205,9 @@ def report_plan(directory):
                "http_latency_incomplete": False,
                "usage_field_available_attempts": {k: 0 for k in TOKEN_FIELDS},
                "reported_usage": {k: 0 for k in TOKEN_FIELDS}, "api_cost": aggregate_cost([])}
+        row.update(task_name=cfg.get("expected_task_name"), max_control_steps=cfg["max_steps"],
+                   action_horizon=cfg["action_horizon"], control_steps=None, policy_decisions=None,
+                   decision_latency_seconds=None, reason=None)
         campaign = child_path(root, entry["run_directory"])
         episode = campaign / "episode"
         if (episode / "manifest.json").is_file():
@@ -154,12 +222,15 @@ def report_plan(directory):
                 varying = {"task", "task_name", "bddl_sha256", "official_init_state_sha256", "initial_state_count"}
                 runtime_signatures.add(digest({k: v for k, v in environment.items() if k not in varying}))
                 row["task_name"] = environment.get("task_name")
+                if cfg.get("expected_task_name") and row["task_name"] != cfg["expected_task_name"]:
+                    raise ExperimentError(f"Episode {entry['index']} task name differs from its plan")
             summary = build_report(episode, replay=False)
             for key in ("status", "scored", "task_success", "http_requests", "model_outputs",
                         "valid_model_outputs", "truncated_outputs", "usage_incomplete",
                         "command_wall_seconds", "simulated_control_seconds", "task_execution_wall_seconds",
                         "retry_backoff_seconds", "reported_usage", "api_cost", "http_latency_incomplete",
-                        "usage_field_available_attempts"):
+                        "usage_field_available_attempts", "control_steps", "policy_decisions", "reason",
+                        "decision_latency_seconds"):
                 if key in summary:
                     row[key] = summary[key]
             row["reported_total_tokens"] = summary["reported_usage"]["total_tokens"]
@@ -194,11 +265,14 @@ def report_plan(directory):
     if len(runtime_signatures) > 1:
         raise ExperimentError("Episodes use different simulator/runtime contracts; report separate plans")
     total = counts(rows)
-    per_task = {str(task): counts([r for r in rows if r["task_id"] == task])
-                for task in sorted({r["task_id"] for r in rows})}
+    def task_key(row):
+        return f"{row['suite']}:{row['task_id']}" if plan["schema_version"] == 2 else str(row['task_id'])
+    per_task = {task: counts([r for r in rows if task_key(r) == task])
+                for task in sorted({task_key(r) for r in rows})}
     for task, statistics in per_task.items():
-        trials = [r for r in rows if r["task_id"] == int(task)]
+        trials = [r for r in rows if task_key(r) == task]
         statistics.update(resource_totals(trials))
+        statistics.update(suite=trials[0]["suite"], task_id=trials[0]["task_id"], task_name=trials[0].get("task_name"))
     complete = total["scored"] == total["planned"]
     outputs = sum(r["model_outputs"] for r in rows)
     report = {"schema_version": 2, "plan_sha256": plan["plan_sha256"], "source_sha256": plan["source_sha256"],
@@ -223,7 +297,8 @@ def report_plan(directory):
                         "A changed provider system_fingerprint may indicate serving drift; weights are not pinned."],
               "episodes": rows}
     write_json(root / "aggregate.json", report)
-    fields = ("index", "suite", "task_id", "init_state_id", "seed", "status", "scored", "task_success",
+    fields = ("index", "suite", "task_id", "task_name", "init_state_id", "seed", "status", "reason", "scored", "task_success",
+              "max_control_steps", "action_horizon", "control_steps", "policy_decisions",
               "http_requests", "model_outputs", "valid_model_outputs", "truncated_outputs",
               "reported_total_tokens", "usage_incomplete", "command_wall_seconds", "simulated_control_seconds",
               "task_execution_wall_seconds", "api_wait_seconds", "http_latency_incomplete", "retry_backoff_seconds",
