@@ -6,7 +6,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from .artifacts import Store, write_json
-from .client import Client, resolve_api_key
+from .client import Client, resolve_api_key, response_content
 from .config import Config
 from .errors import ExperimentError, InvalidAction
 from .protocol import CAMERAS, Observation, parse_action, parse_actions, request_payload
@@ -57,18 +57,26 @@ def prepare_replay(directory, step, max_tokens=None, effort=None, timeout=None):
         encoded = json.dumps(payload, allow_nan=False, separators=(",", ":")).encode()
         if hashlib.sha256(encoded).hexdigest() != recorded["request_sha256"]:
             raise ExperimentError("Reconstructed request does not match original SHA256; refusing approximate replay")
-    if ((max_tokens is not None and (type(max_tokens) is not int or not 1 <= max_tokens <= 393216))
-            or effort not in (None, "low", "high")
+    openai = cfg.api_provider == "openai"
+    if openai and max_tokens is None:
+        max_tokens = cfg.max_tokens  # GPT replay retains its finite budget by default.
+    allowed_efforts = (None, "low", "medium", "high", "xhigh", "max") if openai else (None, "low", "high")
+    if ((max_tokens is not None and (type(max_tokens) is not int or not 1 <= max_tokens <= (128000 if openai else 393216)))
+            or effort not in allowed_efforts
             or (timeout is not None and (type(timeout) is not int or timeout <= 0))):
         raise ExperimentError("Invalid replay max_tokens or reasoning effort")
-    changes = {"max_tokens": {"before": payload.get("max_tokens"), "after": max_tokens}}
+    token_field = "max_output_tokens" if openai else "max_tokens"
+    changes = {token_field: {"before": payload.get(token_field), "after": max_tokens}}
     if max_tokens is None:
-        payload.pop("max_tokens", None)
+        payload.pop(token_field, None)
     else:
-        payload["max_tokens"] = max_tokens
+        payload[token_field] = max_tokens
     if effort is not None:
-        changes["reasoning_effort"] = {"before": payload["reasoning_effort"], "after": effort}
-        payload["reasoning_effort"] = effort
+        changes["reasoning_effort"] = {"before": cfg.reasoning_effort, "after": effort}
+        if openai:
+            payload["reasoning"]["effort"] = effort
+        else:
+            payload["reasoning_effort"] = effort
     # Original protocol label is retained; diagnostic overrides are explicit in the manifest.
     if timeout is not None:
         changes["timeout_seconds"] = {"before": cfg.timeout_seconds, "after": timeout}
@@ -85,9 +93,9 @@ def replay_request(directory, step, max_tokens, out, effort=None, dry_run=False,
     if Path(out).exists():
         raise ExperimentError(f"Output directory already exists: {out}; choose a new directory")
     # Fail before creating artifacts; a missing credential is not a model decision.
-    api_key = None if dry_run else resolve_api_key(prompt=prompt_api_key)
+    api_key = None if dry_run else resolve_api_key(prompt=prompt_api_key, provider=cfg.api_provider)
     store = Store(out, "replay-request", cfg)
-    prompt = payload["messages"][0]["content"]
+    prompt = payload["instructions"] if cfg.api_provider == "openai" else payload["messages"][0]["content"]
     (store.path / "prompt.txt").write_text(prompt, encoding="utf-8")
     store.manifest.update(replay=provenance, prompt_sha256=hashlib.sha256(prompt.encode()).hexdigest())
     write_json(store.path / "manifest.json", store.manifest)
@@ -105,11 +113,7 @@ def replay_request(directory, step, max_tokens, out, effort=None, dry_run=False,
             client = Client(cfg, store, api_key=api_key)
             decision_started = time.perf_counter()
             reply = client.complete(payload, step)
-            try:
-                choice = reply["choices"][0]
-                finish, content = choice["finish_reason"], choice["message"]["content"]
-            except (KeyError, IndexError, TypeError) as exc:
-                raise InvalidAction("API response has no complete assistant choice") from exc
+            content, finish = response_content(cfg, reply)
             decision["finish_reason"] = finish
             action = (parse_action(content, finish) if cfg.protocol_version == "ds-libero-direct-v1"
                       else parse_actions(content, finish, min(cfg.action_horizon, cfg.max_steps - step)))

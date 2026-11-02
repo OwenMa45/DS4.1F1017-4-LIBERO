@@ -24,30 +24,34 @@ class HTTPResponse:
     body: bytes
 
 
-def resolve_api_key(api_key=None, prompt=False):
-    key = api_key if api_key is not None else os.environ.get("DEEPSEEK_API_KEY", "")
+def resolve_api_key(api_key=None, prompt=False, provider="deepseek"):
+    if provider not in ("deepseek", "openai"):
+        raise ExperimentError("Unknown API provider")
+    env_name, filename, label = (("OPENAI_API_KEY", "gpt_API.txt", "OpenAI") if provider == "openai" else
+                                 ("DEEPSEEK_API_KEY", "ds_API.txt", "DeepSeek"))
+    key = api_key if api_key is not None else os.environ.get(env_name, "")
     if api_key is None and not key.strip():
-        key_file = Path(__file__).resolve().parent.parent / "ds_API.txt"
+        key_file = Path(__file__).resolve().parent.parent / filename
         try:
             key = key_file.read_text(encoding="utf-8-sig").strip()
         except FileNotFoundError:
             pass
         except OSError:
-            raise ExperimentError("Cannot read project ds_API.txt; check file permissions") from None
+            raise ExperimentError(f"Cannot read project {filename}; check file permissions") from None
     if not key.strip() and prompt:
         if not sys.stdin.isatty():
-            raise ExperimentError("Hidden key input requires an interactive terminal; export DEEPSEEK_API_KEY before running")
+            raise ExperimentError(f"Hidden key input requires an interactive terminal; export {env_name} before running")
         try:
             # Never allow getpass's fallback to echoed input.
             with warnings.catch_warnings():
                 warnings.simplefilter("error", getpass.GetPassWarning)
-                key = getpass.getpass("DeepSeek API key (hidden, this run only): ")
+                key = getpass.getpass(f"{label} API key (hidden, this run only): ")
         except (EOFError, KeyboardInterrupt, getpass.GetPassWarning) as exc:
             raise ExperimentError("API key input cancelled or hidden input unavailable; no request was sent") from exc
     if not key.strip():
-        raise ExperimentError("DEEPSEEK_API_KEY is missing or empty in this process. Export it in the current shell, "
+        raise ExperimentError(f"{env_name} is missing or empty in this process. Export it in the current shell, "
                               "or use replay-request --prompt-api-key in an interactive terminal. "
-                              "Alternatively put only the key in project ds_API.txt (Git ignored). No API request was sent.")
+                              f"Alternatively put only the key in project {filename} (Git ignored). No API request was sent.")
     return key.strip()
 
 
@@ -70,7 +74,7 @@ def transport(endpoint, payload, api_key, timeout):
 class Client:
     def __init__(self, cfg, store, api_key=None, send=transport, sleep=time.sleep):
         self.cfg, self.store, self.send, self.sleep = cfg, store, send, sleep
-        self.api_key = resolve_api_key(api_key)
+        self.api_key = resolve_api_key(api_key, provider=cfg.api_provider)
         self.attempts = 0
 
     def complete(self, payload, step):
@@ -118,9 +122,12 @@ class Client:
                 if isinstance(data, dict):
                     event["returned_model"] = data.get("model")
                     event["response_id"] = data.get("id")
-                    event["response_created"] = data.get("created")
+                    event["response_created"] = data.get("created_at", data.get("created"))
                     event["usage"] = data.get("usage")
                     event["system_fingerprint"] = data.get("system_fingerprint")
+                    event["service_tier"] = data.get("service_tier")
+                    if self.cfg.api_provider == "openai":
+                        event["finish_reason"] = response_finish(data)
                     choices = data.get("choices")
                     if isinstance(choices, list) and choices and isinstance(choices[0], dict):
                         event["finish_reason"] = choices[0].get("finish_reason")
@@ -147,6 +154,49 @@ class Client:
         raise AssertionError("unreachable")
 
 
+def response_finish(reply):
+    status = reply.get("status")
+    if status == "completed":
+        return "stop"
+    details = reply.get("incomplete_details") or {}
+    if status == "incomplete" and isinstance(details, dict) and details.get("reason") == "max_output_tokens":
+        return "length"
+    return status or "missing_status"
+
+
+def response_content(cfg, reply):
+    if cfg.api_provider == "openai":
+        finish = response_finish(reply)
+        if reply.get("status") in ("failed", "cancelled", "queued", "in_progress"):
+            raise APIError("Responses API did not complete; see the saved response")
+        output = reply.get("output")
+        if not isinstance(output, list):
+            raise InvalidAction("Responses API has no output array")
+        texts = []
+        for item in output:
+            if not isinstance(item, dict):
+                raise InvalidAction("Malformed Responses output item")
+            if item.get("type") == "reasoning":
+                continue
+            if item.get("type") != "message" or item.get("role") != "assistant":
+                raise InvalidAction("Unexpected non-message output; this policy has no tools")
+            if item.get("status") not in (None, "completed") and finish == "stop":
+                raise InvalidAction("Incomplete assistant message")
+            parts = item.get("content")
+            if not isinstance(parts, list):
+                raise InvalidAction("Malformed assistant message content")
+            for part in parts:
+                if not isinstance(part, dict) or part.get("type") != "output_text" or not isinstance(part.get("text"), str):
+                    raise InvalidAction("Refused or non-text assistant output")
+                texts.append(part["text"])
+        return "".join(texts), finish
+    try:
+        choice = reply["choices"][0]
+        return choice["message"]["content"], choice["finish_reason"]
+    except (KeyError, IndexError, TypeError) as exc:
+        raise InvalidAction("API response has no complete assistant choice") from exc
+
+
 class ModelPolicy:
     def __init__(self, cfg, task, client, store):
         self.cfg, self.task, self.client, self.store = cfg, task, client, store
@@ -167,12 +217,7 @@ class ModelPolicy:
                                                for s, _, refs in self.visual_history]
             reply = self.client.complete(request_payload(self.cfg, self.task, obs, history, step,
                 [(s, o) for s, o, _ in self.visual_history], feedback), step)
-            try:
-                choice = reply["choices"][0]
-                content = choice["message"]["content"]
-                finish = choice["finish_reason"]
-            except (KeyError, IndexError, TypeError) as exc:
-                raise InvalidAction("API response has no complete assistant choice") from exc
+            content, finish = response_content(self.cfg, reply)
             event.update(finish_reason=finish, content_characters=len(content) if isinstance(content, str) else None)
             v2 = self.cfg.protocol_version == "ds-libero-direct-v2"
             action = (parse_actions(content, finish, min(self.cfg.action_horizon, self.cfg.max_steps - step))

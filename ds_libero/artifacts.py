@@ -41,7 +41,7 @@ class Store:
         prompt = system_prompt(cfg)
         (self.path / "prompt.txt").write_text(prompt, encoding="utf-8")
         self.manifest = {"schema_version": 1, "command": command, "created_utc": utc_now(),
-                         "api_pricing": pricing_snapshot(),
+                         "api_pricing": pricing_snapshot(cfg.model),
                          "config": cfg.to_dict(), "config_sha256": cfg.fingerprint,
                          "source_sha256": source_fingerprint(),
                          "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),

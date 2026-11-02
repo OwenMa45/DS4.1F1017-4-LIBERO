@@ -140,11 +140,15 @@ def build_report(path, replay=True):
     write_json(root / "summary.json", summary)
     write_json(root / "api_calls.json", {"task_identity": identity, "api_pricing": manifest.get("api_pricing"),
                                         "api_cost": accounting["api_cost"], "attempts": ledger})
-    rows = [{**identity, **r, "estimated_cost_min_cny": (r["estimated_cost_range_cny"] or [None, None])[0],
-             "estimated_cost_max_cny": (r["estimated_cost_range_cny"] or [None, None])[1]} for r in ledger]
+    currency = accounting["api_cost"]["currency"].lower()
+    rows = [{**identity, **r, "estimated_cost_min": (r["estimated_cost_range"] or [None, None])[0],
+             "estimated_cost_max": (r["estimated_cost_range"] or [None, None])[1],
+             f"estimated_cost_min_{currency}": (r["estimated_cost_range"] or [None, None])[0],
+             f"estimated_cost_max_{currency}": (r["estimated_cost_range"] or [None, None])[1]} for r in ledger]
     fields = (*identity, "attempt", "step", "retry", "started_utc", "finished_utc", "response_created",
               "response_id", "completed", "status_code", "finish_reason", "returned_model", "system_fingerprint",
-              "http_latency_seconds", *TOKEN_FIELDS, "usage_complete", "estimated_cost_min_cny", "estimated_cost_max_cny", "error")
+              "http_latency_seconds", *TOKEN_FIELDS, "usage_complete", "currency", "service_tier",
+              "estimated_cost_min", "estimated_cost_max", f"estimated_cost_min_{currency}", f"estimated_cost_max_{currency}", "error")
     with (root / "api_calls.csv").open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
         writer.writeheader()
@@ -152,7 +156,7 @@ def build_report(path, replay=True):
     return summary
 
 
-def build_campaign_report(path, expected_config=None, expected_source=None):
+def build_campaign_report(path, expected_config=None, expected_source=None, currency=None):
     """Include paid preflight even when it prevented a scored episode from starting."""
     root = Path(path)
     summaries = {}
@@ -176,7 +180,8 @@ def build_campaign_report(path, expected_config=None, expected_source=None):
     usage = {k: sum(s["reported_usage"][k] for s in all_summaries) for k in TOKEN_FIELDS}
     availability = {k: sum(s["usage_field_available_attempts"][k] for s in all_summaries) for k in TOKEN_FIELDS}
     cost = aggregate_cost([s["api_cost"] for s in all_summaries],
-                          pricing_available=all(s["api_cost"]["pricing_available"] for s in all_summaries))
+                          pricing_available=all(s["api_cost"]["pricing_available"] for s in all_summaries),
+                          currency=currency)
     wall = [s.get("command_wall_seconds") for s in all_summaries]
     report = {"schema_version": 1, "scope": "all recorded phases, including failed preflight and retries",
               "task_identity": all_summaries[-1]["task_identity"] if all_summaries else None,

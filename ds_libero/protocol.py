@@ -231,6 +231,17 @@ def request_payload(cfg, task, obs, history, step, visual_history=(), control_fe
         content.append({"type": "text", "text": json.dumps(state, allow_nan=False)})
         _append_images(content, old_obs, f"Historical step {old_step}")
     _append_images(content, obs, "Current")
+    if cfg.api_provider == "openai":
+        # Same prompt, observations and PNGs as the DeepSeek policy; only the wire format differs.
+        inputs = [{"type": "input_text", "text": item["text"]} if item["type"] == "text" else
+                  {"type": "input_image", "image_url": item["image_url"]["url"], "detail": "original"}
+                  for item in content]
+        return {"model": cfg.model, "instructions": system_prompt(cfg),
+                "input": [{"role": "user", "content": inputs}],
+                "reasoning": {"effort": cfg.reasoning_effort},
+                "text": {"format": {"type": "json_object"}},
+                "max_output_tokens": cfg.max_tokens, "stream": False, "store": False,
+                "service_tier": "default", "prompt_cache_options": {"mode": "implicit", "ttl": "30m"}}
     payload = {"model": cfg.model, "messages": [
                 {"role": "system", "content": system_prompt(cfg)},
                 {"role": "user", "content": content}],

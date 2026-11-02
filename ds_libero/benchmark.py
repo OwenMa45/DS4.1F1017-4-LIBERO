@@ -8,7 +8,7 @@ from collections import Counter
 from pathlib import Path
 
 from .artifacts import source_fingerprint, utc_now, write_json
-from .accounting import TOKEN_FIELDS, aggregate_cost
+from .accounting import TOKEN_FIELDS, aggregate_cost, pricing_snapshot
 from .config import Config, SUITE_HORIZONS, digest
 from .errors import ExperimentError
 from .report import build_campaign_report, build_report, distribution, load_events
@@ -195,6 +195,8 @@ def report_plan(directory):
     rows, api_latencies, runtime_signatures = [], [], set()
     for entry in plan["episodes"]:
         cfg = entry["config"]
+        pricing = pricing_snapshot(cfg["model"])
+        currency = pricing["currency"] if pricing else "CNY"
         row = {"index": entry["index"], "suite": cfg["suite"], "task_id": cfg["task_id"],
                "init_state_id": cfg["init_state_id"], "seed": cfg["seed"],
                "status": "not_started", "scored": False, "task_success": None,
@@ -204,7 +206,7 @@ def report_plan(directory):
                "task_execution_wall_seconds": None, "api_wait_seconds": 0., "retry_backoff_seconds": 0.,
                "http_latency_incomplete": False,
                "usage_field_available_attempts": {k: 0 for k in TOKEN_FIELDS},
-               "reported_usage": {k: 0 for k in TOKEN_FIELDS}, "api_cost": aggregate_cost([])}
+               "reported_usage": {k: 0 for k in TOKEN_FIELDS}, "api_cost": aggregate_cost([], currency=currency)}
         row.update(task_name=cfg.get("expected_task_name"), max_control_steps=cfg["max_steps"],
                    action_horizon=cfg["action_horizon"], control_steps=None, policy_decisions=None,
                    decision_latency_seconds=None, reason=None)
@@ -251,11 +253,15 @@ def report_plan(directory):
                 if result.is_file():
                     row["preflight_status"] = {"phase": phase, "status": json.loads(result.read_text(encoding="utf-8"))["status"]}
                     break
-        row["campaign"] = (build_campaign_report(campaign, entry["config_sha256"], plan["source_sha256"])
+        row["campaign"] = (build_campaign_report(campaign, entry["config_sha256"], plan["source_sha256"], currency)
                            if campaign.exists() else None)
         for prefix, cost in (("episode", row["api_cost"]),
-                             ("campaign", row["campaign"]["api_cost"] if row["campaign"] else aggregate_cost([]))):
-            row[f"{prefix}_known_cost_min_cny"], row[f"{prefix}_known_cost_max_cny"] = cost["known_cost_range_cny"]
+                             ("campaign", row["campaign"]["api_cost"] if row["campaign"] and row["campaign"]["phases"]
+                              else aggregate_cost([], currency=currency))):
+            row[f"{prefix}_known_cost_min"], row[f"{prefix}_known_cost_max"] = cost["known_cost_range"]
+            unit = cost["currency"].lower()
+            row[f"{prefix}_known_cost_min_{unit}"], row[f"{prefix}_known_cost_max_{unit}"] = cost["known_cost_range"]
+            row[f"{prefix}_cost_currency"] = cost["currency"]
             row[f"{prefix}_cost_incomplete"] = cost["incomplete"]
         row["campaign_http_requests"] = row["campaign"]["http_requests"] if row["campaign"] else 0
         row["campaign_reported_total_tokens"] = row["campaign"]["reported_usage"]["total_tokens"] if row["campaign"] else 0
@@ -297,14 +303,17 @@ def report_plan(directory):
                         "A changed provider system_fingerprint may indicate serving drift; weights are not pinned."],
               "episodes": rows}
     write_json(root / "aggregate.json", report)
+    unit = rows[0]["api_cost"]["currency"].lower()
     fields = ("index", "suite", "task_id", "task_name", "init_state_id", "seed", "status", "reason", "scored", "task_success",
               "max_control_steps", "action_horizon", "control_steps", "policy_decisions",
               "http_requests", "model_outputs", "valid_model_outputs", "truncated_outputs",
               "reported_total_tokens", "usage_incomplete", "command_wall_seconds", "simulated_control_seconds",
               "task_execution_wall_seconds", "api_wait_seconds", "http_latency_incomplete", "retry_backoff_seconds",
-              "episode_known_cost_min_cny", "episode_known_cost_max_cny", "episode_cost_incomplete",
+              f"episode_known_cost_min_{unit}", f"episode_known_cost_max_{unit}", "episode_cost_incomplete",
+              "episode_cost_currency", "episode_known_cost_min", "episode_known_cost_max",
               "campaign_http_requests", "campaign_reported_total_tokens", "campaign_usage_incomplete",
-              "campaign_known_cost_min_cny", "campaign_known_cost_max_cny", "campaign_cost_incomplete",
+              f"campaign_known_cost_min_{unit}", f"campaign_known_cost_max_{unit}", "campaign_cost_incomplete",
+              "campaign_cost_currency", "campaign_known_cost_min", "campaign_known_cost_max",
               *(f"reported_{k}" for k in TOKEN_FIELDS if k != "total_tokens"))
     with (root / "episodes.csv").open("w", encoding="utf-8", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
@@ -314,7 +323,8 @@ def report_plan(directory):
 
 
 def resource_totals(rows):
-    campaigns = [r["campaign"] for r in rows if r.get("campaign")]
+    campaigns = [r["campaign"] for r in rows if r.get("campaign") and r["campaign"]["phases"]]
+    currency = rows[0]["api_cost"]["currency"] if rows else "CNY"
     return {"reported_usage": {k: sum(r["reported_usage"][k] for r in rows) for k in TOKEN_FIELDS},
             "usage_field_available_attempts": {k: sum(r["usage_field_available_attempts"][k] for r in rows)
                                                 for k in TOKEN_FIELDS},
@@ -335,5 +345,5 @@ def resource_totals(rows):
                 k: sum(c["usage_field_available_attempts"][k] for c in campaigns) for k in TOKEN_FIELDS},
             "campaign_usage_incomplete": any(c["usage_incomplete"] for c in campaigns),
             "campaign_api_cost": aggregate_cost([c["api_cost"] for c in campaigns],
-                pricing_available=all(c["api_cost"]["pricing_available"] for c in campaigns)),
+                pricing_available=all(c["api_cost"]["pricing_available"] for c in campaigns), currency=currency),
             "campaign_api_wait_seconds": sum(c["api_wait_seconds"] for c in campaigns)}

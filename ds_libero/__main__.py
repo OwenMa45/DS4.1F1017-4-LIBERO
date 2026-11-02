@@ -15,8 +15,13 @@ from .runner import run_episode
 
 
 def parser():
-    p = argparse.ArgumentParser(description="Reproducible DeepSeek / LIBERO direct-policy experiments")
+    p = argparse.ArgumentParser(description="Reproducible DeepSeek and GPT / LIBERO direct-policy experiments")
     commands = p.add_subparsers(dest="command", required=True)
+    check = commands.add_parser("check-config", help="Validate configuration and credential presence without API calls")
+    check.add_argument("--config", type=Path, required=True)
+    estimate = commands.add_parser("estimate-gpt", help="Offline cost/time scenarios; no API calls")
+    estimate.add_argument("--config", type=Path, default=Path("configs/gpt61_sol_medium_220.json"))
+    estimate.add_argument("--baseline", type=Path, help="Existing five-task plan with recorded events")
     for command in ("calibrate", "api-check", "run"):
         child = commands.add_parser(command)
         child.add_argument("--config", type=Path, help="JSON config; defaults to the fixed v1 protocol")
@@ -35,7 +40,7 @@ def parser():
     budget.add_argument("--max-tokens", type=int, default=None,
                         help="Optional explicit cap; default omits the API field (provider limit still applies)")
     budget.add_argument("--no-token-limit", dest="max_tokens", action="store_const", const=None)
-    replay.add_argument("--reasoning-effort", choices=("low", "high"))
+    replay.add_argument("--reasoning-effort", choices=("low", "medium", "high", "xhigh", "max"))
     replay.add_argument("--timeout-seconds", type=int, default=1800,
                         help="HTTP socket timeout, independent of token budget (default 1800)")
     replay.add_argument("--out", type=Path, required=True)
@@ -66,6 +71,23 @@ def parser():
 
 def main(argv=None):
     args = parser().parse_args(argv)
+    if args.command == "estimate-gpt":
+        from .forecast import forecast_gpt
+        try:
+            print(json.dumps(forecast_gpt(Config.load(args.config), args.baseline), ensure_ascii=False, indent=2))
+        except (OSError, ValueError, KeyError, ExperimentError) as exc:
+            print(f"Forecast failed: {exc}", file=sys.stderr)
+            return 2
+        return 0
+    if args.command == "check-config":
+        try:
+            cfg = Config.load(args.config)
+            resolve_api_key(provider=cfg.api_provider)
+        except (OSError, ValueError, ExperimentError) as exc:
+            print(f"Cannot start: {exc}", file=sys.stderr)
+            return 2
+        print(f"Configuration and {cfg.api_provider} credential present; no API call sent.")
+        return 0
     if args.command == "report-campaign":
         from .report import build_campaign_report
         try:
@@ -119,7 +141,7 @@ def main(argv=None):
     try:
         cfg = Config.load(args.config)
         if args.command in ("api-check", "run"):
-            resolve_api_key()
+            resolve_api_key(provider=cfg.api_provider)
         # Check gates' existence before spending time constructing the simulator.
         for gate in (getattr(args, "calibration", None), getattr(args, "api_check", None)):
             if gate is not None and not (gate / "result.json").is_file():

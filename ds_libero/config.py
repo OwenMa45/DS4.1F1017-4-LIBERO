@@ -47,9 +47,12 @@ class Config:
     gripper_feedback_barrier: bool = False
     geometry_contract: bool = False
     expected_task_name: str = ""
+    api_provider: str = "deepseek"
 
     def to_dict(self):
         values = asdict(self)
+        if self.api_provider == "deepseek":
+            values.pop("api_provider")
         # Old profile hashes must remain replayable.
         for key in ("grasp_feedback", "gripper_feedback_barrier", "geometry_contract", "expected_task_name"):
             if not values[key]:
@@ -83,8 +86,21 @@ class Config:
         # v1 deliberately runs one fixed episode, not an accidentally expanded benchmark.
         if cfg.protocol_version not in ("ds-libero-direct-v1", "ds-libero-direct-v2"):
             raise ExperimentError("Unknown protocol_version")
-        locked = ("task_order_index", "settle_steps", "image_size", "history_steps",
-                  "control_freq", "model", "endpoint", "max_retries")
+        locked = ("task_order_index", "settle_steps", "image_size", "history_steps", "control_freq")
+        if cfg.api_provider == "deepseek":
+            locked += ("model", "endpoint", "max_retries")
+        elif cfg.api_provider == "openai":
+            if (cfg.model != "gpt-6.1-sol" or cfg.endpoint != "https://api.openai.com/v1/responses"
+                    or cfg.protocol_version != "ds-libero-direct-v2"):
+                raise ExperimentError("GPT comparison requires gpt-6.1-sol, official Responses API and v2")
+            if not 1 <= cfg.max_steps <= 220 or not 1 <= cfg.max_http_requests <= 220:
+                raise ExperimentError("GPT comparison caps control steps and episode HTTP attempts at 220 each")
+            if not 0 <= cfg.max_retries <= 2:
+                raise ExperimentError("GPT max_retries must be 0..2 and counts against the HTTP budget")
+            if cfg.max_tokens is None or not 1 <= cfg.max_tokens <= 128000:
+                raise ExperimentError("GPT requires a finite max_tokens budget (1..128000, including reasoning)")
+        else:
+            raise ExperimentError("api_provider must be deepseek or openai")
         if cfg.evaluation_scope not in ("pilot", "benchmark", "diagnostic"):
             raise ExperimentError("evaluation_scope must be pilot, benchmark or diagnostic")
         if cfg.evaluation_scope == "pilot":
@@ -107,8 +123,9 @@ class Config:
         for key in locked:
             if getattr(cfg, key) != getattr(default, key):
                 raise ExperimentError(f"This pilot fixes {key}={getattr(default, key)!r}")
-        if cfg.reasoning_effort not in ("low", "high"):
-            raise ExperimentError("Use low or high; medium maps to high in the DeepSeek API")
+        efforts = ("low", "medium", "high", "xhigh", "max") if cfg.api_provider == "openai" else ("low", "high")
+        if cfg.reasoning_effort not in efforts:
+            raise ExperimentError(f"Unsupported reasoning_effort for {cfg.api_provider}: choose {efforts}")
         if not 1 <= cfg.action_horizon <= 16 or not 0 <= cfg.visual_history <= 2:
             raise ExperimentError("action_horizon must be 1..16; visual_history must be 0..2")
         for key in ("timeout_seconds", "max_http_requests"):

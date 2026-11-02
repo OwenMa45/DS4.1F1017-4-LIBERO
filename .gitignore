@@ -11,3 +11,4 @@ dist/
 *.bundle
 *.zip
 ds_API.txt
+gpt_API.txt
