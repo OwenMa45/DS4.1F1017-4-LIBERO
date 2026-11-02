@@ -77,7 +77,7 @@ bash scripts/run_gpt_five.sh "$OUT"
 )
 ```
 
-该流程前台运行，请保持终端连接，或在已有 tmux 会话中执行。脚本会保存日志；最后查看刚打印的输出目录中的 `aggregate.json`、`episodes.csv` 和各回合 `campaign_summary.json`。本次推送前，合并远程已有测试后共 **112 项离线测试通过**，另已通过 Python 3.10 和 Bash 语法检查。
+该流程前台运行，请保持终端连接，或在已有 tmux 会话中执行。脚本会保存日志；最后查看刚打印的输出目录中的 `aggregate.json`、`episodes.csv` 和各回合 `campaign_summary.json`。修复 JSON mode 请求后共 **115 项离线测试通过**，另已通过 Python 3.10 和 Bash 语法检查。
 
 ```bash
 # 一条命令：冻结新计划，然后按顺序运行 5 个任务（此命令会消耗 API 额度）
@@ -106,6 +106,14 @@ bash "$SIM" -B -m ds_libero report-plan outputs/gpt61-sol-medium-220-001
 ```
 
 逐次 `api_calls.json/csv`、逐回合 `summary.json`、各阶段 `campaign_summary.json`、五任务 `aggregate.json` 和 `episodes.csv` 都记录实际 token、费用与等待时间。GPT 费用标注 **USD**，DeepSeek 保留 **CNY**；不做隐含汇率换算。`known_cost_range` 是已知小计，存在未知 usage 时 `total_cost_range=null`。缓存写入量缺失、返回服务档位不符或模型不匹配时，不把相关请求算成免费。
+
+## API 检查返回 HTTP 400：input 缺少 JSON 指令
+
+首轮远程运行的错误为 `Response input messages must contain the word 'json' in some form to use 'text.format' of type 'json_object'.`。此前 JSON 输出指令仅存在于 Responses 的顶层 `instructions`，而服务端检查的是 `input` 消息，因而在 API 检查阶段拒绝请求，未执行控制动作。该结果属于请求错误，不计为模型任务失败。[官方 JSON mode 说明](https://developers.openai.com/api/docs/guides/structured-outputs#json-mode)要求在消息中明确指示输出 JSON。
+
+修复在 GPT 的用户 `input` 末尾补充一句 JSON 输出要求；共享策略提示、观测、图像、动作格式及限制仍沿用原配置。`gpt-6.1-sol`、medium、220 控制步、16,384 输出 token 和默认不重试均未改变。后续 HTTP 错误会把脱敏的 `message/type/param/code` 写入事件日志及 `summary.json` 的 `reason`。
+
+更新代码后使用上面的完整运行命令创建**新输出目录**，重新标定和 API 检查。旧失败目录保留供分析；它冻结了旧源码指纹，不能直接续跑，也不要用 `replay-request` 重发其中保存的旧请求。新计划会先检查 API，成功后才开始正式控制。此次修复在离线测试中复现并消除了全部五项任务的同类 400；尚未用真实 API 或仿真验证。
 
 ## 费用与时间估算
 

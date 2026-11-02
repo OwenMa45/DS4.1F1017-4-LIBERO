@@ -25,6 +25,9 @@ from test_experiment import FakeEnv, MemoryStore, observation, run_quiet
 
 
 ACTION = [0., 0., 0., 0., 0., 0., -1.]
+JSON_INPUT_ERROR = {"message": "Response input messages must contain the word 'json' in some form "
+                              "to use 'text.format' of type 'json_object'.",
+                    "type": "invalid_request_error", "param": "input", "code": None}
 
 
 def config(**changes):
@@ -127,12 +130,60 @@ class OpenAIProtocolTests(unittest.TestCase):
             self.assertNotIn(key, gpt_payload)
         blocks = gpt_payload["input"][0]["content"]
         original = ds_payload["messages"][1]["content"]
-        self.assertEqual(len(blocks), len(original))
-        for block, previous in zip(blocks, original):
+        self.assertEqual(len(blocks), len(original) + 1)
+        for block, previous in zip(blocks[:-1], original):
             self.assertEqual(block.get("text", block.get("image_url")),
                              previous.get("text", previous.get("image_url", {}).get("url")))
         self.assertEqual(sum(b["type"] == "input_image" for b in blocks), 6)
         self.assertEqual(json.loads(blocks[0]["text"])["max_actions_this_response"], 1)
+
+    def test_json_mode_input_contract_accepts_all_five_tasks(self):
+        # Reproduce the server's check of input messages, excluding top-level instructions.
+        def send(endpoint, body, key, timeout):
+            payload = json.loads(body)
+            input_text = " ".join(block["text"] for message in payload["input"]
+                                  for block in message["content"] if block["type"] == "input_text")
+            if payload["text"]["format"]["type"] == "json_object" and "json" not in input_text.lower():
+                return HTTPResponse(400, json.dumps({"error": JSON_INPUT_ERROR}).encode())
+            return http(response())
+        for cfg in five_configs(config()):
+            with self.subTest(task=cfg.expected_task_name):
+                env, store = Env(success_at=1), MemoryStore()
+                client = Client(cfg, store, api_key="dummy", send=send)
+                result = run_quiet(env, ModelPolicy(cfg, cfg.expected_task_name, client, store), store, cfg)
+                self.assertEqual((result["status"], env.steps, client.attempts), ("success", 1, 1))
+
+    def test_server_error_details_reach_summary_redacted_without_retry_or_action(self):
+        key = "sensitive-test-key"
+        for diagnostic in (JSON_INPUT_ERROR, {**JSON_INPUT_ERROR, "message": "Rejected key: " + key}):
+            with self.subTest(message=diagnostic["message"]), tempfile.TemporaryDirectory() as temp:
+                env, cfg = Env(), config(max_retries=2)
+                store = Store(Path(temp) / "run", "run", cfg)
+                client = Client(cfg, store, api_key=key,
+                                send=lambda *a: HTTPResponse(400, json.dumps({"error": diagnostic}).encode()))
+                result = run_quiet(env, ModelPolicy(cfg, "task", client, store), store, cfg)
+                store.finish(result)
+                summary = build_report(store.path, replay=False)
+                self.assertEqual((summary["status"], env.steps, client.attempts), ("api_error", 0, 1))
+                self.assertFalse(summary["scored"])
+                self.assertIn(diagnostic["message"].replace(key, "[REDACTED]"), summary["reason"])
+                self.assertIn('"param": "input"', summary["reason"])
+                events = (store.path / "events.jsonl").read_text(encoding="utf-8")
+                attempt = next(e for e in map(json.loads, events.splitlines()) if e["event"] == "api_attempt")
+                self.assertEqual(attempt["api_error"]["type"], "invalid_request_error")
+                self.assertIsNone(attempt["api_error"]["code"])
+                self.assertNotIn(key, events + json.dumps(summary))
+
+    def test_nonstandard_error_bodies_keep_http_failure_diagnostic(self):
+        bodies = (b"", b"<html>Bad request</html>", b"null", b'{"error":"Bad request"}',
+                  b'{"error":{"message":[],"type":123,"param":{},"code":false}}')
+        for body in bodies:
+            with self.subTest(body=body):
+                env, store, cfg = Env(), MemoryStore(), config()
+                client = Client(cfg, store, api_key="dummy", send=lambda *a: HTTPResponse(400, body))
+                result = run_quiet(env, ModelPolicy(cfg, "task", client, store), store, cfg)
+                self.assertEqual((result["status"], env.steps, client.attempts), ("api_error", 0, 1))
+                self.assertIn("HTTP 400", result["reason"])
 
     def test_completed_output_after_reasoning_parses_and_failures_never_execute(self):
         self.assertEqual(json.loads(response_content(config(), response())[0]), {"actions": [ACTION]})

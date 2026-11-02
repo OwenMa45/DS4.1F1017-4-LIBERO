@@ -120,6 +120,15 @@ class Client:
                 except ValueError:
                     pass
                 if isinstance(data, dict):
+                    if not 200 <= response.status < 300 and isinstance(data.get("error"), dict):
+                        # Keep actionable server diagnostics in the result/summary, not just the raw body.
+                        event["api_error"] = {}
+                        for field in ("message", "type", "param", "code"):
+                            value = data["error"].get(field)
+                            if isinstance(value, str):
+                                value = " ".join(value.replace(self.api_key, "[REDACTED]").split())[:1000]
+                            if value is None or isinstance(value, str):
+                                event["api_error"][field] = value
                     event["returned_model"] = data.get("model")
                     event["response_id"] = data.get("id")
                     event["response_created"] = data.get("created_at", data.get("created"))
@@ -144,6 +153,8 @@ class Client:
                          (response.status == 429 or 500 <= response.status <= 599))
             if not retryable or retry == self.cfg.max_retries:
                 detail = "transport error" if response is None else f"HTTP {response.status}"
+                if event.get("api_error"):
+                    detail += ": " + json.dumps(event["api_error"], ensure_ascii=False)
                 raise APIError(f"{detail}; see redacted attempt log and response body")
             backoff_start = time.perf_counter()
             try:
