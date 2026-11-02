@@ -17,7 +17,7 @@
   "reasoning_effort": "medium",
   "max_tokens": 16384,
   "timeout_seconds": 600,
-  "max_retries": 0,
+  "max_retries": 1,
   "max_http_requests": 220,
   "action_horizon": 8,
   "visual_history": 2,

@@ -2,8 +2,10 @@ import contextlib
 import io
 import json
 import os
+import ssl
 import tempfile
 import unittest
+import urllib.error
 from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
@@ -63,6 +65,11 @@ def http(data):
     return HTTPResponse(200, json.dumps(data).encode())
 
 
+def ssl_eof(detail=""):
+    return urllib.error.URLError(ssl.SSLEOFError(
+        8, "[SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol " + detail))
+
+
 def event(data=None):
     data = response() if data is None else data
     return {"event": "api_attempt", "attempt": 1, "step": 0, "returned_model": data["model"],
@@ -104,6 +111,7 @@ class OpenAIProtocolTests(unittest.TestCase):
         trials = five_configs(cfg)
         self.assertEqual([(c.suite, c.task_id, c.expected_task_name) for c in trials], list(FIVE_TASKS))
         self.assertTrue(all(c.max_steps == 220 and c.init_state_id == c.seed == 0 for c in trials))
+        self.assertTrue(all(c.max_retries == 1 and c.max_http_requests == 220 for c in trials))
         for changes in ({"max_steps": 221}, {"max_http_requests": 221}, {"max_tokens": None},
                         {"endpoint": "https://example.com/v1/responses"}, {"model": "gpt-other"},
                         {"api_provider": "deepseek"}, {"max_retries": -1}):
@@ -218,20 +226,87 @@ class OpenAIProtocolTests(unittest.TestCase):
             self.assertEqual((env.steps, result["status"]), (220, "failure"))
             self.assertEqual(client.attempts, 220 if chunk == 1 else 28)
 
-    def test_default_does_not_retry_paid_timeout_and_budget_includes_enabled_retries(self):
-        for cfg, status, count in ((config(), 429, 1), (config(), 503, 1),
-                                    (config(max_http_requests=1, max_retries=2), 503, 1)):
+    def test_default_retries_http_once_and_respects_nonretryable_errors_and_budget(self):
+        for cfg, status, count in ((config(), 429, 2), (config(), 503, 2),
+                                    (config(), 400, 1), (config(), 401, 1), (config(), 403, 1),
+                                    (config(max_http_requests=1), 503, 1)):
             env, store = Env(), MemoryStore()
             client = Client(cfg, store, api_key="dummy", send=lambda *a: HTTPResponse(status, b'{}'), sleep=lambda _: None)
             result = run_quiet(env, ModelPolicy(cfg, "task", client, store), store, cfg)
             self.assertEqual((client.attempts, env.steps), (count, 0))
             self.assertFalse(result["scored"])
-        env, store, cfg = Env(), MemoryStore(), config()
+
+    def test_explicit_zero_retries_still_stops_on_first_timeout(self):
+        env, store, cfg = Env(), MemoryStore(), config(max_retries=0)
         def timeout(*args):
             raise TimeoutError("timed out")
         client = Client(cfg, store, api_key="dummy", send=timeout)
         result = run_quiet(env, ModelPolicy(cfg, "task", client, store), store, cfg)
         self.assertEqual((client.attempts, env.steps, result["status"]), (1, 0, "api_error"))
+
+    def test_ssl_disconnect_retries_identical_input_without_advancing_simulation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            env, cfg = Env(success_at=1), config()
+            store = Store(Path(temp) / "run", "run", cfg)
+            requests, waits = [], []
+            def send(endpoint, body, key, timeout):
+                self.assertEqual(env.steps, 0)
+                requests.append(body)
+                if len(requests) == 1:
+                    raise ssl_eof()
+                return http(response())
+            def sleep(seconds):
+                self.assertEqual(env.steps, 0)
+                waits.append(seconds)
+            client = Client(cfg, store, api_key="dummy", send=send, sleep=sleep)
+            result = run_quiet(env, ModelPolicy(cfg, "task", client, store), store, cfg)
+            store.finish(result)
+            summary = build_report(store.path, replay=False)
+            self.assertEqual((result["status"], env.steps, client.attempts), ("success", 1, 2))
+            self.assertEqual(requests[0], requests[1])
+            self.assertEqual(waits, [2])
+            self.assertEqual(summary["http_requests"], 2)
+            self.assertEqual(summary["valid_model_outputs"], 1)
+            self.assertEqual(summary["api_cost"]["unknown_cost_attempts"], 1)
+            self.assertIsNone(summary["api_cost"]["total_cost_range_usd"])
+
+    def test_repeated_ssl_failure_stops_after_one_retry_with_redacted_summary(self):
+        with tempfile.TemporaryDirectory() as temp:
+            env, cfg, key = Env(), config(), "sensitive-test-key"
+            store = Store(Path(temp) / "run", "run", cfg)
+            waits = []
+            def fail(*args):
+                raise ssl_eof(key)
+            client = Client(cfg, store, api_key=key, send=fail, sleep=waits.append)
+            result = run_quiet(env, ModelPolicy(cfg, "task", client, store), store, cfg)
+            store.finish(result)
+            summary = build_report(store.path, replay=False)
+            self.assertEqual((result["status"], env.steps, client.attempts), ("api_error", 0, 2))
+            self.assertFalse(result["scored"])
+            self.assertEqual(waits, [2])
+            self.assertIn("UNEXPECTED_EOF_WHILE_READING", summary["reason"])
+            self.assertIn("URLError", summary["reason"])
+            self.assertIn("[REDACTED]", summary["reason"])
+            events = (store.path / "events.jsonl").read_text(encoding="utf-8")
+            attempts = [e for e in map(json.loads, events.splitlines()) if e["event"] == "api_attempt"]
+            self.assertEqual([e["retry"] for e in attempts], [0, 1])
+            self.assertTrue(all(e["error_cause_type"] == "SSLEOFError" for e in attempts))
+            self.assertNotIn(key, events + json.dumps(summary))
+            self.assertEqual(summary["api_cost"]["unknown_cost_attempts"], 2)
+
+    def test_recovered_retry_counts_towards_220_attempt_limit(self):
+        env, store, cfg = Env(), MemoryStore(), config()
+        calls, waits = [], []
+        def send(endpoint, body, key, timeout):
+            calls.append(body)
+            if len(calls) == 1:
+                raise ssl_eof()
+            return http(response())
+        client = Client(cfg, store, api_key="dummy", send=send, sleep=waits.append)
+        result = run_quiet(env, ModelPolicy(cfg, "task", client, store), store, cfg)
+        self.assertEqual((result["status"], env.steps, client.attempts), ("budget_exhausted", 219, 220))
+        self.assertEqual(len(calls), 220)
+        self.assertEqual(waits, [2])
 
 
 class OpenAIAccountingTests(unittest.TestCase):
@@ -295,7 +370,7 @@ class OpenAIAccountingTests(unittest.TestCase):
             self.assertEqual(report["planned"], 5)
             self.assertEqual(len(report["per_task"]), 5)
             self.assertEqual(report["campaign_api_cost"]["currency"], "USD")
-            self.assertEqual(plan["max_http_requests_per_episode_including_api_check"], 221)
+            self.assertEqual(plan["max_http_requests_per_episode_including_api_check"], 222)
             entry = plan["episodes"][0]
             store = Store(root / entry["run_directory"] / "api-check", "api-check", Config.from_dict(entry["config"]))
             store.event(event())
@@ -312,7 +387,7 @@ class OpenAIAccountingTests(unittest.TestCase):
     def test_forecast_is_labeled_offline_and_matches_request_ceiling(self):
         with patch("ds_libero.client.Client", side_effect=AssertionError("No API")):
             report = forecast_gpt(config())
-        self.assertEqual(report["maximum_total_http_attempts_including_preflight"], 1105)
+        self.assertEqual(report["maximum_total_http_attempts_including_preflight"], 1110)
         self.assertEqual(report["projected_total_http_attempts_including_preflight"], 225)
         self.assertEqual(report["scenarios"][1]["assumed_output_tokens_per_call_including_reasoning"], 4000)
         self.assertIn("Offline", report["notes"][0])

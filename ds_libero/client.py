@@ -102,6 +102,10 @@ class Client:
             except (urllib.error.URLError, TimeoutError, socket.timeout, ConnectionError, OSError) as exc:
                 network_error = str(exc).replace(self.api_key, "[REDACTED]")
                 event["error"] = network_error
+                event["error_type"] = type(exc).__name__
+                cause = getattr(exc, "reason", None)
+                if isinstance(cause, BaseException):
+                    event["error_cause_type"] = type(cause).__name__
             except KeyboardInterrupt:
                 event.update(error="interrupted", elapsed_seconds=time.perf_counter() - started,
                              finished_utc=utc_now())
@@ -153,6 +157,8 @@ class Client:
                          (response.status == 429 or 500 <= response.status <= 599))
             if not retryable or retry == self.cfg.max_retries:
                 detail = "transport error" if response is None else f"HTTP {response.status}"
+                if network_error is not None:
+                    detail += f" ({event['error_type']}): " + " ".join(network_error.split())[:1000]
                 if event.get("api_error"):
                     detail += ": " + json.dumps(event["api_error"], ensure_ascii=False)
                 raise APIError(f"{detail}; see redacted attempt log and response body")
