@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "scope": "all recorded phases, including failed preflight and retries",
+  "task_identity": {
+    "suite": "libero_goal",
+    "task_id": 0,
+    "task_order_index": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "task_name": "open_the_middle_drawer_of_the_cabinet"
+  },
+  "phases": {
+    "calibration": {
+      "status": "pass",
+      "http_requests": 0,
+      "reported_usage": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 0,
+        "prompt_cache_write_tokens": 0,
+        "prompt_cache_write_30m_tokens": 0,
+        "prompt_cache_write_12h_tokens": 0
+      },
+      "api_cost": {
+        "currency": "USD",
+        "priced_attempts": 0,
+        "unknown_cost_attempts": 0,
+        "incomplete": false,
+        "pricing_available": true,
+        "known_cost_range": [
+          0.0,
+          0.0
+        ],
+        "total_cost_range": [
+          0.0,
+          0.0
+        ],
+        "known_cost_range_usd": [
+          0.0,
+          0.0
+        ],
+        "total_cost_range_usd": [
+          0.0,
+          0.0
+        ],
+        "note": "Published price estimate, not actual billing; unknown requests are excluded from known subtotal. No currency conversion."
+      },
+      "usage_field_available_attempts": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 0,
+        "prompt_cache_write_tokens": 0,
+        "prompt_cache_write_30m_tokens": 0,
+        "prompt_cache_write_12h_tokens": 0
+      },
+      "command_wall_seconds": 114.09988092072308
+    },
+    "api-check": {
+      "status": "pass",
+      "http_requests": 1,
+      "reported_usage": {
+        "prompt_tokens": 3574,
+        "completion_tokens": 340,
+        "total_tokens": 3914,
+        "reasoning_tokens": 196,
+        "prompt_cache_hit_tokens": 1230,
+        "prompt_cache_miss_tokens": 3,
+        "prompt_cache_write_tokens": 2341,
+        "prompt_cache_write_30m_tokens": 2341,
+        "prompt_cache_write_12h_tokens": 0
+      },
+      "api_cost": {
+        "currency": "USD",
+        "priced_attempts": 1,
+        "unknown_cost_attempts": 0,
+        "incomplete": false,
+        "pricing_available": true,
+        "known_cost_range": [
+          0.0093815,
+          0.0093815
+        ],
+        "total_cost_range": [
+          0.0093815,
+          0.0093815
+        ],
+        "known_cost_range_usd": [
+          0.0093815,
+          0.0093815
+        ],
+        "total_cost_range_usd": [
+          0.0093815,
+          0.0093815
+        ],
+        "note": "Published price estimate, not actual billing; unknown requests are excluded from known subtotal. No currency conversion."
+      },
+      "usage_field_available_attempts": {
+        "prompt_tokens": 1,
+        "completion_tokens": 1,
+        "total_tokens": 1,
+        "reasoning_tokens": 1,
+        "prompt_cache_hit_tokens": 1,
+        "prompt_cache_miss_tokens": 1,
+        "prompt_cache_write_tokens": 1,
+        "prompt_cache_write_30m_tokens": 1,
+        "prompt_cache_write_12h_tokens": 1
+      },
+      "command_wall_seconds": 27.792479941621423
+    },
+    "episode": {
+      "status": "success",
+      "http_requests": 19,
+      "reported_usage": {
+        "prompt_tokens": 161412,
+        "completion_tokens": 5540,
+        "total_tokens": 166952,
+        "reasoning_tokens": 3573,
+        "prompt_cache_hit_tokens": 24481,
+        "prompt_cache_miss_tokens": 54,
+        "prompt_cache_write_tokens": 136877,
+        "prompt_cache_write_30m_tokens": 136877,
+        "prompt_cache_write_12h_tokens": 0
+      },
+      "api_cost": {
+        "currency": "USD",
+        "priced_attempts": 18,
+        "unknown_cost_attempts": 1,
+        "incomplete": true,
+        "pricing_available": true,
+        "known_cost_range": [
+          0.4001486,
+          0.4001486
+        ],
+        "total_cost_range": null,
+        "known_cost_range_usd": [
+          0.4001486,
+          0.4001486
+        ],
+        "total_cost_range_usd": null,
+        "note": "Published price estimate, not actual billing; unknown requests are excluded from known subtotal. No currency conversion."
+      },
+      "usage_field_available_attempts": {
+        "prompt_tokens": 18,
+        "completion_tokens": 18,
+        "total_tokens": 18,
+        "reasoning_tokens": 18,
+        "prompt_cache_hit_tokens": 18,
+        "prompt_cache_miss_tokens": 18,
+        "prompt_cache_write_tokens": 18,
+        "prompt_cache_write_30m_tokens": 18,
+        "prompt_cache_write_12h_tokens": 18
+      },
+      "command_wall_seconds": 389.4976311381906
+    }
+  },
+  "http_requests": 20,
+  "reported_usage": {
+    "prompt_tokens": 164986,
+    "completion_tokens": 5880,
+    "total_tokens": 170866,
+    "reasoning_tokens": 3769,
+    "prompt_cache_hit_tokens": 25711,
+    "prompt_cache_miss_tokens": 57,
+    "prompt_cache_write_tokens": 139218,
+    "prompt_cache_write_30m_tokens": 139218,
+    "prompt_cache_write_12h_tokens": 0
+  },
+  "usage_incomplete": true,
+  "usage_field_available_attempts": {
+    "prompt_tokens": 19,
+    "completion_tokens": 19,
+    "total_tokens": 19,
+    "reasoning_tokens": 19,
+    "prompt_cache_hit_tokens": 19,
+    "prompt_cache_miss_tokens": 19,
+    "prompt_cache_write_tokens": 19,
+    "prompt_cache_write_30m_tokens": 19,
+    "prompt_cache_write_12h_tokens": 19
+  },
+  "api_cost": {
+    "currency": "USD",
+    "priced_attempts": 19,
+    "unknown_cost_attempts": 1,
+    "incomplete": true,
+    "pricing_available": true,
+    "known_cost_range": [
+      0.4095301,
+      0.4095301
+    ],
+    "total_cost_range": null,
+    "known_cost_range_usd": [
+      0.4095301,
+      0.4095301
+    ],
+    "total_cost_range_usd": null,
+    "note": "Published price estimate, not actual billing; unknown requests are excluded from known subtotal. No currency conversion."
+  },
+  "api_wait_seconds": 346.23887431807816,
+  "http_latency_incomplete": false,
+  "recorded_command_wall_seconds": 531.3899920005351,
+  "command_wall_incomplete": false,
+  "note": "Command wall sum excludes shell gaps and report/GIF generation; episode task latency is in episode/summary.json. No score is assigned here."
+}

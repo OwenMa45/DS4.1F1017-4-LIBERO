@@ -1,0 +1,447 @@
+[robosuite WARNING] No private macro file found! (macros.py:53)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:54)
+[robosuite WARNING] To setup, run: python /mnt/cpfs/users/mrq/libero_cpu/.venv/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (macros.py:55)
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/mnt/cpfs/users/mrq/libero_cpu/LIBERO/libero/libero/benchmark/__init__.py:164: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  init_states = torch.load(init_states_path)
+Task: pick up the black bowl between the plate and the ramekin and place it on the plate
+Artifacts: /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO/outputs/pilot-v2-geometry-chunk16-2048-001/episode
+API step=0 attempt=1 retry=0 waiting (timeout=1800s)
+API attempt=1 elapsed=44.919s status=200 finish=stop total_tokens=13218
+step=1/2048 decision=1 success=False
+step=2/2048 decision=1 success=False
+step=3/2048 decision=1 success=False
+step=4/2048 decision=1 success=False
+step=5/2048 decision=1 success=False
+step=6/2048 decision=1 success=False
+API step=6 attempt=2 retry=0 waiting (timeout=1800s)
+API attempt=2 elapsed=119.676s status=200 finish=stop total_tokens=31058
+step=7/2048 decision=2 success=False
+step=8/2048 decision=2 success=False
+step=9/2048 decision=2 success=False
+step=10/2048 decision=2 success=False
+step=11/2048 decision=2 success=False
+step=12/2048 decision=2 success=False
+API step=12 attempt=3 retry=0 waiting (timeout=1800s)
+API attempt=3 elapsed=173.869s status=200 finish=stop total_tokens=45002
+step=13/2048 decision=3 success=False
+step=14/2048 decision=3 success=False
+step=15/2048 decision=3 success=False
+step=16/2048 decision=3 success=False
+step=17/2048 decision=3 success=False
+step=18/2048 decision=3 success=False
+step=19/2048 decision=3 success=False
+API step=19 attempt=4 retry=0 waiting (timeout=1800s)
+API attempt=4 elapsed=69.970s status=200 finish=stop total_tokens=23597
+step=20/2048 decision=4 success=False
+step=21/2048 decision=4 success=False
+step=22/2048 decision=4 success=False
+step=23/2048 decision=4 success=False
+API step=23 attempt=5 retry=0 waiting (timeout=1800s)
+API attempt=5 elapsed=116.686s status=200 finish=stop total_tokens=32492
+step=24/2048 decision=5 success=False
+step=25/2048 decision=5 success=False
+step=26/2048 decision=5 success=False
+step=27/2048 decision=5 success=False
+step=28/2048 decision=5 success=False
+step=29/2048 decision=5 success=False
+step=30/2048 decision=5 success=False
+step=31/2048 decision=5 success=False
+API step=31 attempt=6 retry=0 waiting (timeout=1800s)
+API attempt=6 elapsed=65.087s status=200 finish=stop total_tokens=21666
+step=32/2048 decision=6 success=False
+step=33/2048 decision=6 success=False
+step=34/2048 decision=6 success=False
+step=35/2048 decision=6 success=False
+step=36/2048 decision=6 success=False
+step=37/2048 decision=6 success=False
+API step=37 attempt=7 retry=0 waiting (timeout=1800s)
+API attempt=7 elapsed=144.055s status=200 finish=stop total_tokens=36983
+step=38/2048 decision=7 success=False
+step=39/2048 decision=7 success=False
+step=40/2048 decision=7 success=False
+step=41/2048 decision=7 success=False
+step=42/2048 decision=7 success=False
+step=43/2048 decision=7 success=False
+step=44/2048 decision=7 success=False
+step=45/2048 decision=7 success=False
+API step=45 attempt=8 retry=0 waiting (timeout=1800s)
+API attempt=8 elapsed=32.718s status=200 finish=stop total_tokens=16145
+step=46/2048 decision=8 success=False
+step=47/2048 decision=8 success=False
+step=48/2048 decision=8 success=False
+step=49/2048 decision=8 success=False
+API step=49 attempt=9 retry=0 waiting (timeout=1800s)
+API attempt=9 elapsed=41.010s status=200 finish=stop total_tokens=17660
+step=50/2048 decision=9 success=False
+step=51/2048 decision=9 success=False
+step=52/2048 decision=9 success=False
+step=53/2048 decision=9 success=False
+step=54/2048 decision=9 success=False
+step=55/2048 decision=9 success=False
+step=56/2048 decision=9 success=False
+step=57/2048 decision=9 success=False
+step=58/2048 decision=9 success=False
+step=59/2048 decision=9 success=False
+API step=59 attempt=10 retry=0 waiting (timeout=1800s)
+API attempt=10 elapsed=77.407s status=200 finish=stop total_tokens=24334
+step=60/2048 decision=10 success=False
+step=61/2048 decision=10 success=False
+step=62/2048 decision=10 success=False
+API step=62 attempt=11 retry=0 waiting (timeout=1800s)
+API attempt=11 elapsed=227.177s status=200 finish=stop total_tokens=51527
+step=63/2048 decision=11 success=False
+step=64/2048 decision=11 success=False
+step=65/2048 decision=11 success=False
+API step=65 attempt=12 retry=0 waiting (timeout=1800s)
+API attempt=12 elapsed=81.275s status=200 finish=stop total_tokens=24376
+step=66/2048 decision=12 success=False
+step=67/2048 decision=12 success=False
+step=68/2048 decision=12 success=False
+API step=68 attempt=13 retry=0 waiting (timeout=1800s)
+API attempt=13 elapsed=82.953s status=200 finish=stop total_tokens=24779
+step=69/2048 decision=13 success=False
+step=70/2048 decision=13 success=False
+API step=70 attempt=14 retry=0 waiting (timeout=1800s)
+API attempt=14 elapsed=130.409s status=200 finish=stop total_tokens=35038
+step=71/2048 decision=14 success=False
+step=72/2048 decision=14 success=False
+step=73/2048 decision=14 success=False
+step=74/2048 decision=14 success=False
+step=75/2048 decision=14 success=False
+step=76/2048 decision=14 success=False
+API step=76 attempt=15 retry=0 waiting (timeout=1800s)
+API attempt=15 elapsed=65.522s status=200 finish=stop total_tokens=22604
+step=77/2048 decision=15 success=False
+step=78/2048 decision=15 success=False
+step=79/2048 decision=15 success=False
+step=80/2048 decision=15 success=False
+step=81/2048 decision=15 success=False
+step=82/2048 decision=15 success=False
+step=83/2048 decision=15 success=False
+step=84/2048 decision=15 success=False
+step=85/2048 decision=15 success=False
+step=86/2048 decision=15 success=False
+API step=86 attempt=16 retry=0 waiting (timeout=1800s)
+API attempt=16 elapsed=78.889s status=200 finish=stop total_tokens=24865
+step=87/2048 decision=16 success=False
+step=88/2048 decision=16 success=False
+step=89/2048 decision=16 success=False
+step=90/2048 decision=16 success=False
+step=91/2048 decision=16 success=False
+step=92/2048 decision=16 success=False
+step=93/2048 decision=16 success=False
+step=94/2048 decision=16 success=False
+step=95/2048 decision=16 success=False
+step=96/2048 decision=16 success=False
+step=97/2048 decision=16 success=False
+step=98/2048 decision=16 success=False
+step=99/2048 decision=16 success=False
+step=100/2048 decision=16 success=False
+step=101/2048 decision=16 success=False
+step=102/2048 decision=16 success=False
+API step=102 attempt=17 retry=0 waiting (timeout=1800s)
+API attempt=17 elapsed=109.560s status=200 finish=stop total_tokens=33253
+step=103/2048 decision=17 success=False
+step=104/2048 decision=17 success=False
+API step=104 attempt=18 retry=0 waiting (timeout=1800s)
+API attempt=18 elapsed=75.172s status=200 finish=stop total_tokens=24901
+step=105/2048 decision=18 success=False
+step=106/2048 decision=18 success=False
+step=107/2048 decision=18 success=False
+step=108/2048 decision=18 success=False
+step=109/2048 decision=18 success=False
+step=110/2048 decision=18 success=False
+API step=110 attempt=19 retry=0 waiting (timeout=1800s)
+API attempt=19 elapsed=184.402s status=200 finish=stop total_tokens=44153
+step=111/2048 decision=19 success=False
+step=112/2048 decision=19 success=False
+step=113/2048 decision=19 success=False
+step=114/2048 decision=19 success=False
+step=115/2048 decision=19 success=False
+API step=115 attempt=20 retry=0 waiting (timeout=1800s)
+API attempt=20 elapsed=250.267s status=200 finish=stop total_tokens=56550
+step=116/2048 decision=20 success=False
+step=117/2048 decision=20 success=False
+step=118/2048 decision=20 success=False
+step=119/2048 decision=20 success=False
+step=120/2048 decision=20 success=False
+step=121/2048 decision=20 success=False
+step=122/2048 decision=20 success=False
+step=123/2048 decision=20 success=False
+step=124/2048 decision=20 success=False
+API step=124 attempt=21 retry=0 waiting (timeout=1800s)
+API attempt=21 elapsed=154.425s status=200 finish=stop total_tokens=39320
+step=125/2048 decision=21 success=False
+step=126/2048 decision=21 success=False
+step=127/2048 decision=21 success=False
+API step=127 attempt=22 retry=0 waiting (timeout=1800s)
+API attempt=22 elapsed=108.646s status=200 finish=stop total_tokens=30459
+step=128/2048 decision=22 success=False
+step=129/2048 decision=22 success=False
+step=130/2048 decision=22 success=False
+step=131/2048 decision=22 success=False
+step=132/2048 decision=22 success=False
+API step=132 attempt=23 retry=0 waiting (timeout=1800s)
+API attempt=23 elapsed=69.365s status=200 finish=stop total_tokens=23934
+step=133/2048 decision=23 success=False
+step=134/2048 decision=23 success=False
+step=135/2048 decision=23 success=False
+step=136/2048 decision=23 success=False
+API step=136 attempt=24 retry=0 waiting (timeout=1800s)
+API attempt=24 elapsed=99.376s status=200 finish=stop total_tokens=29971
+step=137/2048 decision=24 success=False
+step=138/2048 decision=24 success=False
+step=139/2048 decision=24 success=False
+step=140/2048 decision=24 success=False
+API step=140 attempt=25 retry=0 waiting (timeout=1800s)
+API attempt=25 elapsed=266.063s status=200 finish=stop total_tokens=57977
+step=141/2048 decision=25 success=False
+step=142/2048 decision=25 success=False
+step=143/2048 decision=25 success=False
+step=144/2048 decision=25 success=False
+step=145/2048 decision=25 success=False
+step=146/2048 decision=25 success=False
+step=147/2048 decision=25 success=False
+step=148/2048 decision=25 success=False
+API step=148 attempt=26 retry=0 waiting (timeout=1800s)
+API attempt=26 elapsed=9.579s status=200 finish=stop total_tokens=12190
+step=149/2048 decision=26 success=False
+step=150/2048 decision=26 success=False
+step=151/2048 decision=26 success=False
+step=152/2048 decision=26 success=False
+step=153/2048 decision=26 success=False
+API step=153 attempt=27 retry=0 waiting (timeout=1800s)
+API attempt=27 elapsed=180.359s status=200 finish=stop total_tokens=43487
+step=154/2048 decision=27 success=False
+step=155/2048 decision=27 success=False
+step=156/2048 decision=27 success=False
+step=157/2048 decision=27 success=False
+API step=157 attempt=28 retry=0 waiting (timeout=1800s)
+API attempt=28 elapsed=143.719s status=200 finish=stop total_tokens=36341
+step=158/2048 decision=28 success=False
+step=159/2048 decision=28 success=False
+API step=159 attempt=29 retry=0 waiting (timeout=1800s)
+API attempt=29 elapsed=169.277s status=200 finish=stop total_tokens=40047
+step=160/2048 decision=29 success=False
+step=161/2048 decision=29 success=False
+step=162/2048 decision=29 success=False
+API step=162 attempt=30 retry=0 waiting (timeout=1800s)
+API attempt=30 elapsed=98.517s status=200 finish=stop total_tokens=29257
+step=163/2048 decision=30 success=False
+step=164/2048 decision=30 success=False
+step=165/2048 decision=30 success=False
+API step=165 attempt=31 retry=0 waiting (timeout=1800s)
+API attempt=31 elapsed=357.269s status=200 finish=length total_tokens=76219
+{
+  "schema_version": 2,
+  "command": "run",
+  "finished_utc": "2026-10-30T13:46:03.401403+00:00",
+  "status": "invalid_output",
+  "scored": true,
+  "task_success": false,
+  "reason": "incomplete or unsupported response: finish_reason='length'",
+  "control_steps": 165,
+  "policy_decisions": 31,
+  "settle_steps": 10,
+  "simulated_control_seconds": 8.25,
+  "simulation_step_seconds": 72.4288032669574,
+  "reset_and_settle_seconds": 6.39999970421195,
+  "control_loop_wall_seconds": 3913.758021507412,
+  "task_execution_wall_seconds": 3907.3580216914415,
+  "last_step_may_have_executed": false,
+  "command_wall_seconds": 3925.2729829475284,
+  "task_identity": {
+    "suite": "libero_spatial",
+    "task_id": 0,
+    "task_order_index": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "task_name": "pick_up_the_black_bowl_between_the_plate_and_the_ramekin_and_place_it_on_the_plate"
+  },
+  "protocol": {
+    "protocol_version": "ds-libero-direct-v2",
+    "suite": "libero_spatial",
+    "task_order_index": 0,
+    "task_id": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "settle_steps": 10,
+    "max_steps": 2048,
+    "image_size": 256,
+    "history_steps": 4,
+    "control_freq": 20,
+    "model": "deepseek-flash",
+    "expected_release": "DeepSeek-V4.1-Flash-1017",
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "reasoning_effort": "high",
+    "max_tokens": null,
+    "timeout_seconds": 1800,
+    "max_retries": 2,
+    "max_http_requests": 6144,
+    "action_horizon": 16,
+    "visual_history": 2,
+    "camera_geometry": true,
+    "evaluation_scope": "pilot",
+    "grasp_feedback": true,
+    "gripper_feedback_barrier": true,
+    "geometry_contract": true
+  },
+  "config_sha256": "db9b5e1e3cf110b6b4a8d2998186cd90f0f666c6597c26d4c7f6e8d1130377a4",
+  "source_sha256": "6c4af8bbf957ed331441ac520e5de69b91d22223b2241b05722fa803a18cca23",
+  "environment_sha256": "d846374d2c1e716aaf327f3f1ae51f0710b5dc07acbb5d8b150ca91156efa727",
+  "scope": "single episode diagnostic; not an aggregate LIBERO benchmark score",
+  "http_requests": 31,
+  "completed_http_requests": 31,
+  "unfinished_http_attempts": [],
+  "decision_requests": 31,
+  "model_outputs": 31,
+  "valid_model_outputs": 30,
+  "action_validity_rate": 0.967741935483871,
+  "executed_action_count": 165,
+  "gripper_motion_diagnostics": {
+    "closing_bouts": [
+      {
+        "start_step": 37,
+        "initial_joint_separation_m": 0.07954950371580935,
+        "stationary_close_steps_before_first_arm_motion": 8,
+        "first_arm_motion_step": 45,
+        "joint_separation_before_first_arm_motion_m": 0.021447808109184716,
+        "last_step": 48,
+        "final_joint_separation_m": 0.003955100913195564
+      },
+      {
+        "start_step": 70,
+        "initial_joint_separation_m": 0.07824336753370972,
+        "stationary_close_steps_before_first_arm_motion": 6,
+        "first_arm_motion_step": 76,
+        "joint_separation_before_first_arm_motion_m": 0.04098111552887486,
+        "last_step": 85,
+        "final_joint_separation_m": 0.021999624029528035
+      },
+      {
+        "start_step": 140,
+        "initial_joint_separation_m": 0.07964616047145218,
+        "stationary_close_steps_before_first_arm_motion": 8,
+        "first_arm_motion_step": 148,
+        "joint_separation_before_first_arm_motion_m": 0.02149981618194241,
+        "last_step": 152,
+        "final_joint_separation_m": 0.0040711350972272
+      }
+    ],
+    "skipped_incomplete_steps": 0,
+    "note": "Command timing and robot joint separation only; not a grasp success detector."
+  },
+  "feedback_boundaries": 0,
+  "discarded_actions_at_feedback_boundaries": 0,
+  "executed_actions_per_decision": {
+    "count": 31,
+    "mean": 5.32258064516129,
+    "p50": 5.0,
+    "p95": 10.0,
+    "max": 16,
+    "total": 165
+  },
+  "actions_per_valid_decision": {
+    "count": 30,
+    "mean": 5.5,
+    "p50": 5.0,
+    "p95": 10.0,
+    "max": 16,
+    "total": 165
+  },
+  "truncated_outputs": 1,
+  "finish_reasons": {
+    "length": 1,
+    "stop": 30
+  },
+  "system_fingerprints": [
+    "bc19ba97cbe016479903222bb1578db6"
+  ],
+  "reported_usage": {
+    "prompt_tokens": 323599,
+    "completion_tokens": 699804,
+    "total_tokens": 1023403,
+    "reasoning_tokens": 696563,
+    "prompt_cache_hit_tokens": 43008,
+    "prompt_cache_miss_tokens": 280591
+  },
+  "usage_available_attempts": 31,
+  "usage_field_available_attempts": {
+    "prompt_tokens": 31,
+    "completion_tokens": 31,
+    "total_tokens": 31,
+    "reasoning_tokens": 31,
+    "prompt_cache_hit_tokens": 31,
+    "prompt_cache_miss_tokens": 31
+  },
+  "usage_incomplete": false,
+  "api_cost": {
+    "currency": "CNY",
+    "priced_attempts": 31,
+    "unknown_cost_attempts": 0,
+    "incomplete": false,
+    "pricing_available": true,
+    "known_cost_range_cny": [
+      3.08066716,
+      6.16133432
+    ],
+    "total_cost_range_cny": [
+      3.08066716,
+      6.16133432
+    ],
+    "note": "Published off-peak/peak estimate range, not actual billing; unknown requests are excluded from known subtotal."
+  },
+  "api_pricing": {
+    "schema_version": 1,
+    "model": "deepseek-flash",
+    "currency": "CNY",
+    "verified_date": "2026-10-29",
+    "source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "per_million_tokens": {
+      "off_peak": {
+        "prompt_cache_hit_tokens": "0.02",
+        "prompt_cache_miss_tokens": "1",
+        "completion_tokens": "4"
+      },
+      "peak": {
+        "prompt_cache_hit_tokens": "0.04",
+        "prompt_cache_miss_tokens": "2",
+        "completion_tokens": "8"
+      }
+    },
+    "method": "Range at published off-peak/peak rates, not an invoice; no holiday or billing-time guess.",
+    "note": "Reasoning is included in completion_tokens and is never billed twice. Prices may change."
+  },
+  "usage_note": "Reasoning is a subset of completion tokens; unknown usage is not zero cost.",
+  "returned_models": [
+    "deepseek-flash"
+  ],
+  "http_latency_seconds": {
+    "count": 31,
+    "mean": 123.47150340844547,
+    "p50": 108.64574635960162,
+    "p95": 258.1648272993043,
+    "max": 357.26861088722944,
+    "total": 3827.6166056618094
+  },
+  "http_latency_incomplete": false,
+  "decision_latency_seconds": {
+    "count": 31,
+    "mean": 123.52108758447632,
+    "p50": 108.67591164447367,
+    "p95": 258.21545823384076,
+    "max": 357.303538126871,
+    "total": 3829.153715118766
+  },
+  "decision_latency_incomplete": false,
+  "retry_backoff_seconds": 0,
+  "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
+  "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
+  "warnings": [],
+  "replay": "replay.gif"
+}
+RESULT: invalid_output | /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO/outputs/pilot-v2-geometry-chunk16-2048-001/episode/summary.json

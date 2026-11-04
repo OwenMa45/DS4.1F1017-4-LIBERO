@@ -1,0 +1,78 @@
+{
+  "task_identity": {
+    "suite": "libero_10",
+    "task_id": 5,
+    "task_order_index": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "task_name": "STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy"
+  },
+  "api_pricing": {
+    "schema_version": 1,
+    "model": "deepseek-flash",
+    "currency": "CNY",
+    "verified_date": "2026-10-29",
+    "source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "per_million_tokens": {
+      "off_peak": {
+        "prompt_cache_hit_tokens": "0.02",
+        "prompt_cache_miss_tokens": "1",
+        "completion_tokens": "4"
+      },
+      "peak": {
+        "prompt_cache_hit_tokens": "0.04",
+        "prompt_cache_miss_tokens": "2",
+        "completion_tokens": "8"
+      }
+    },
+    "method": "Range at published off-peak/peak rates, not an invoice; no holiday or billing-time guess.",
+    "note": "Reasoning is included in completion_tokens and is never billed twice. Prices may change."
+  },
+  "api_cost": {
+    "currency": "CNY",
+    "priced_attempts": 1,
+    "unknown_cost_attempts": 0,
+    "incomplete": false,
+    "pricing_available": true,
+    "known_cost_range_cny": [
+      0.06331504,
+      0.12663008
+    ],
+    "total_cost_range_cny": [
+      0.06331504,
+      0.12663008
+    ],
+    "note": "Published off-peak/peak estimate range, not actual billing; unknown requests are excluded from known subtotal."
+  },
+  "attempts": [
+    {
+      "step": 0,
+      "attempt": 1,
+      "retry": 0,
+      "started_utc": "2026-11-01T17:28:00.473095+00:00",
+      "finished_utc": "2026-11-01T17:29:20.015227+00:00",
+      "response_created": 1793554080,
+      "response_id": "bf579d8e-8f80-44de-9300-3fc2b3a2af2a",
+      "status_code": 200,
+      "finish_reason": "stop",
+      "returned_model": "deepseek-flash",
+      "system_fingerprint": "bc19ba97cbe016479903222bb1578db6",
+      "request_sha256": "72239edefe59ea92f7dde11c958fde0cacb65d5f30c8739b077265334137748f",
+      "request_file": "requests/step_00000.json",
+      "error": null,
+      "completed": true,
+      "http_latency_seconds": 79.54206102341413,
+      "prompt_tokens": 3988,
+      "completion_tokens": 15114,
+      "total_tokens": 19102,
+      "reasoning_tokens": 15028,
+      "prompt_cache_hit_tokens": 1152,
+      "prompt_cache_miss_tokens": 2836,
+      "usage_complete": true,
+      "estimated_cost_range_cny": [
+        0.06331504,
+        0.12663008
+      ]
+    }
+  ]
+}

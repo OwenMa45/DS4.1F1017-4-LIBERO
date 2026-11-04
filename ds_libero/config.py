@@ -99,8 +99,15 @@ class Config:
                 raise ExperimentError("GPT max_retries must be 0..2 and counts against the HTTP budget")
             if cfg.max_tokens is None or not 1 <= cfg.max_tokens <= 128000:
                 raise ExperimentError("GPT requires a finite max_tokens budget (1..128000, including reasoning)")
+        elif cfg.api_provider == "external":
+            # A user adapter owns its inference transport. Keep the two existing
+            # provider contracts locked; this profile has no built-in API client.
+            if (cfg.protocol_version != "ds-libero-direct-v2" or cfg.evaluation_scope != "diagnostic"
+                    or cfg.endpoint or cfg.max_retries != 0 or cfg.max_tokens is not None
+                    or not cfg.model.strip()):
+                raise ExperimentError("External policies require v2 diagnostic scope, a model label, empty endpoint, max_retries=0 and max_tokens=null")
         else:
-            raise ExperimentError("api_provider must be deepseek or openai")
+            raise ExperimentError("api_provider must be deepseek, openai or external")
         if cfg.evaluation_scope not in ("pilot", "benchmark", "diagnostic"):
             raise ExperimentError("evaluation_scope must be pilot, benchmark or diagnostic")
         if cfg.evaluation_scope == "pilot":
@@ -123,7 +130,8 @@ class Config:
         for key in locked:
             if getattr(cfg, key) != getattr(default, key):
                 raise ExperimentError(f"This pilot fixes {key}={getattr(default, key)!r}")
-        efforts = ("low", "medium", "high", "xhigh", "max") if cfg.api_provider == "openai" else ("low", "high")
+        efforts = (("none",) if cfg.api_provider == "external" else
+                   ("low", "medium", "high", "xhigh", "max") if cfg.api_provider == "openai" else ("low", "high"))
         if cfg.reasoning_effort not in efforts:
             raise ExperimentError(f"Unsupported reasoning_effort for {cfg.api_provider}: choose {efforts}")
         if not 1 <= cfg.action_horizon <= 16 or not 0 <= cfg.visual_history <= 2:

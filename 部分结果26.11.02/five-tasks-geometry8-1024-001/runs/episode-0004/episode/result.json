@@ -1,0 +1,17 @@
+{
+  "finished_utc": "2026-11-01T20:45:37.953012+00:00",
+  "status": "invalid_output",
+  "scored": true,
+  "task_success": false,
+  "reason": "incomplete or unsupported response: finish_reason='length'",
+  "control_steps": 774,
+  "policy_decisions": 157,
+  "settle_steps": 10,
+  "simulated_control_seconds": 38.7,
+  "simulation_step_seconds": 189.34585784748197,
+  "reset_and_settle_seconds": 4.007850119844079,
+  "control_loop_wall_seconds": 11765.582258323207,
+  "task_execution_wall_seconds": 11761.5744070746,
+  "last_step_may_have_executed": false,
+  "command_wall_seconds": 11775.988652728498
+}

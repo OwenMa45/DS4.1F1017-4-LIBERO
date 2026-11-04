@@ -17,6 +17,9 @@ from .runner import run_episode
 def parser():
     p = argparse.ArgumentParser(description="Reproducible DeepSeek and GPT / LIBERO direct-policy experiments")
     commands = p.add_subparsers(dest="command", required=True)
+    microbench = commands.add_parser("microbench", help="Reusable fixed five-task benchmark and policy adapter API")
+    from .microbench_cli import add_arguments
+    add_arguments(microbench)
     check = commands.add_parser("check-config", help="Validate configuration and credential presence without API calls")
     check.add_argument("--config", type=Path, required=True)
     estimate = commands.add_parser("estimate-gpt", help="Offline cost/time scenarios; no API calls")
@@ -71,6 +74,9 @@ def parser():
 
 def main(argv=None):
     args = parser().parse_args(argv)
+    if args.command == "microbench":
+        from .microbench_cli import dispatch
+        return dispatch(args)
     if args.command == "estimate-gpt":
         from .forecast import forecast_gpt
         try:

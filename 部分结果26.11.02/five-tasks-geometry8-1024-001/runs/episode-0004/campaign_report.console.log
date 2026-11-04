@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "scope": "all recorded phases, including failed preflight and retries",
+  "task_identity": {
+    "suite": "libero_10",
+    "task_id": 5,
+    "task_order_index": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "task_name": "STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy"
+  },
+  "phases": {
+    "calibration": {
+      "status": "pass",
+      "http_requests": 0,
+      "reported_usage": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 0
+      },
+      "api_cost": {
+        "currency": "CNY",
+        "priced_attempts": 0,
+        "unknown_cost_attempts": 0,
+        "incomplete": false,
+        "pricing_available": true,
+        "known_cost_range_cny": [
+          0.0,
+          0.0
+        ],
+        "total_cost_range_cny": [
+          0.0,
+          0.0
+        ],
+        "note": "Published off-peak/peak estimate range, not actual billing; unknown requests are excluded from known subtotal."
+      },
+      "usage_field_available_attempts": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0,
+        "reasoning_tokens": 0,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 0
+      },
+      "command_wall_seconds": 85.78552697971463
+    },
+    "api-check": {
+      "status": "pass",
+      "http_requests": 1,
+      "reported_usage": {
+        "prompt_tokens": 3988,
+        "completion_tokens": 15114,
+        "total_tokens": 19102,
+        "reasoning_tokens": 15028,
+        "prompt_cache_hit_tokens": 1152,
+        "prompt_cache_miss_tokens": 2836
+      },
+      "api_cost": {
+        "currency": "CNY",
+        "priced_attempts": 1,
+        "unknown_cost_attempts": 0,
+        "incomplete": false,
+        "pricing_available": true,
+        "known_cost_range_cny": [
+          0.06331504,
+          0.12663008
+        ],
+        "total_cost_range_cny": [
+          0.06331504,
+          0.12663008
+        ],
+        "note": "Published off-peak/peak estimate range, not actual billing; unknown requests are excluded from known subtotal."
+      },
+      "usage_field_available_attempts": {
+        "prompt_tokens": 1,
+        "completion_tokens": 1,
+        "total_tokens": 1,
+        "reasoning_tokens": 1,
+        "prompt_cache_hit_tokens": 1,
+        "prompt_cache_miss_tokens": 1
+      },
+      "command_wall_seconds": 94.29167865589261
+    },
+    "episode": {
+      "status": "invalid_output",
+      "http_requests": 157,
+      "reported_usage": {
+        "prompt_tokens": 1645986,
+        "completion_tokens": 2158238,
+        "total_tokens": 3804224,
+        "reasoning_tokens": 2143080,
+        "prompt_cache_hit_tokens": 183552,
+        "prompt_cache_miss_tokens": 1462434
+      },
+      "api_cost": {
+        "currency": "CNY",
+        "priced_attempts": 157,
+        "unknown_cost_attempts": 0,
+        "incomplete": false,
+        "pricing_available": true,
+        "known_cost_range_cny": [
+          10.09905704,
+          20.19811408
+        ],
+        "total_cost_range_cny": [
+          10.09905704,
+          20.19811408
+        ],
+        "note": "Published off-peak/peak estimate range, not actual billing; unknown requests are excluded from known subtotal."
+      },
+      "usage_field_available_attempts": {
+        "prompt_tokens": 157,
+        "completion_tokens": 157,
+        "total_tokens": 157,
+        "reasoning_tokens": 157,
+        "prompt_cache_hit_tokens": 157,
+        "prompt_cache_miss_tokens": 157
+      },
+      "command_wall_seconds": 11775.988652728498
+    }
+  },
+  "http_requests": 158,
+  "reported_usage": {
+    "prompt_tokens": 1649974,
+    "completion_tokens": 2173352,
+    "total_tokens": 3823326,
+    "reasoning_tokens": 2158108,
+    "prompt_cache_hit_tokens": 184704,
+    "prompt_cache_miss_tokens": 1465270
+  },
+  "usage_incomplete": false,
+  "usage_field_available_attempts": {
+    "prompt_tokens": 158,
+    "completion_tokens": 158,
+    "total_tokens": 158,
+    "reasoning_tokens": 158,
+    "prompt_cache_hit_tokens": 158,
+    "prompt_cache_miss_tokens": 158
+  },
+  "api_cost": {
+    "currency": "CNY",
+    "priced_attempts": 158,
+    "unknown_cost_attempts": 0,
+    "incomplete": false,
+    "pricing_available": true,
+    "known_cost_range_cny": [
+      10.16237208,
+      20.32474416
+    ],
+    "total_cost_range_cny": [
+      10.16237208,
+      20.32474416
+    ],
+    "note": "Published off-peak/peak estimate range, not actual billing; unknown requests are excluded from known subtotal."
+  },
+  "api_wait_seconds": 11622.267163803801,
+  "http_latency_incomplete": false,
+  "recorded_command_wall_seconds": 11956.065858364105,
+  "command_wall_incomplete": false,
+  "note": "Command wall sum excludes shell gaps and report/GIF generation; episode task latency is in episode/summary.json. No score is assigned here."
+}

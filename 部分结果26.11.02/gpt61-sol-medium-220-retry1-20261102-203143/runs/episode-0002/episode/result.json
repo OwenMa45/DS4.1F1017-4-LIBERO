@@ -1,0 +1,16 @@
+{
+  "finished_utc": "2026-11-02T13:20:03.403511+00:00",
+  "status": "success",
+  "scored": true,
+  "task_success": true,
+  "control_steps": 97,
+  "policy_decisions": 18,
+  "settle_steps": 10,
+  "simulated_control_seconds": 4.85,
+  "simulation_step_seconds": 34.31064482033253,
+  "reset_and_settle_seconds": 5.3807357251644135,
+  "control_loop_wall_seconds": 380.00601220317185,
+  "task_execution_wall_seconds": 374.6252751480788,
+  "last_step_may_have_executed": false,
+  "command_wall_seconds": 389.4976311381906
+}

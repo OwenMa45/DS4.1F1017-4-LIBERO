@@ -1,0 +1,225 @@
+{
+  "schema_version": 2,
+  "command": "run",
+  "finished_utc": "2026-10-29T14:59:16.385655+00:00",
+  "status": "failure",
+  "scored": true,
+  "task_success": false,
+  "reason": "control_step_limit",
+  "control_steps": 220,
+  "policy_decisions": 52,
+  "settle_steps": 10,
+  "simulated_control_seconds": 11.0,
+  "simulation_step_seconds": 97.73161389306188,
+  "reset_and_settle_seconds": 6.521584747359157,
+  "control_loop_wall_seconds": 6624.743591004983,
+  "task_execution_wall_seconds": 6618.222005287185,
+  "last_step_may_have_executed": false,
+  "command_wall_seconds": 6639.9295671042055,
+  "task_identity": {
+    "suite": "libero_spatial",
+    "task_id": 0,
+    "task_order_index": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "task_name": "pick_up_the_black_bowl_between_the_plate_and_the_ramekin_and_place_it_on_the_plate"
+  },
+  "protocol": {
+    "protocol_version": "ds-libero-direct-v2",
+    "suite": "libero_spatial",
+    "task_order_index": 0,
+    "task_id": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "settle_steps": 10,
+    "max_steps": 220,
+    "image_size": 256,
+    "history_steps": 4,
+    "control_freq": 20,
+    "model": "deepseek-flash",
+    "expected_release": "DeepSeek-V4.1-Flash-1017",
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "reasoning_effort": "high",
+    "max_tokens": null,
+    "timeout_seconds": 1800,
+    "max_retries": 2,
+    "max_http_requests": 300,
+    "action_horizon": 8,
+    "visual_history": 2,
+    "camera_geometry": true,
+    "evaluation_scope": "pilot",
+    "grasp_feedback": true,
+    "gripper_feedback_barrier": true,
+    "geometry_contract": true
+  },
+  "config_sha256": "d10e39d9200550978dc2dfc527bffe77ce926e4ccb89fbbac282bac5ecc0f90b",
+  "source_sha256": "a73e2f8ad9d05f648c6af13e2e0344014f5aec3c1b25988bf381ea1b3ba34c99",
+  "environment_sha256": "6b300ba66e959622bedb0d12816a6c17ac27c408b7a311d6ff630ecf2094fd27",
+  "scope": "single episode diagnostic; not an aggregate LIBERO benchmark score",
+  "http_requests": 52,
+  "completed_http_requests": 52,
+  "unfinished_http_attempts": [],
+  "decision_requests": 52,
+  "model_outputs": 52,
+  "valid_model_outputs": 52,
+  "action_validity_rate": 1.0,
+  "executed_action_count": 220,
+  "gripper_motion_diagnostics": {
+    "closing_bouts": [
+      {
+        "start_step": 40,
+        "initial_joint_separation_m": 0.07963558740661436,
+        "stationary_close_steps_before_first_arm_motion": 11,
+        "first_arm_motion_step": 51,
+        "joint_separation_before_first_arm_motion_m": 0.008039018669115914,
+        "last_step": 65,
+        "final_joint_separation_m": 0.007568451752129719
+      },
+      {
+        "start_step": 90,
+        "initial_joint_separation_m": 0.078522045266807,
+        "stationary_close_steps_before_first_arm_motion": 10,
+        "first_arm_motion_step": 100,
+        "joint_separation_before_first_arm_motion_m": 0.020417587671627914,
+        "last_step": 102,
+        "final_joint_separation_m": 0.008266324925112239
+      },
+      {
+        "start_step": 130,
+        "initial_joint_separation_m": 0.03678724894888498,
+        "stationary_close_steps_before_first_arm_motion": 10,
+        "first_arm_motion_step": 140,
+        "joint_separation_before_first_arm_motion_m": 0.01748508117343495,
+        "last_step": 142,
+        "final_joint_separation_m": 0.007506152035879572
+      },
+      {
+        "start_step": 159,
+        "initial_joint_separation_m": 0.07715200695477964,
+        "stationary_close_steps_before_first_arm_motion": 0,
+        "first_arm_motion_step": 159,
+        "joint_separation_before_first_arm_motion_m": 0.07715200695477964,
+        "last_step": 201,
+        "final_joint_separation_m": 0.00479541720342152
+      },
+      {
+        "start_step": 206,
+        "initial_joint_separation_m": 0.02133328732208637,
+        "stationary_close_steps_before_first_arm_motion": 0,
+        "first_arm_motion_step": 206,
+        "joint_separation_before_first_arm_motion_m": 0.02133328732208637,
+        "last_step": 219,
+        "final_joint_separation_m": 0.0052746028218407515
+      }
+    ],
+    "skipped_incomplete_steps": 0,
+    "note": "Command timing and robot joint separation only; not a grasp success detector."
+  },
+  "feedback_boundaries": 0,
+  "discarded_actions_at_feedback_boundaries": 0,
+  "executed_actions_per_decision": {
+    "count": 52,
+    "mean": 4.230769230769231,
+    "p50": 4.0,
+    "p95": 8.0,
+    "max": 8,
+    "total": 220
+  },
+  "actions_per_valid_decision": {
+    "count": 52,
+    "mean": 4.230769230769231,
+    "p50": 4.0,
+    "p95": 8.0,
+    "max": 8,
+    "total": 220
+  },
+  "truncated_outputs": 0,
+  "finish_reasons": {
+    "stop": 52
+  },
+  "system_fingerprints": [
+    "bc19ba97cbe016479903222bb1578db6"
+  ],
+  "reported_usage": {
+    "prompt_tokens": 538918,
+    "completion_tokens": 1189906,
+    "total_tokens": 1728824,
+    "reasoning_tokens": 1185558,
+    "prompt_cache_hit_tokens": 62592,
+    "prompt_cache_miss_tokens": 476326
+  },
+  "usage_available_attempts": 52,
+  "usage_field_available_attempts": {
+    "prompt_tokens": 52,
+    "completion_tokens": 52,
+    "total_tokens": 52,
+    "reasoning_tokens": 52,
+    "prompt_cache_hit_tokens": 52,
+    "prompt_cache_miss_tokens": 52
+  },
+  "usage_incomplete": false,
+  "api_cost": {
+    "currency": "CNY",
+    "priced_attempts": 52,
+    "unknown_cost_attempts": 0,
+    "incomplete": false,
+    "pricing_available": true,
+    "known_cost_range_cny": [
+      5.23720184,
+      10.47440368
+    ],
+    "total_cost_range_cny": [
+      5.23720184,
+      10.47440368
+    ],
+    "note": "Published off-peak/peak estimate range, not actual billing; unknown requests are excluded from known subtotal."
+  },
+  "api_pricing": {
+    "schema_version": 1,
+    "model": "deepseek-flash",
+    "currency": "CNY",
+    "verified_date": "2026-10-29",
+    "source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "per_million_tokens": {
+      "off_peak": {
+        "prompt_cache_hit_tokens": "0.02",
+        "prompt_cache_miss_tokens": "1",
+        "completion_tokens": "4"
+      },
+      "peak": {
+        "prompt_cache_hit_tokens": "0.04",
+        "prompt_cache_miss_tokens": "2",
+        "completion_tokens": "8"
+      }
+    },
+    "method": "Range at published off-peak/peak rates, not an invoice; no holiday or billing-time guess.",
+    "note": "Reasoning is included in completion_tokens and is never billed twice. Prices may change."
+  },
+  "usage_note": "Reasoning is a subset of completion tokens; unknown usage is not zero cost.",
+  "returned_models": [
+    "deepseek-flash"
+  ],
+  "http_latency_seconds": {
+    "count": 52,
+    "mean": 125.16642368731733,
+    "p50": 114.10096635855734,
+    "p95": 226.51084784837437,
+    "max": 354.4454927369952,
+    "total": 6508.6540317405015
+  },
+  "http_latency_incomplete": false,
+  "decision_latency_seconds": {
+    "count": 52,
+    "mean": 125.20849637314677,
+    "p50": 114.1495176460594,
+    "p95": 226.55073292497542,
+    "max": 354.4783069808036,
+    "total": 6510.841811403632
+  },
+  "decision_latency_incomplete": false,
+  "retry_backoff_seconds": 0,
+  "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
+  "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
+  "warnings": [],
+  "replay": "replay.gif"
+}

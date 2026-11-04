@@ -1,0 +1,519 @@
+[robosuite WARNING] No private macro file found! (macros.py:53)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:54)
+[robosuite WARNING] To setup, run: python /mnt/cpfs/users/mrq/libero_cpu/.venv/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (macros.py:55)
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/mnt/cpfs/users/mrq/libero_cpu/LIBERO/libero/libero/benchmark/__init__.py:164: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  init_states = torch.load(init_states_path)
+Task: pick up the black bowl between the plate and the ramekin and place it on the plate
+Artifacts: /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO/outputs/pilot-v2-high-default-001/calibration
+x_position_positive: PASS measured=[0.0021902618879021396, 1.6845887954716407e-05, -0.0005970127353622789]
+x_position_negative: PASS measured=[-0.0022289958907762975, -9.509531351632391e-06, 0.000550967998177887]
+y_position_positive: PASS measured=[-3.4855220451823765e-06, 0.0027364357252462716, -2.499643449738187e-05]
+y_position_negative: PASS measured=[-9.107542435479732e-05, -0.0027510973358989242, -7.030483824110867e-05]
+z_position_positive: PASS measured=[-0.00019480695293266903, 1.0337216298214602e-05, 0.0028219217240570416]
+z_position_negative: PASS measured=[0.00014726650945032227, 3.673639938321996e-06, -0.0028655968707091972]
+x_rotation_positive: PASS measured=[0.028619969288570135, -0.00047593308697232257, -0.0007893323199112137]
+x_rotation_negative: PASS measured=[-0.02867909814915486, 0.00017388369040025495, 0.001788045271870221]
+y_rotation_positive: PASS measured=[2.770293727020196e-05, 0.022264143639247263, 0.0003512231416958441]
+y_rotation_negative: PASS measured=[-0.00010138213672652805, -0.021884983820779403, 0.00014704358286004047]
+z_rotation_positive: PASS measured=[-0.0001490182836343161, 0.00010275292731269162, 0.0285275862945796]
+z_rotation_negative: PASS measured=[0.00010103660858575358, 8.161507472095647e-05, -0.027603834896637255]
+{
+  "schema_version": 2,
+  "command": "calibrate",
+  "finished_utc": "2026-10-29T06:24:14.679226+00:00",
+  "status": "pass",
+  "scored": false,
+  "task_success": null,
+  "probes": [
+    {
+      "name": "x_position_positive",
+      "action": [
+        0.1,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        0.0021902618879021396,
+        1.6845887954716407e-05,
+        -0.0005970127353622789
+      ],
+      "delta_rotation_world_rad": [
+        -0.00030693175063038064,
+        -0.0026258325713006485,
+        0.001140224585995181
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "x_position_negative",
+      "action": [
+        -0.1,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.0022289958907762975,
+        -9.509531351632391e-06,
+        0.000550967998177887
+      ],
+      "delta_rotation_world_rad": [
+        -5.20057470409111e-05,
+        0.0037473361090646904,
+        0.0010471094398528233
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "y_position_positive",
+      "action": [
+        0.0,
+        0.1,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -3.4855220451823765e-06,
+        0.0027364357252462716,
+        -2.499643449738187e-05
+      ],
+      "delta_rotation_world_rad": [
+        0.00024011076892631677,
+        0.00032493018661852046,
+        0.002620054614510835
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "y_position_negative",
+      "action": [
+        0.0,
+        -0.1,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -9.107542435479732e-05,
+        -0.0027510973358989242,
+        -7.030483824110867e-05
+      ],
+      "delta_rotation_world_rad": [
+        -0.000808692710168783,
+        0.00025620512571928293,
+        0.00042632610210942555
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "z_position_positive",
+      "action": [
+        0.0,
+        0.0,
+        0.1,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.00019480695293266903,
+        1.0337216298214602e-05,
+        0.0028219217240570416
+      ],
+      "delta_rotation_world_rad": [
+        -0.00013032840660603896,
+        -0.00029451293438049597,
+        0.0010655363081773792
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "z_position_negative",
+      "action": [
+        0.0,
+        0.0,
+        -0.1,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        0.00014726650945032227,
+        3.673639938321996e-06,
+        -0.0028655968707091972
+      ],
+      "delta_rotation_world_rad": [
+        -0.0001813844824059758,
+        0.0014017218620174133,
+        0.0010883598630001463
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "x_rotation_positive",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -1.4382248299665834e-05,
+        0.0019004946443287943,
+        -1.0163666138041094e-05
+      ],
+      "delta_rotation_world_rad": [
+        0.028619969288570135,
+        -0.00047593308697232257,
+        -0.0007893323199112137
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "x_rotation_negative",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        -0.1,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        5.207235192186688e-05,
+        -0.001954911316265592,
+        6.772991128078942e-05
+      ],
+      "delta_rotation_world_rad": [
+        -0.02867909814915486,
+        0.00017388369040025495,
+        0.001788045271870221
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "y_rotation_positive",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.0032412369183772993,
+        7.45230792700835e-08,
+        -0.0024230777324374397
+      ],
+      "delta_rotation_world_rad": [
+        2.770293727020196e-05,
+        0.022264143639247263,
+        0.0003512231416958441
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "y_rotation_negative",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.1,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        0.0032612242482059906,
+        -8.636559701175571e-05,
+        0.0025135823613995356
+      ],
+      "delta_rotation_world_rad": [
+        -0.00010138213672652805,
+        -0.021884983820779403,
+        0.00014704358286004047
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "z_rotation_positive",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        1.3899477673690042e-05,
+        0.0007067944990354867,
+        -3.993638027832702e-06
+      ],
+      "delta_rotation_world_rad": [
+        -0.0001490182836343161,
+        0.00010275292731269162,
+        0.0285275862945796
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "z_rotation_negative",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.1,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -2.130205921543893e-05,
+        -0.0007701136261824247,
+        -1.1153438953970252e-05
+      ],
+      "delta_rotation_world_rad": [
+        0.00010103660858575358,
+        8.161507472095647e-05,
+        -0.027603834896637255
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "gripper_close_then_open",
+      "initial_aperture_m": 0.07744556715404674,
+      "closed_aperture_m": 0.0018387839555477424,
+      "opened_aperture_m": 0.07816114960386279,
+      "passed": true
+    }
+  ],
+  "controller": {
+    "input_min": [
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0
+    ],
+    "input_max": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "output_min": [
+      -0.05,
+      -0.05,
+      -0.05,
+      -0.5,
+      -0.5,
+      -0.5
+    ],
+    "output_max": [
+      0.05,
+      0.05,
+      0.05,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "name": "OSC_POSE",
+    "use_delta": true,
+    "impedance_mode": "fixed",
+    "control_freq": 20,
+    "gripper": "PandaGripper",
+    "controller_source_sha256": "cfa62a0e719bc53ef0c701efa66f7b3e2272d4fca2150ec73c05bb145eba85cb",
+    "gripper_source_sha256": "a3760a8fc4599fa6f79914304b82466f3c1bda1a945943ca693bb57f00dc59eb"
+  },
+  "note": "Diagnostic probes only; sign thresholds test motion, not target-position accuracy.",
+  "command_wall_seconds": 118.48639676906168,
+  "task_identity": {
+    "suite": "libero_spatial",
+    "task_id": 0,
+    "task_order_index": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "task_name": "pick_up_the_black_bowl_between_the_plate_and_the_ramekin_and_place_it_on_the_plate"
+  },
+  "protocol": {
+    "protocol_version": "ds-libero-direct-v2",
+    "suite": "libero_spatial",
+    "task_order_index": 0,
+    "task_id": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "settle_steps": 10,
+    "max_steps": 220,
+    "image_size": 256,
+    "history_steps": 4,
+    "control_freq": 20,
+    "model": "deepseek-flash",
+    "expected_release": "DeepSeek-V4.1-Flash-1017",
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "reasoning_effort": "high",
+    "max_tokens": null,
+    "timeout_seconds": 1800,
+    "max_retries": 2,
+    "max_http_requests": 300,
+    "action_horizon": 8,
+    "visual_history": 2,
+    "camera_geometry": true,
+    "evaluation_scope": "pilot"
+  },
+  "config_sha256": "234d3b33d5757faffc5490cdcb7fbb5245f3ad476c4ae64f788de5bb31aed3fb",
+  "source_sha256": "c4021c24b4cda0183f1499b441ac9e2514559d3982a72bf110a589b0e3f9f971",
+  "environment_sha256": "4c46a96b71bf90ae2f64c822e98ebd8162d126801673c242930d9603edd97f9a",
+  "scope": "single episode diagnostic; not an aggregate LIBERO benchmark score",
+  "http_requests": 0,
+  "completed_http_requests": 0,
+  "unfinished_http_attempts": [],
+  "decision_requests": 0,
+  "model_outputs": 0,
+  "valid_model_outputs": 0,
+  "action_validity_rate": null,
+  "executed_action_count": 0,
+  "actions_per_valid_decision": {
+    "count": 0,
+    "mean": null,
+    "p50": null,
+    "p95": null,
+    "max": null,
+    "total": 0
+  },
+  "truncated_outputs": 0,
+  "finish_reasons": {},
+  "system_fingerprints": [],
+  "reported_usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "reasoning_tokens": 0,
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 0
+  },
+  "usage_available_attempts": 0,
+  "usage_field_available_attempts": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "reasoning_tokens": 0,
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 0
+  },
+  "usage_incomplete": false,
+  "api_cost": {
+    "currency": "CNY",
+    "priced_attempts": 0,
+    "unknown_cost_attempts": 0,
+    "incomplete": false,
+    "pricing_available": true,
+    "known_cost_range_cny": [
+      0.0,
+      0.0
+    ],
+    "total_cost_range_cny": [
+      0.0,
+      0.0
+    ],
+    "note": "Published off-peak/peak estimate range, not actual billing; unknown requests are excluded from known subtotal."
+  },
+  "api_pricing": {
+    "schema_version": 1,
+    "model": "deepseek-flash",
+    "currency": "CNY",
+    "verified_date": "2026-10-29",
+    "source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "per_million_tokens": {
+      "off_peak": {
+        "prompt_cache_hit_tokens": "0.02",
+        "prompt_cache_miss_tokens": "1",
+        "completion_tokens": "4"
+      },
+      "peak": {
+        "prompt_cache_hit_tokens": "0.04",
+        "prompt_cache_miss_tokens": "2",
+        "completion_tokens": "8"
+      }
+    },
+    "method": "Range at published off-peak/peak rates, not an invoice; no holiday or billing-time guess.",
+    "note": "Reasoning is included in completion_tokens and is never billed twice. Prices may change."
+  },
+  "usage_note": "Reasoning is a subset of completion tokens; unknown usage is not zero cost.",
+  "returned_models": [],
+  "http_latency_seconds": {
+    "count": 0,
+    "mean": null,
+    "p50": null,
+    "p95": null,
+    "max": null,
+    "total": 0
+  },
+  "http_latency_incomplete": false,
+  "decision_latency_seconds": {
+    "count": 0,
+    "mean": null,
+    "p50": null,
+    "p95": null,
+    "max": null,
+    "total": 0
+  },
+  "decision_latency_incomplete": false,
+  "retry_backoff_seconds": 0,
+  "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
+  "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
+  "warnings": []
+}
+RESULT: pass | /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO/outputs/pilot-v2-high-default-001/calibration/summary.json

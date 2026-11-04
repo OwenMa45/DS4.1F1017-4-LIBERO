@@ -1,0 +1,199 @@
+{
+  "schema_version": 2,
+  "command": "run",
+  "finished_utc": "2026-11-02T13:43:16.121448+00:00",
+  "status": "failure",
+  "scored": true,
+  "task_success": false,
+  "reason": "control_step_limit",
+  "control_steps": 220,
+  "policy_decisions": 38,
+  "settle_steps": 10,
+  "simulated_control_seconds": 11.0,
+  "simulation_step_seconds": 83.01629820466042,
+  "reset_and_settle_seconds": 5.468639060854912,
+  "control_loop_wall_seconds": 1233.4101001657546,
+  "task_execution_wall_seconds": 1227.9414571542293,
+  "last_step_may_have_executed": false,
+  "command_wall_seconds": 1243.122630983591,
+  "task_identity": {
+    "suite": "libero_goal",
+    "task_id": 5,
+    "task_order_index": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "task_name": "push_the_plate_to_the_front_of_the_stove"
+  },
+  "protocol": {
+    "protocol_version": "ds-libero-direct-v2",
+    "suite": "libero_goal",
+    "task_order_index": 0,
+    "task_id": 5,
+    "init_state_id": 0,
+    "seed": 0,
+    "settle_steps": 10,
+    "max_steps": 220,
+    "image_size": 256,
+    "history_steps": 4,
+    "control_freq": 20,
+    "model": "gpt-6.1-sol",
+    "expected_release": "GPT-6.1 Sol (API alias; not an immutable snapshot)",
+    "endpoint": "https://api.openai.com/v1/responses",
+    "reasoning_effort": "medium",
+    "max_tokens": 16384,
+    "timeout_seconds": 600,
+    "max_retries": 1,
+    "max_http_requests": 220,
+    "action_horizon": 8,
+    "visual_history": 2,
+    "camera_geometry": true,
+    "evaluation_scope": "diagnostic",
+    "grasp_feedback": true,
+    "gripper_feedback_barrier": true,
+    "geometry_contract": true,
+    "expected_task_name": "push_the_plate_to_the_front_of_the_stove",
+    "api_provider": "openai"
+  },
+  "config_sha256": "baa75d4ff7bf51a378fc5def8e5231c8e923b81ed6f5a093214214425e4bc0f1",
+  "source_sha256": "010a151002ce4092438c7893bfce99a1852a5a2a00c5aac14709ff1c6b988ceb",
+  "environment_sha256": "c92b62822e3ec934dc0b0f1dfc5c7c7b36cf76ac7949889f4ff72da9b9d5450b",
+  "scope": "single episode diagnostic; not an aggregate LIBERO benchmark score",
+  "http_requests": 40,
+  "completed_http_requests": 40,
+  "unfinished_http_attempts": [],
+  "decision_requests": 38,
+  "model_outputs": 38,
+  "valid_model_outputs": 38,
+  "action_validity_rate": 1.0,
+  "executed_action_count": 220,
+  "gripper_motion_diagnostics": {
+    "closing_bouts": [
+      {
+        "start_step": 0,
+        "initial_joint_separation_m": 0.07745834352626169,
+        "stationary_close_steps_before_first_arm_motion": 12,
+        "first_arm_motion_step": 12,
+        "joint_separation_before_first_arm_motion_m": 0.003952239181893018,
+        "last_step": 219,
+        "final_joint_separation_m": 0.0009997100734987663
+      }
+    ],
+    "skipped_incomplete_steps": 0,
+    "note": "Command timing and robot joint separation only; not a grasp success detector."
+  },
+  "feedback_boundaries": 0,
+  "discarded_actions_at_feedback_boundaries": 0,
+  "executed_actions_per_decision": {
+    "count": 38,
+    "mean": 5.7894736842105265,
+    "p50": 6.0,
+    "p95": 8.0,
+    "max": 8,
+    "total": 220
+  },
+  "actions_per_valid_decision": {
+    "count": 38,
+    "mean": 5.7894736842105265,
+    "p50": 6.0,
+    "p95": 8.0,
+    "max": 8,
+    "total": 220
+  },
+  "truncated_outputs": 0,
+  "finish_reasons": {
+    "stop": 38
+  },
+  "system_fingerprints": [],
+  "reported_usage": {
+    "prompt_tokens": 351894,
+    "completion_tokens": 13926,
+    "total_tokens": 365820,
+    "reasoning_tokens": 9796,
+    "prompt_cache_hit_tokens": 49075,
+    "prompt_cache_miss_tokens": 114,
+    "prompt_cache_write_tokens": 302705,
+    "prompt_cache_write_30m_tokens": 302705,
+    "prompt_cache_write_12h_tokens": 0
+  },
+  "usage_available_attempts": 38,
+  "usage_field_available_attempts": {
+    "prompt_tokens": 38,
+    "completion_tokens": 38,
+    "total_tokens": 38,
+    "reasoning_tokens": 38,
+    "prompt_cache_hit_tokens": 38,
+    "prompt_cache_miss_tokens": 38,
+    "prompt_cache_write_tokens": 38,
+    "prompt_cache_write_30m_tokens": 38,
+    "prompt_cache_write_12h_tokens": 38
+  },
+  "usage_incomplete": true,
+  "api_cost": {
+    "currency": "USD",
+    "priced_attempts": 38,
+    "unknown_cost_attempts": 2,
+    "incomplete": true,
+    "pricing_available": true,
+    "known_cost_range": [
+      0.901158,
+      0.901158
+    ],
+    "total_cost_range": null,
+    "known_cost_range_usd": [
+      0.901158,
+      0.901158
+    ],
+    "total_cost_range_usd": null,
+    "note": "Published price estimate, not actual billing; unknown requests are excluded from known subtotal. No currency conversion."
+  },
+  "api_pricing": {
+    "schema_version": 2,
+    "model": "gpt-6.1-sol",
+    "currency": "USD",
+    "verified_date": "2026-11-02",
+    "service_tier": "default",
+    "cache_ttl": "30m",
+    "source": "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+    "cache_source": "https://developers.openai.com/api/docs/guides/prompt-caching",
+    "per_million_tokens": {
+      "standard": {
+        "prompt_cache_hit_tokens": "0.10",
+        "prompt_cache_miss_tokens": "2",
+        "prompt_cache_write_30m_tokens": "2.50",
+        "prompt_cache_write_12h_tokens": "5",
+        "completion_tokens": "10"
+      }
+    },
+    "long_context_threshold": 272000,
+    "long_context_input_multiplier": "2",
+    "long_context_output_multiplier": "1.5",
+    "note": "Standard USD estimate, not an invoice. Reasoning is included in output; no currency conversion."
+  },
+  "usage_note": "Reasoning is a subset of completion tokens; unknown usage is not zero cost.",
+  "returned_models": [
+    "gpt-6.1-sol"
+  ],
+  "http_latency_seconds": {
+    "count": 40,
+    "mean": 28.31396370306611,
+    "p50": 14.803470194339752,
+    "p95": 60.95202044062306,
+    "max": 125.69162185490131,
+    "total": 1132.5585481226444
+  },
+  "http_latency_incomplete": false,
+  "decision_latency_seconds": {
+    "count": 38,
+    "mean": 29.943582274215785,
+    "p50": 15.525024910457432,
+    "p95": 70.14340233290561,
+    "max": 125.71779848262668,
+    "total": 1137.8561264201999
+  },
+  "decision_latency_incomplete": false,
+  "retry_backoff_seconds": 4.003410158678889,
+  "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
+  "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
+  "warnings": [],
+  "replay": "replay.gif"
+}

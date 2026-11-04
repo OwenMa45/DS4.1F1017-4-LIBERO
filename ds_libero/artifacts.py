@@ -47,6 +47,10 @@ class Store:
                          "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
                          "host_platform": platform.platform(), "model_version_pinned": False,
                          "model_identity_note": "Official API alias; expected release is a label, not an immutable revision."}
+        if cfg.api_provider == "external":
+            self.manifest.update(api_pricing=None, prompt_role="reference_control_contract",
+                model_identity_note="User-supplied policy; revision is declared by the experimenter. See microbench policy metadata.",
+                inference_accounting="Not instrumented; zero recorded API events does not imply zero inference cost.")
         try:
             result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=Path(__file__).parent.parent,
                                     capture_output=True, text=True, timeout=5)

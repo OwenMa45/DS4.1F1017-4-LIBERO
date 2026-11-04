@@ -1,0 +1,17 @@
+{
+  "finished_utc": "2026-11-01T17:26:12.035602+00:00",
+  "status": "invalid_output",
+  "scored": true,
+  "task_success": false,
+  "reason": "action must be a JSON array of exactly seven numbers",
+  "control_steps": 70,
+  "policy_decisions": 12,
+  "settle_steps": 10,
+  "simulated_control_seconds": 3.5,
+  "simulation_step_seconds": 27.89167246595025,
+  "reset_and_settle_seconds": 5.511239264160395,
+  "control_loop_wall_seconds": 1915.688760444522,
+  "task_execution_wall_seconds": 1910.177520222962,
+  "last_step_may_have_executed": false,
+  "command_wall_seconds": 1926.8745213411748
+}

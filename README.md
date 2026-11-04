@@ -1,5 +1,7 @@
 # DeepSeek-V4.1-Flash-1017 × LIBERO
 
+**2026-11-04：五项任务已封装为 LIBERO-Five v1 微型 bench。** 新实验实现 `create_policy(context) -> policy` 和 `policy.act(request)`，通过 `MicroBench().evaluate(...)` 接入；任务初始化、动作检查、成功判定、日志与汇总统一处理。也支持原有 DeepSeek / GPT 配置。默认 220 个控制步，可独立配置 1024 步；协议指纹区分控制预算。使用 `python -m ds_libero microbench list / plan / run / report`，详见 [接口、接入示例与运行说明](docs/microbench.md)。
+
 **2026-11-02：新增 GPT 五任务对照。** 使用 `gpt-6.1-sol`、`medium`、每项最多 220 个实际控制步，沿用既有五任务的几何反馈与 1–8 步动作块。默认每响应 16,384 token，连接异常、超时、429/5xx 最多自动重试 1 次，重试计入正式回合的 220 次请求预算。独立读取根目录 `gpt_API.txt` 或 `OPENAI_API_KEY`，按美元记录开销。[配置、运行命令和费用/时间估算](docs/gpt_comparison_2026-11-02.md)。准备好运行节点和密钥后：`bash scripts/run_gpt_five.sh outputs/gpt61-sol-medium-220-001`。重试改动只做离线验证，未额外调用付费 API。
 
 零样本、视觉反馈、单步 7 维动作控制实验。首版只运行 LIBERO Spatial 的黑碗任务一个回合，不将单回合结果包装为整体基准分数。

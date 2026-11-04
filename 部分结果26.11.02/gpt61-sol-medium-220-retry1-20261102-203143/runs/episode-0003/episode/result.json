@@ -1,0 +1,17 @@
+{
+  "finished_utc": "2026-11-02T13:43:16.121448+00:00",
+  "status": "failure",
+  "scored": true,
+  "task_success": false,
+  "reason": "control_step_limit",
+  "control_steps": 220,
+  "policy_decisions": 38,
+  "settle_steps": 10,
+  "simulated_control_seconds": 11.0,
+  "simulation_step_seconds": 83.01629820466042,
+  "reset_and_settle_seconds": 5.468639060854912,
+  "control_loop_wall_seconds": 1233.4101001657546,
+  "task_execution_wall_seconds": 1227.9414571542293,
+  "last_step_may_have_executed": false,
+  "command_wall_seconds": 1243.122630983591
+}

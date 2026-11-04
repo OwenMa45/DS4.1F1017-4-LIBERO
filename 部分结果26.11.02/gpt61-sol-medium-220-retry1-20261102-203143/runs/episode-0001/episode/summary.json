@@ -1,0 +1,262 @@
+{
+  "schema_version": 2,
+  "command": "run",
+  "finished_utc": "2026-11-02T13:10:56.650717+00:00",
+  "status": "failure",
+  "scored": true,
+  "task_success": false,
+  "reason": "control_step_limit",
+  "control_steps": 220,
+  "policy_decisions": 52,
+  "settle_steps": 10,
+  "simulated_control_seconds": 11.0,
+  "simulation_step_seconds": 61.06143378652632,
+  "reset_and_settle_seconds": 4.58107846044004,
+  "control_loop_wall_seconds": 984.1877327673137,
+  "task_execution_wall_seconds": 979.6066533830017,
+  "last_step_may_have_executed": false,
+  "command_wall_seconds": 994.8494227640331,
+  "task_identity": {
+    "suite": "libero_object",
+    "task_id": 0,
+    "task_order_index": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "task_name": "pick_up_the_alphabet_soup_and_place_it_in_the_basket"
+  },
+  "protocol": {
+    "protocol_version": "ds-libero-direct-v2",
+    "suite": "libero_object",
+    "task_order_index": 0,
+    "task_id": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "settle_steps": 10,
+    "max_steps": 220,
+    "image_size": 256,
+    "history_steps": 4,
+    "control_freq": 20,
+    "model": "gpt-6.1-sol",
+    "expected_release": "GPT-6.1 Sol (API alias; not an immutable snapshot)",
+    "endpoint": "https://api.openai.com/v1/responses",
+    "reasoning_effort": "medium",
+    "max_tokens": 16384,
+    "timeout_seconds": 600,
+    "max_retries": 1,
+    "max_http_requests": 220,
+    "action_horizon": 8,
+    "visual_history": 2,
+    "camera_geometry": true,
+    "evaluation_scope": "diagnostic",
+    "grasp_feedback": true,
+    "gripper_feedback_barrier": true,
+    "geometry_contract": true,
+    "expected_task_name": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+    "api_provider": "openai"
+  },
+  "config_sha256": "a3232c41bff58ea8f92ea484c83d97402afa224709a74745a3ee42d0d4dc02c6",
+  "source_sha256": "010a151002ce4092438c7893bfce99a1852a5a2a00c5aac14709ff1c6b988ceb",
+  "environment_sha256": "7cc68315521a488d895c96e121d63e69b04f7fb7ed02ac5e0382f13b0e46128d",
+  "scope": "single episode diagnostic; not an aggregate LIBERO benchmark score",
+  "http_requests": 55,
+  "completed_http_requests": 55,
+  "unfinished_http_attempts": [],
+  "decision_requests": 52,
+  "model_outputs": 52,
+  "valid_model_outputs": 52,
+  "action_validity_rate": 1.0,
+  "executed_action_count": 220,
+  "gripper_motion_diagnostics": {
+    "closing_bouts": [
+      {
+        "start_step": 37,
+        "initial_joint_separation_m": 0.07953271791044139,
+        "stationary_close_steps_before_first_arm_motion": 11,
+        "first_arm_motion_step": 48,
+        "joint_separation_before_first_arm_motion_m": 0.00549619046830453,
+        "last_step": 49,
+        "final_joint_separation_m": 0.0030929454968491093
+      },
+      {
+        "start_step": 66,
+        "initial_joint_separation_m": 0.07780951886462911,
+        "stationary_close_steps_before_first_arm_motion": 11,
+        "first_arm_motion_step": 77,
+        "joint_separation_before_first_arm_motion_m": 0.0054919936804367015,
+        "last_step": 78,
+        "final_joint_separation_m": 0.0030916245991407174
+      },
+      {
+        "start_step": 92,
+        "initial_joint_separation_m": 0.07690901449278678,
+        "stationary_close_steps_before_first_arm_motion": 11,
+        "first_arm_motion_step": 103,
+        "joint_separation_before_first_arm_motion_m": 0.005489947970931095,
+        "last_step": 104,
+        "final_joint_separation_m": 0.0030909842582999467
+      },
+      {
+        "start_step": 125,
+        "initial_joint_separation_m": 0.07816448635055603,
+        "stationary_close_steps_before_first_arm_motion": 11,
+        "first_arm_motion_step": null,
+        "joint_separation_before_first_arm_motion_m": null,
+        "last_step": 135,
+        "final_joint_separation_m": 0.005492879567506296
+      },
+      {
+        "start_step": 149,
+        "initial_joint_separation_m": 0.07691068285902056,
+        "stationary_close_steps_before_first_arm_motion": 11,
+        "first_arm_motion_step": 160,
+        "joint_separation_before_first_arm_motion_m": 0.00548995235605401,
+        "last_step": 161,
+        "final_joint_separation_m": 0.003090986273048441
+      },
+      {
+        "start_step": 176,
+        "initial_joint_separation_m": 0.07739018962905067,
+        "stationary_close_steps_before_first_arm_motion": 9,
+        "first_arm_motion_step": 185,
+        "joint_separation_before_first_arm_motion_m": 0.01313160122553899,
+        "last_step": 186,
+        "final_joint_separation_m": 0.005491038202144083
+      },
+      {
+        "start_step": 199,
+        "initial_joint_separation_m": 0.07605146946643757,
+        "stationary_close_steps_before_first_arm_motion": 9,
+        "first_arm_motion_step": 208,
+        "joint_separation_before_first_arm_motion_m": 0.013121976074517249,
+        "last_step": 209,
+        "final_joint_separation_m": 0.005488013899339145
+      },
+      {
+        "start_step": 217,
+        "initial_joint_separation_m": 0.048848900098361625,
+        "stationary_close_steps_before_first_arm_motion": 3,
+        "first_arm_motion_step": null,
+        "joint_separation_before_first_arm_motion_m": null,
+        "last_step": 219,
+        "final_joint_separation_m": 0.05279476583623181
+      }
+    ],
+    "skipped_incomplete_steps": 0,
+    "note": "Command timing and robot joint separation only; not a grasp success detector."
+  },
+  "feedback_boundaries": 0,
+  "discarded_actions_at_feedback_boundaries": 0,
+  "executed_actions_per_decision": {
+    "count": 52,
+    "mean": 4.230769230769231,
+    "p50": 3.0,
+    "p95": 8.0,
+    "max": 8,
+    "total": 220
+  },
+  "actions_per_valid_decision": {
+    "count": 52,
+    "mean": 4.230769230769231,
+    "p50": 3.0,
+    "p95": 8.0,
+    "max": 8,
+    "total": 220
+  },
+  "truncated_outputs": 0,
+  "finish_reasons": {
+    "stop": 52
+  },
+  "system_fingerprints": [],
+  "reported_usage": {
+    "prompt_tokens": 484631,
+    "completion_tokens": 9160,
+    "total_tokens": 493791,
+    "reasoning_tokens": 5131,
+    "prompt_cache_hit_tokens": 66324,
+    "prompt_cache_miss_tokens": 156,
+    "prompt_cache_write_tokens": 418151,
+    "prompt_cache_write_30m_tokens": 418151,
+    "prompt_cache_write_12h_tokens": 0
+  },
+  "usage_available_attempts": 52,
+  "usage_field_available_attempts": {
+    "prompt_tokens": 52,
+    "completion_tokens": 52,
+    "total_tokens": 52,
+    "reasoning_tokens": 52,
+    "prompt_cache_hit_tokens": 52,
+    "prompt_cache_miss_tokens": 52,
+    "prompt_cache_write_tokens": 52,
+    "prompt_cache_write_30m_tokens": 52,
+    "prompt_cache_write_12h_tokens": 52
+  },
+  "usage_incomplete": true,
+  "api_cost": {
+    "currency": "USD",
+    "priced_attempts": 52,
+    "unknown_cost_attempts": 3,
+    "incomplete": true,
+    "pricing_available": true,
+    "known_cost_range": [
+      1.1439219,
+      1.1439219
+    ],
+    "total_cost_range": null,
+    "known_cost_range_usd": [
+      1.1439219,
+      1.1439219
+    ],
+    "total_cost_range_usd": null,
+    "note": "Published price estimate, not actual billing; unknown requests are excluded from known subtotal. No currency conversion."
+  },
+  "api_pricing": {
+    "schema_version": 2,
+    "model": "gpt-6.1-sol",
+    "currency": "USD",
+    "verified_date": "2026-11-02",
+    "service_tier": "default",
+    "cache_ttl": "30m",
+    "source": "https://developers.openai.com/api/docs/models/gpt-6.1-sol",
+    "cache_source": "https://developers.openai.com/api/docs/guides/prompt-caching",
+    "per_million_tokens": {
+      "standard": {
+        "prompt_cache_hit_tokens": "0.10",
+        "prompt_cache_miss_tokens": "2",
+        "prompt_cache_write_30m_tokens": "2.50",
+        "prompt_cache_write_12h_tokens": "5",
+        "completion_tokens": "10"
+      }
+    },
+    "long_context_threshold": 272000,
+    "long_context_input_multiplier": "2",
+    "long_context_output_multiplier": "1.5",
+    "note": "Standard USD estimate, not an invoice. Reasoning is included in output; no currency conversion."
+  },
+  "usage_note": "Reasoning is a subset of completion tokens; unknown usage is not zero cost.",
+  "returned_models": [
+    "gpt-6.1-sol"
+  ],
+  "http_latency_seconds": {
+    "count": 55,
+    "mean": 16.439683243022724,
+    "p50": 8.243034273386002,
+    "p95": 39.03658008817583,
+    "max": 81.94202607870102,
+    "total": 904.1825783662498
+  },
+  "http_latency_incomplete": false,
+  "decision_latency_seconds": {
+    "count": 52,
+    "mean": 17.539500640382848,
+    "p50": 8.719773781485856,
+    "p95": 49.5568141005001,
+    "max": 81.97176256775856,
+    "total": 912.054033299908
+  },
+  "decision_latency_incomplete": false,
+  "retry_backoff_seconds": 6.005917686969042,
+  "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
+  "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
+  "warnings": [],
+  "replay": "replay.gif"
+}

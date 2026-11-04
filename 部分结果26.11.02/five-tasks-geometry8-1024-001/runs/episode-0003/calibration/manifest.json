@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "command": "calibrate",
+  "created_utc": "2026-11-01T16:49:41.539550+00:00",
+  "api_pricing": {
+    "schema_version": 1,
+    "model": "deepseek-flash",
+    "currency": "CNY",
+    "verified_date": "2026-10-29",
+    "source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "per_million_tokens": {
+      "off_peak": {
+        "prompt_cache_hit_tokens": "0.02",
+        "prompt_cache_miss_tokens": "1",
+        "completion_tokens": "4"
+      },
+      "peak": {
+        "prompt_cache_hit_tokens": "0.04",
+        "prompt_cache_miss_tokens": "2",
+        "completion_tokens": "8"
+      }
+    },
+    "method": "Range at published off-peak/peak rates, not an invoice; no holiday or billing-time guess.",
+    "note": "Reasoning is included in completion_tokens and is never billed twice. Prices may change."
+  },
+  "config": {
+    "protocol_version": "ds-libero-direct-v2",
+    "suite": "libero_goal",
+    "task_order_index": 0,
+    "task_id": 5,
+    "init_state_id": 0,
+    "seed": 0,
+    "settle_steps": 10,
+    "max_steps": 1024,
+    "image_size": 256,
+    "history_steps": 4,
+    "control_freq": 20,
+    "model": "deepseek-flash",
+    "expected_release": "DeepSeek-V4.1-Flash-1017",
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "reasoning_effort": "high",
+    "max_tokens": null,
+    "timeout_seconds": 1800,
+    "max_retries": 2,
+    "max_http_requests": 1024,
+    "action_horizon": 8,
+    "visual_history": 2,
+    "camera_geometry": true,
+    "evaluation_scope": "diagnostic",
+    "grasp_feedback": true,
+    "gripper_feedback_barrier": true,
+    "geometry_contract": true,
+    "expected_task_name": "push_the_plate_to_the_front_of_the_stove"
+  },
+  "config_sha256": "18ea8e51f39c740d40081da43ee6db2905253419f5e419dc23f9e9c8af12483c",
+  "source_sha256": "bc076b0c800abb2b5cd38a99d448b8f65a45b4119e7102e18293c74f679649ef",
+  "prompt_sha256": "ceed6f61e8f80df963bbb147076526b4e48b77d7fccd9ebf5554476d75ca7bad",
+  "host_platform": "Linux-5.10.134-013.7.2.kangaroo.al8.x86_64-x86_64-with-glibc2.39",
+  "model_version_pinned": false,
+  "model_identity_note": "Official API alias; expected release is a label, not an immutable revision.",
+  "experiment_git_commit": "cb0c2620faa3ee717f8f1e7ee5d14a1a83e2d490",
+  "environment": {
+    "python": "3.10.22",
+    "versions": {
+      "robosuite": "1.4.1",
+      "mujoco": "2.3.7",
+      "torch": "2.5.1+cpu",
+      "numpy": "1.26.4",
+      "Pillow": "10.4.0"
+    },
+    "libero_commit": "8f1084e3132a39270c3a13ebe37270a43ece2a01",
+    "libero_tracked_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "libero_has_tracked_changes": false,
+    "libero_root": "/mnt/cpfs/users/mrq/libero_cpu/LIBERO",
+    "libero_config": "/mnt/cpfs/users/mrq/libero_cpu/libero_config/config.yaml",
+    "libero_config_sha256": "82a60f9dff923d05a929d30b2cc8087b6820bfd45b1d0e709c808e581bf11aea",
+    "backend": "robosuite.renderers.context.osmesa_context",
+    "renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "task": "push the plate to the front of the stove",
+    "task_name": "push_the_plate_to_the_front_of_the_stove",
+    "bddl_sha256": "26f22f8ad39a4b2b344b049115c45661a877fa0b4821fb78246725e7e87d8c0b",
+    "official_init_state_sha256": "cea30572c1ece1c5d5a53c64fef51544c3a02dbb6bf6bc06d02d3a03ea719aa7",
+    "initial_state_count": 50,
+    "controller": {
+      "input_min": [
+        -1.0,
+        -1.0,
+        -1.0,
+        -1.0,
+        -1.0,
+        -1.0
+      ],
+      "input_max": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "output_min": [
+        -0.05,
+        -0.05,
+        -0.05,
+        -0.5,
+        -0.5,
+        -0.5
+      ],
+      "output_max": [
+        0.05,
+        0.05,
+        0.05,
+        0.5,
+        0.5,
+        0.5
+      ],
+      "name": "OSC_POSE",
+      "use_delta": true,
+      "impedance_mode": "fixed",
+      "control_freq": 20,
+      "gripper": "PandaGripper",
+      "controller_source_sha256": "cfa62a0e719bc53ef0c701efa66f7b3e2272d4fca2150ec73c05bb145eba85cb",
+      "gripper_source_sha256": "a3760a8fc4599fa6f79914304b82466f3c1bda1a945943ca693bb57f00dc59eb",
+      "geometry_schema": "panda-grip-site-v1",
+      "eef_position_source": "gripper0_grip_site",
+      "eef_orientation_source": "gripper0_grip_site",
+      "legacy_orientation_source": "robot0_right_hand",
+      "raw_image_convention": "opengl",
+      "observation_refresh": "sim.forward then force_update; no simulation step"
+    },
+    "simulator_horizon": 1035,
+    "simulator_ignore_done": false
+  },
+  "environment_sha256": "ebde55af1d35c273dfb848378922547add50157b671b36374a4bf64c8f34599c"
+}

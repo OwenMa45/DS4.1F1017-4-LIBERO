@@ -1,0 +1,919 @@
+[robosuite WARNING] No private macro file found! (macros.py:53)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:54)
+[robosuite WARNING] To setup, run: python /mnt/cpfs/users/mrq/libero_cpu/.venv/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (macros.py:55)
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/mnt/cpfs/users/mrq/libero_cpu/LIBERO/libero/libero/benchmark/__init__.py:164: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  init_states = torch.load(init_states_path)
+Task: pick up the alphabet soup and place it in the basket
+Artifacts: /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO/outputs/five-tasks-geometry8-1024-001/runs/episode-0001/calibration
+x_position_positive: PASS measured=[0.001881353747784309, 0.00014328865948182775, -0.0008677665900497511]
+x_position_negative: PASS measured=[-0.0027186641964786207, 0.00012975244909044573, 0.00026344542523273895]
+y_position_positive: PASS measured=[-0.0003544498056450296, 0.002878502360018312, -0.00023572327058268838]
+y_position_negative: PASS measured=[-0.0003668341785608986, -0.002790757837413704, -0.0002509008732681228]
+z_position_positive: PASS measured=[-0.0005193405152217057, 0.0001365174921425013, 0.0027189307081579295]
+z_position_negative: PASS measured=[-0.0002761256229610043, 0.0001358982909023228, -0.0032711831515485623]
+x_rotation_positive: PASS measured=[0.02956759306493784, -0.0017356159382282074, -0.0012337658825362099]
+x_rotation_negative: PASS measured=[-0.02975637676886666, -0.0015329525167056973, 0.001497617197738493]
+y_rotation_positive: PASS measured=[4.6366253077383895e-05, 0.021095035247494495, 0.00046837278016982533]
+y_rotation_negative: PASS measured=[-0.00012820996057168605, -0.024621157360496353, 0.00017808450485427374]
+z_rotation_positive: PASS measured=[-0.00020812358938051613, -0.001448184504192156, 0.029131899007794147]
+z_rotation_negative: PASS measured=[2.561896426088387e-05, -0.0014518527995205225, -0.028860253443055435]
+{
+  "schema_version": 2,
+  "command": "calibrate",
+  "finished_utc": "2026-11-01T12:03:37.237384+00:00",
+  "status": "pass",
+  "scored": false,
+  "task_success": null,
+  "probes": [
+    {
+      "name": "x_position_positive",
+      "action": [
+        0.1,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        0.001881353747784309,
+        0.00014328865948182775,
+        -0.0008677665900497511
+      ],
+      "delta_rotation_world_rad": [
+        -0.00013505493632130617,
+        -0.005245065258160919,
+        0.0006040120087313666
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "x_position_negative",
+      "action": [
+        -0.1,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.0027186641964786207,
+        0.00012975244909044573,
+        0.00026344542523273895
+      ],
+      "delta_rotation_world_rad": [
+        -6.606799713528175e-05,
+        0.0010947585465021586,
+        0.0005238107779727134
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "y_position_positive",
+      "action": [
+        0.0,
+        0.1,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.0003544498056450296,
+        0.002878502360018312,
+        -0.00023572327058268838
+      ],
+      "delta_rotation_world_rad": [
+        0.0003066280088943655,
+        -0.0017232368894626122,
+        0.0020699981351249633
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "y_position_negative",
+      "action": [
+        0.0,
+        -0.1,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.0003668341785608986,
+        -0.002790757837413704,
+        -0.0002509008732681228
+      ],
+      "delta_rotation_world_rad": [
+        -0.0007116701371602212,
+        -0.0017954250955146372,
+        -0.0002854783238312796
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "z_position_positive",
+      "action": [
+        0.0,
+        0.0,
+        0.1,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.0005193405152217057,
+        0.0001365174921425013,
+        0.0027189307081579295
+      ],
+      "delta_rotation_world_rad": [
+        -0.00010524376217041331,
+        -0.0027872188641134363,
+        0.0005705638145510311
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "z_position_negative",
+      "action": [
+        0.0,
+        0.0,
+        -0.1,
+        0.0,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.0002761256229610043,
+        0.0001358982909023228,
+        -0.0032711831515485623
+      ],
+      "delta_rotation_world_rad": [
+        -9.589612849307877e-05,
+        -0.001334080084685939,
+        0.0005566311248024502
+      ],
+      "minimum_signed_motion": 5e-05,
+      "passed": true
+    },
+    {
+      "name": "x_rotation_positive",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.00041729474160592805,
+        0.0020150789172466224,
+        -0.0002824534025111791
+      ],
+      "delta_rotation_world_rad": [
+        0.02956759306493784,
+        -0.0017356159382282074,
+        -0.0012337658825362099
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "x_rotation_negative",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        -0.1,
+        0.0,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.0003683041192724945,
+        -0.0019462140714194484,
+        -0.00021667187161522605
+      ],
+      "delta_rotation_world_rad": [
+        -0.02975637676886666,
+        -0.0015329525167056973,
+        0.001497617197738493
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "y_rotation_positive",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.0038225829673302347,
+        8.03518014731771e-05,
+        -0.002775934914081485
+      ],
+      "delta_rotation_world_rad": [
+        4.6366253077383895e-05,
+        0.021095035247494495,
+        0.00046837278016982533
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "y_rotation_negative",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.1,
+        0.0,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        0.0029115997991867315,
+        4.6212106321105034e-05,
+        0.0022060718878411656
+      ],
+      "delta_rotation_world_rad": [
+        -0.00012820996057168605,
+        -0.024621157360496353,
+        0.00017808450485427374
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "z_rotation_positive",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.1,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.0003773789546154538,
+        0.0007982473479859241,
+        -0.00026390299476641843
+      ],
+      "delta_rotation_world_rad": [
+        -0.00020812358938051613,
+        -0.001448184504192156,
+        0.029131899007794147
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "z_rotation_negative",
+      "action": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.1,
+        -1.0
+      ],
+      "steps": 3,
+      "delta_position_m": [
+        -0.0003975624359034702,
+        -0.0007121240211372453,
+        -0.0002653360350309275
+      ],
+      "delta_rotation_world_rad": [
+        2.561896426088387e-05,
+        -0.0014518527995205225,
+        -0.028860253443055435
+      ],
+      "minimum_signed_motion": 0.0001,
+      "passed": true
+    },
+    {
+      "name": "gripper_close_then_open",
+      "initial_aperture_m": 0.07745832022146275,
+      "close_trace": [
+        {
+          "steps": 1,
+          "joint_separation_m": 0.07710676429071125
+        },
+        {
+          "steps": 2,
+          "joint_separation_m": 0.0734687763127444
+        },
+        {
+          "steps": 3,
+          "joint_separation_m": 0.06706690653845093
+        },
+        {
+          "steps": 4,
+          "joint_separation_m": 0.059086950699159604
+        },
+        {
+          "steps": 5,
+          "joint_separation_m": 0.050221624236411966
+        },
+        {
+          "steps": 6,
+          "joint_separation_m": 0.040859310429942224
+        },
+        {
+          "steps": 7,
+          "joint_separation_m": 0.03121779836617055
+        },
+        {
+          "steps": 8,
+          "joint_separation_m": 0.021419363761179824
+        },
+        {
+          "steps": 9,
+          "joint_separation_m": 0.013132088655264829
+        },
+        {
+          "steps": 10,
+          "joint_separation_m": 0.008239960897261318
+        },
+        {
+          "steps": 11,
+          "joint_separation_m": 0.005491192150491661
+        },
+        {
+          "steps": 12,
+          "joint_separation_m": 0.003952240793791889
+        },
+        {
+          "steps": 13,
+          "joint_separation_m": 0.0030913744089682412
+        },
+        {
+          "steps": 14,
+          "joint_separation_m": 0.0026100254212916884
+        },
+        {
+          "steps": 15,
+          "joint_separation_m": 0.0023409456707167604
+        },
+        {
+          "steps": 16,
+          "joint_separation_m": 0.0021905469339892564
+        },
+        {
+          "steps": 17,
+          "joint_separation_m": 0.002093582360460571
+        },
+        {
+          "steps": 18,
+          "joint_separation_m": 0.002003762380283927
+        },
+        {
+          "steps": 19,
+          "joint_separation_m": 0.0019178196518063505
+        },
+        {
+          "steps": 20,
+          "joint_separation_m": 0.0018355632506208855
+        }
+      ],
+      "open_trace": [
+        {
+          "steps": 1,
+          "joint_separation_m": 0.002363078326599807
+        },
+        {
+          "steps": 2,
+          "joint_separation_m": 0.0062276281470371505
+        },
+        {
+          "steps": 3,
+          "joint_separation_m": 0.012762636783494465
+        },
+        {
+          "steps": 4,
+          "joint_separation_m": 0.02081733175982148
+        },
+        {
+          "steps": 5,
+          "joint_separation_m": 0.029724593535280217
+        },
+        {
+          "steps": 6,
+          "joint_separation_m": 0.039110459088959784
+        },
+        {
+          "steps": 7,
+          "joint_separation_m": 0.048765206093595
+        },
+        {
+          "steps": 8,
+          "joint_separation_m": 0.05857108053784696
+        },
+        {
+          "steps": 9,
+          "joint_separation_m": 0.06686254123996224
+        },
+        {
+          "steps": 10,
+          "joint_separation_m": 0.07175702730849864
+        },
+        {
+          "steps": 11,
+          "joint_separation_m": 0.07450712166120843
+        },
+        {
+          "steps": 12,
+          "joint_separation_m": 0.07604681628164703
+        },
+        {
+          "steps": 13,
+          "joint_separation_m": 0.07690809876908553
+        },
+        {
+          "steps": 14,
+          "joint_separation_m": 0.07738968048765851
+        },
+        {
+          "steps": 15,
+          "joint_separation_m": 0.07765889032502499
+        },
+        {
+          "steps": 16,
+          "joint_separation_m": 0.07780936173767916
+        },
+        {
+          "steps": 17,
+          "joint_separation_m": 0.07790634263382426
+        },
+        {
+          "steps": 18,
+          "joint_separation_m": 0.07799616596189501
+        },
+        {
+          "steps": 19,
+          "joint_separation_m": 0.07808211178686436
+        },
+        {
+          "steps": 20,
+          "joint_separation_m": 0.07816437114825825
+        }
+      ],
+      "closed_aperture_m": 0.0018355632506208855,
+      "opened_aperture_m": 0.07816437114825825,
+      "passed": true
+    }
+  ],
+  "controller": {
+    "input_min": [
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0,
+      -1.0
+    ],
+    "input_max": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "output_min": [
+      -0.05,
+      -0.05,
+      -0.05,
+      -0.5,
+      -0.5,
+      -0.5
+    ],
+    "output_max": [
+      0.05,
+      0.05,
+      0.05,
+      0.5,
+      0.5,
+      0.5
+    ],
+    "name": "OSC_POSE",
+    "use_delta": true,
+    "impedance_mode": "fixed",
+    "control_freq": 20,
+    "gripper": "PandaGripper",
+    "controller_source_sha256": "cfa62a0e719bc53ef0c701efa66f7b3e2272d4fca2150ec73c05bb145eba85cb",
+    "gripper_source_sha256": "a3760a8fc4599fa6f79914304b82466f3c1bda1a945943ca693bb57f00dc59eb",
+    "geometry_schema": "panda-grip-site-v1",
+    "eef_position_source": "gripper0_grip_site",
+    "eef_orientation_source": "gripper0_grip_site",
+    "legacy_orientation_source": "robot0_right_hand",
+    "raw_image_convention": "opengl",
+    "observation_refresh": "sim.forward then force_update; no simulation step"
+  },
+  "note": "Diagnostic probes only; sign thresholds test motion, not target-position accuracy.",
+  "geometry_contract_checks": [
+    {
+      "frame": "x_position_positive_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "x_position_positive_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 2.220446049250313e-16,
+      "mount_position_error_m": 2.7755575615628914e-17,
+      "mount_rotation_error": 4.440892098500626e-16,
+      "fingerpad_position_error_m": 2.0816681711721685e-17
+    },
+    {
+      "frame": "x_position_negative_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "x_position_negative_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 2.220446049250313e-16,
+      "mount_position_error_m": 1.3877787807814457e-17,
+      "mount_rotation_error": 2.220446049250313e-16,
+      "fingerpad_position_error_m": 2.7321894746634712e-17
+    },
+    {
+      "frame": "y_position_positive_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "y_position_positive_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 3.3306690738754696e-16,
+      "mount_position_error_m": 5.921024328635846e-18,
+      "mount_rotation_error": 4.440892098500626e-16,
+      "fingerpad_position_error_m": 3.599551212651875e-17
+    },
+    {
+      "frame": "y_position_negative_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "y_position_negative_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 3.3306690738754696e-16,
+      "mount_position_error_m": 5.551115123125783e-17,
+      "mount_rotation_error": 4.440892098500626e-16,
+      "fingerpad_position_error_m": 5.854691731421724e-17
+    },
+    {
+      "frame": "z_position_positive_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "z_position_positive_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 0.0,
+      "mount_position_error_m": 1.3877787807814457e-17,
+      "mount_rotation_error": 2.220446049250313e-16,
+      "fingerpad_position_error_m": 3.252606517456513e-17
+    },
+    {
+      "frame": "z_position_negative_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "z_position_negative_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 3.3306690738754696e-16,
+      "mount_position_error_m": 6.938893903907228e-17,
+      "mount_rotation_error": 6.661338147750939e-16,
+      "fingerpad_position_error_m": 7.32920668600201e-17
+    },
+    {
+      "frame": "x_rotation_positive_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "x_rotation_positive_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 5.551115123125783e-16,
+      "mount_position_error_m": 4.163336342344337e-17,
+      "mount_rotation_error": 4.440892098500626e-16,
+      "fingerpad_position_error_m": 2.666677774896532e-17
+    },
+    {
+      "frame": "x_rotation_negative_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "x_rotation_negative_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 4.163336342344337e-17,
+      "mount_rotation_error": 2.220446049250313e-16,
+      "fingerpad_position_error_m": 5.637851296924623e-17
+    },
+    {
+      "frame": "y_rotation_positive_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "y_rotation_positive_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 2.220446049250313e-16,
+      "mount_position_error_m": 2.7755575615628914e-17,
+      "mount_rotation_error": 4.440892098500626e-16,
+      "fingerpad_position_error_m": 2.862293735361732e-17
+    },
+    {
+      "frame": "y_rotation_negative_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "y_rotation_negative_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 4.163336342344337e-17,
+      "mount_rotation_error": 2.220446049250313e-16,
+      "fingerpad_position_error_m": 4.466912950640278e-17
+    },
+    {
+      "frame": "z_rotation_positive_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "z_rotation_positive_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 2.220446049250313e-16,
+      "mount_position_error_m": 4.163336342344337e-17,
+      "mount_rotation_error": 4.440892098500626e-16,
+      "fingerpad_position_error_m": 5.594483210025203e-17
+    },
+    {
+      "frame": "z_rotation_negative_before",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 1.1102230246251565e-16,
+      "mount_position_error_m": 1.3174660462195335e-17,
+      "mount_rotation_error": 1.2358873835348696e-16,
+      "fingerpad_position_error_m": 6.505213034913027e-17
+    },
+    {
+      "frame": "z_rotation_negative_after",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 3.3306690738754696e-16,
+      "mount_position_error_m": 5.551115123125783e-17,
+      "mount_rotation_error": 2.220446049250313e-16,
+      "fingerpad_position_error_m": 4.85722573273506e-17
+    },
+    {
+      "frame": "gripper_closed",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 0.0,
+      "mount_position_error_m": 2.7755575615628914e-17,
+      "mount_rotation_error": 2.220446049250313e-16,
+      "fingerpad_position_error_m": 5.898059818321144e-17
+    },
+    {
+      "frame": "gripper_open",
+      "observation_position_error_m": 0.0,
+      "legacy_hand_rotation_error": 2.220446049250313e-16,
+      "mount_position_error_m": 2.7755575615628914e-17,
+      "mount_rotation_error": 4.440892098500626e-16,
+      "fingerpad_position_error_m": 2.0816681711721685e-17
+    }
+  ],
+  "geometry_overlays": "geometry_overlays/ (diagnostic images only; not policy inputs)",
+  "command_wall_seconds": 96.29887311346829,
+  "task_identity": {
+    "suite": "libero_object",
+    "task_id": 0,
+    "task_order_index": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "task_name": "pick_up_the_alphabet_soup_and_place_it_in_the_basket"
+  },
+  "protocol": {
+    "protocol_version": "ds-libero-direct-v2",
+    "suite": "libero_object",
+    "task_order_index": 0,
+    "task_id": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "settle_steps": 10,
+    "max_steps": 1024,
+    "image_size": 256,
+    "history_steps": 4,
+    "control_freq": 20,
+    "model": "deepseek-flash",
+    "expected_release": "DeepSeek-V4.1-Flash-1017",
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "reasoning_effort": "high",
+    "max_tokens": null,
+    "timeout_seconds": 1800,
+    "max_retries": 2,
+    "max_http_requests": 1024,
+    "action_horizon": 8,
+    "visual_history": 2,
+    "camera_geometry": true,
+    "evaluation_scope": "diagnostic",
+    "grasp_feedback": true,
+    "gripper_feedback_barrier": true,
+    "geometry_contract": true,
+    "expected_task_name": "pick_up_the_alphabet_soup_and_place_it_in_the_basket"
+  },
+  "config_sha256": "1c7911c08b9ae4a2c96f131233c3413f551a5760923aee7a26c8a509363b0751",
+  "source_sha256": "bc076b0c800abb2b5cd38a99d448b8f65a45b4119e7102e18293c74f679649ef",
+  "environment_sha256": "c5282fbabcad01a5fe449519baac6444e2d8f5ce3dad0c78355bbed47c0175c0",
+  "scope": "single episode diagnostic; not an aggregate LIBERO benchmark score",
+  "http_requests": 0,
+  "completed_http_requests": 0,
+  "unfinished_http_attempts": [],
+  "decision_requests": 0,
+  "model_outputs": 0,
+  "valid_model_outputs": 0,
+  "action_validity_rate": null,
+  "executed_action_count": 0,
+  "gripper_motion_diagnostics": {
+    "closing_bouts": [],
+    "skipped_incomplete_steps": 0,
+    "note": "Command timing and robot joint separation only; not a grasp success detector."
+  },
+  "feedback_boundaries": 0,
+  "discarded_actions_at_feedback_boundaries": 0,
+  "executed_actions_per_decision": {
+    "count": 0,
+    "mean": null,
+    "p50": null,
+    "p95": null,
+    "max": null,
+    "total": 0
+  },
+  "actions_per_valid_decision": {
+    "count": 0,
+    "mean": null,
+    "p50": null,
+    "p95": null,
+    "max": null,
+    "total": 0
+  },
+  "truncated_outputs": 0,
+  "finish_reasons": {},
+  "system_fingerprints": [],
+  "reported_usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "reasoning_tokens": 0,
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 0
+  },
+  "usage_available_attempts": 0,
+  "usage_field_available_attempts": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "reasoning_tokens": 0,
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 0
+  },
+  "usage_incomplete": false,
+  "api_cost": {
+    "currency": "CNY",
+    "priced_attempts": 0,
+    "unknown_cost_attempts": 0,
+    "incomplete": false,
+    "pricing_available": true,
+    "known_cost_range_cny": [
+      0.0,
+      0.0
+    ],
+    "total_cost_range_cny": [
+      0.0,
+      0.0
+    ],
+    "note": "Published off-peak/peak estimate range, not actual billing; unknown requests are excluded from known subtotal."
+  },
+  "api_pricing": {
+    "schema_version": 1,
+    "model": "deepseek-flash",
+    "currency": "CNY",
+    "verified_date": "2026-10-29",
+    "source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "per_million_tokens": {
+      "off_peak": {
+        "prompt_cache_hit_tokens": "0.02",
+        "prompt_cache_miss_tokens": "1",
+        "completion_tokens": "4"
+      },
+      "peak": {
+        "prompt_cache_hit_tokens": "0.04",
+        "prompt_cache_miss_tokens": "2",
+        "completion_tokens": "8"
+      }
+    },
+    "method": "Range at published off-peak/peak rates, not an invoice; no holiday or billing-time guess.",
+    "note": "Reasoning is included in completion_tokens and is never billed twice. Prices may change."
+  },
+  "usage_note": "Reasoning is a subset of completion tokens; unknown usage is not zero cost.",
+  "returned_models": [],
+  "http_latency_seconds": {
+    "count": 0,
+    "mean": null,
+    "p50": null,
+    "p95": null,
+    "max": null,
+    "total": 0
+  },
+  "http_latency_incomplete": false,
+  "decision_latency_seconds": {
+    "count": 0,
+    "mean": null,
+    "p50": null,
+    "p95": null,
+    "max": null,
+    "total": 0
+  },
+  "decision_latency_incomplete": false,
+  "retry_backoff_seconds": 0,
+  "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
+  "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
+  "warnings": []
+}
+RESULT: pass | /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO/outputs/five-tasks-geometry8-1024-001/runs/episode-0001/calibration/summary.json

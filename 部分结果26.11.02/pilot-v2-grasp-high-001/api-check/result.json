@@ -1,0 +1,65 @@
+{
+  "finished_utc": "2026-10-29T08:57:18.087603+00:00",
+  "status": "pass",
+  "scored": false,
+  "task_success": null,
+  "proposed_action": [
+    [
+      0.1,
+      0.9,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.1,
+      0.9,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.1,
+      0.9,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.1,
+      0.9,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.1,
+      0.9,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.1,
+      0.9,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "model_actions_executed": 0,
+  "note": "Image request and JSON contract accepted; this is not a vision-accuracy or task-success test.",
+  "command_wall_seconds": 115.78012332506478
+}

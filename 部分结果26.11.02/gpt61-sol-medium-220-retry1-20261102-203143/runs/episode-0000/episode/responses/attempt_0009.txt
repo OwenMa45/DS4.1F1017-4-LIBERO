@@ -1,0 +1,117 @@
+{
+  "id": "resp_046e9331eb4b4c28016ae883fb68f087d2a6f0e71e61738295",
+  "object": "response",
+  "created_at": 1793623035,
+  "status": "completed",
+  "access_programs": null,
+  "background": false,
+  "billing": {
+    "payer": "developer"
+  },
+  "completed_at": 1793623061,
+  "error": null,
+  "frequency_penalty": 0.0,
+  "incomplete_details": null,
+  "instructions": "You control a simulated Franka Panda robot in LIBERO using visual feedback.\nComplete the supplied natural-language task. You have no tools or scripted skills.\nThe two current images are an external agentview and a wrist-mounted camera.\nProprioception uses the Panda grip_site for BOTH world position and orientation\n(unit quaternion in [x,y,z,w] order), and the two gripper joint positions in metres. Previous\nexecuted actions and proprioception are supplied as a short history.\n\nReturn only a json object with the sole key \"actions\", containing 1 to 8\nseven-number actions, for example {\"actions\":[[0,0,0,0,0,0,-1]]}.\nThe first three numbers are normalized WORLD-frame position deltas in [-1,1],\nscaled to 0.05 metres. The next three are WORLD-frame axis-angle rotation-vector\ndeltas in [-1,1], scaled to 0.5 radians; they are not Euler angles.\nThe last number is exactly -1 (open), 1 (close), or 0 (hold gripper command).\nEach action sets a NEW position target relative to the actual grip_site position\nand runs for 0.05 seconds. Nonzero rotation deltas left-multiply the actual site\nrotation about WORLD axes; zero rotation deltas retain the previous orientation goal. Repeating a delta MOVES the target again; it does not hold\na fixed destination. Actual motion in a step can be much smaller than its target\noffset because the controller needs time to respond. Zero deltas hold near the\ncurrent pose, while the gripper command can continue closing or opening.\nA validated prefix runs before another API call, stopping at the feedback boundary\ndescribed below, task success or the control-step limit. Choose short sequences near contact or when uncertain.\nRemaining step budget limits the allowed number of actions in this response.\nOnly the simulator determines success. Waiting for this API never advances time.\nImages are 256 by 256 pixels, already upright. Historical\nimages, if supplied, are labeled with their control step and matching state.\nCamera calibration, if supplied, uses optical axes +X right, +Y down, +Z forward;\nT_world_from_camera maps optical camera coordinates to world metres. The wrist\ncamera pose changes with the robot, so use the calibration paired with each image.\nNo object locations, depth, segmentation, demonstrations or scripted skills are\nprovided. Use measured motion and visual feedback; do not assume a fixed mapping\nbetween world axes and image directions. Return actions, no explanations or keys.\n\nGripper feedback protocol:\nPanda gripper commands change an actuator target gradually. +1 is NOT an instant\ngrasp. 0 preserves the actuator target; it does NOT keep incrementing it closed.\nOpening and closing require multiple simulation steps, often more than one chunk.\nUse gripper-only sequences (zero arm deltas) while closing, then inspect the new\njoint separation and images. If still closing, you may choose another such sequence.\nDo not combine approach, closure, lift and transport into a single blind sequence.\nAlign the fingerpads with the visible grasp region before closing; the wrist camera\nimage centre is not the grasp point. robot_gripper_geometry gives only your own\nfingerpad centres and their projected pixels. It does not locate target objects.\nAvoid descending far while still misaligned; use short corrections near contact.\nAfter closure, choose a small vertical test lift and inspect both views before\ntransport. A nonzero separation alone cannot establish a grasp; an almost empty\nclosure or an object staying behind during lift is evidence to reassess/re-align.\nUse measured EEF displacement instead of summing nominal deltas as actual motion.\nDo not claim a grasp or continue transport merely because you commanded close.\n\nExecution uses a feedback boundary: only the prefix before the first gripper\nopen/close reversal or switch between arm motion and gripper-only commands runs.\nThe remaining suffix is discarded. You receive a fresh observation and choose\nagain. Prefer one phase per response. No automatic grasp or recovery is executed.\n\nGeometry contract (camera_geometry.control_frame):\nThe controlled point is the Panda grip_site near the fingerpads, NOT the mounting\nflange. R_world_from_control maps site-local vectors into world coordinates.\nThe adapter corrects the legacy hand-body quaternion to the controller site frame;\nlegacy_hand_quaternion_xyzw is retained only for audit, not the action reference.\n\nGripper geometry (camera_geometry.robot_gripper_geometry):\npoints_control_frame_m and points_world_m give the SAME robot geom centres in two\nframes. p_world = eef_position_world_m + R_world_from_control * p_control.\nThe pads oppose along site-local X; site-local +Z extends toward the fingertips.\nUse the measured pad_midpoint, jaw_axis_world_left_to_right and matching pixels_uv\nto align with the visible grasp region. Do not add a flange-length offset to the\ngrip_site position. Joint separation, pad-centre distance and inner-face clearance\nare different quantities; these fields do not detect contacts or a successful grasp.\n\nCamera geometry (camera_geometry.cameras):\nK uses pixels of each individual upright image, not a side-by-side replay mosaic.\nFor a world point p, optical coordinates are R^T*(p-t), using R,t from\nT_world_from_camera. With optical Z>0: u=fx*X/Z+cx, v=fy*Y/Z+cy.\nposition_control_frame_m, R_control_from_camera_optical and view_direction_world\ndescribe the actual camera mounting/view; do not assume the wrist image centre is\nthe grasp point or import another robot's camera tilt. Use each historical image's\nown calibration. A pixel gives a ray, not depth; compare both views and observed\nmotion. Pixel references outside the image are off-screen; null is behind the camera.\nChoose corrections only in the existing 7D world-delta format, then check the new\nobservation. Geometry references are not object locations or absolute action targets.\n",
+  "max_output_tokens": 16384,
+  "max_tool_calls": null,
+  "model": "gpt-6.1-sol",
+  "moderation": null,
+  "output": [
+    {
+      "id": "rs_046e9331eb4b4c28016ae883fce6bc87d28525f611c9a9ffe8",
+      "type": "reasoning",
+      "content": [],
+      "encrypted_content": "gAAAAABq6IQVKlTn3f4ECatjEDk2NdjQTl7U9UA5bGSMEZSBzvuAxj_RgrrwLjFKb2vDiqm87EaWjpRrWdmRJ9C1VrVPCuXW-LmmSIecrt-N0oAqwhuszAHEn6qg9GvwshIkdL5BBSepJ3e6lmPMV7SKonfd8UfriyVk96Y3OdsIfORJ_4QS_OhC-KSZpUZmkl6AEN3avfJT2Qc5wTk_M_YOdpgv-2GZQ6ij9-jZlr3BZCg7A0S7cGYiXaMvRBEgwNgviSUq3IU-139n1Wrvb54UVGhZR4vMt7nI2nT812Mh6BdyD_UTo_4pNvWMZZP-S6XlLPQXt46X_71h5z7OvTeXcTNqHOyNfsX1xdwpRdjqI1Myn2jtluC06XvIu3lr3vDlyCaI-uKtYVHVYKtleIkcqJEluYgELFZJvMF8nmhtA_G6IihQxCCnY7ITudG-QPJZtDReChrluR-wodQ2-VFrfC3BCsBfePIikLswag5ndHt4gXRac7Aqtfjn9YH2LuSeOyltwcEwzthVI30-3_YvIpBwm4pdqYSu8xFG3kpsbhFLCmPYE3qr7ULNuDc6hnZAheXGSRe27BHdaHqOsy2jor_9KWkSNbhONCFPZTaX8CbuYfxtK6DJoSLM1I_Y8x5zBWqSiNaxVf7ZtztzOAp2-q2W5UYJF35UtXL6bJeT7w8ydlphLMas_Q-R3vOYQX7PNPF51rE08ZSAfqXxT-JR1_HqtBwJT7jSA9gxdJOG5qL8d_SvFbklw0TrJkbUwf6dt5epI25IaQSHsms2GfGBjvmO_5Z9mX0U-3bihAbE09bVJ3gzdCwbWxySFbrz1wYxcq9ss9sBdxH2Z_DkVTgub3jUkJrC9QV-GaYttp2vir8yWwkaZpItgW4nNPSMaTarsoV6FpRJjjDIm6tWI05urbRFv1q_zcetQUa0SjBWsjDiqQ1a8vgbeyOrznw5gPzWO6imT66l-f3KSU0vchY6jE3Xg-SP_-pnkyn7kV-MqcaGR5X0cqhb-mR46Q418kNbKxGgBzHdwpv5JRi8tdH5XCaUd2QfteCatfzN_LdXSbyV3KtTMW967q8_0fMdkG4QxRq5CiVAxe9vlO4bRSqW2toQ3ynGxEH5jHI3JlW6sOzWT3lPSlO9YPWO5YDjVEVcWdZXQWDlrvNarZTF6E9LGJqeGCsv7ei_slxAURixmTmBUkgUblBU3N9kOK4W0ZexWn_5n9HE6hmIFDLtIr2a5zP55RoJHUwzV0n9THhA0HNWushVM602bwrH-WnTvKiEy1ZmqsCQfPd8VnLmGl_0ipxBYSKuTju4zwoL93zb7qRdDw8HCnMGP-tse9ZgHxmG-YvpDHBpWiz-Dakd0rL3u0_6SgKOjmuFRqUlVzD94_F82vf0CPVc5GXC_ORFD5LxgkMjfIdwbhkYVpBRxatO6r0-wOAwSPCOoeJEavwIcaVFTAxhJerc6OwO43mf1AJzLGva4fy-lcct77PYWyUImvcfWZuTJVJYUxJ2jv68b2Lc52ivddh_h7VdopoR2YP44RwwvnikmqnpuvwoZ90XoeG2UelbB3E0Tl9lVw-m3Ufc72zdqKsBJMndfjh7qALgb2TbN3Nb5d3fMq3-mseaQ8jpOZsa093CBGup_RiCtt1edVG-DXtFBejQwXjqD5yu-7LWcZSJ46dpdavJ0lbeA4ricRNcDYntR44FWcrHJmMJRlny4El5t40GH2qRzVR4ONeBemoqSkip5XJSGWosvGH_N1sNzH72Bi7BE3LaoXZfuoEjUOKT1HSP7vUFQSWQuS4drllMhWKU82ACz0rvpjhmzBnrKSp-l3YhsTnvKG4vstrpMIxUtiJ-kng3TPeKCI5Ducw_VT0cU86kecWBeINajDjLnbUZfGr94_A35YkgCDs-7DjvTJIdHCUQwvUs6tb6NgL2vFeutLzY5iG8vmLqmVxiquaRqjaAvxvFlBgXhB_sXoFZfJN5wgB2rHBav7_KrBncpUISk_vcIwl5yNttlgfhwOJzA1XQ55n77Tcm9Ji5sVNIdY5enOzqgexsd70yXCQzZZTMLZSgIUaS9TWwfGPx3mdCwXfVn7eX289uEuyvLU9EziOpX8B_6J0cmRRx0xGl892pPa-aesuf1LTcovVBi6ERL5p7nTygGTRgpvfL9l_jGKirQgkE3pRRqTRrSSb_AuZ6R1DPaaMiVmYI1BBXt1QoF1dY8Jmxv9ZzRvwGWk-fqCcaaaxEZOrfcfIzjElga3O7JfyzfThyWZRJ82_Q7R1E_WagES61ydKJxZM9ulIHOV4g2z_Cz1moIUheGKTqiJP7rzE0gjOW51rms4iyCtzgt113GQeMEDCzjMAWqfjPAWXmeDAPXzpyQav4PfIEwHhF_DyMkY7dTyYDKG8gY9TZpLDzjK2xIfjZHoOdjDcL_qCrySRMfMTXcnvRc1jba2KESpPe8kyvc_8hW4HBVygzfYKR8ABwUOcTqRTENUmd7qGyr8IocXfEiGAe8BWQKPqdOBm9_JmpC2lOrZ5L5_8k0Eeb1v5K7_fkhU-9aDvaW9zPqN5NW0JCXGuir1zF8dKJOYVJTq96VXkAquWFQ2Sy8Q-R25yIE6HM4b0pnuSCEPLUBNWw-vTqcMZGmFS8LiTTqYgNX8UhQIUZjN0ummcQoZEomt6SVMF05fDe6k8KQSd0ca40CFLhLXp13tZ8VxUw2T2DveLA8fVp1Uoqp5Zj5wyKIHzf8MogMyYo9uTvG8ZmaSlFouQNaNAF4Iy0bZENQQKZmsaQ2-Y7KTBiROjnC4mhRs3gsZwNhFceQVAH5eWu9iVWkYqGVdQx2R8JvB43v-pTyxSiiAxJHNRkLSZMDQCm98EZ4Iki9W2YQT2e1ZyYpnhXdAqSl4hKjgyKC2DzDZmR_cgXZ-3Og3FnQI11vaE_VKZTgTw49HmnAcqtxv9yRKqADWaW1UkslRojaLFJ8l2Mof4-_maxPS2R7elwyjttWvcaLdiqkBRhQvjY4eu_W83sv4eeTXZlX46q9eGoidqAEU6yNlY6W_BpiITZGBqrRYnn0u5x1p4rtIO80Di16TwW2kqRD8jfg3qSnuanL_m3Zs1_onhXRZC-yPSKSUppaxn2DFGP7HyxBCWbW2IbwwwLG7X7BqvmIJLjt1m8EJU2ptX4d-bwAp5H3r8KH6Gh2bTxx5rcxFGwsDekSKi1IEkmlfgoy04I64-2TQy9s7w14MkjEPoqJG3qsmw1UNUFgfdu-m-gdCqTEvgdlhQI_Lc2KFOzJ5-VF_buSOMgHuChFBP50jSKzRELvzWz1vHa9Vw_KqFCtPUBcudzcaYAK1dC8ToOzrkF1D9zPpg0C8lSPdCvU1tRfJy8BWpXOuw2VJjk2iKQyuleupZb7oFdQxQiUW_l6uwDIuhzQKGYbHjMZYYmAEqr58YaQr2KXUCf92ex_MgR1VEYdOaf1LIEvSCu5XPMFVgGm3EJVBlaxTXKkOTULyC8Hah3XlcWu5DvcEH7Uo_BnodRcqfcYHFiywo6IUqlM8vCXgyZEP3nqSl6-OZIoLE4Hk_A8qJ__RTdWC8ft8nbfr6aYf3cHjp9A86BWuz7akJ4CJ8ooZNmJaK3EQzjaNd1SzwqwOUWdKG63NQWdxQ_9obV-S-jEeF6oOWUepfcP4feY-rA9x1AlOolyPV2ZXnQ2R6za7pjIAuS2wCFbuPxkY2jAUChm1Jql1mqNhHGKA6ZjOnoPcZxWoaw3D6K0opr8liqydtsJdeQUOGSHlaHziICAssmn3n1Y6s30bQhycb8XmaUzF2lpmQ7rx4C7Y5xiA3RZwAY_tiIDOoUm-_IQ5IUWAclDTwdcHX3i-1d2KfATlvn5lozmsQM-snpDABhZa2XsjF9EDotMH8n5yIZJP-JJJRyqNVlKfZpN4TpyHlq-bUc89-UVngfecpUjLDQNveFZZNiQc0RGzagDCUTAP-1dVrm_xw-U3pMv2N8NgJ5L0sk8hrzZY3cvbr_gT6fdUANp-o9pynOZ1xqfbGllrR_9V9zWDL2o2-cZ0dU79auhA0RYpW-vmWtQjrBnn8fUYrqrjrjj1wtJp9_0ZuJQa0kr1Eofyh73GTklRM2ONjoZT978ln7Cc6nslT1RGCOpNCu3mu8nOOblZcvb3rwJSUquZzE7Yk66VGZJdYXef2da0e3-Opa6_Ox1P5ZqvPR_GFELOL96uZ6NxfBwNOPRRTcfb-BBV1qg9uAZowLXJmi7hTx43PvmMY5cEIoFVsGDO1YfYuibjUqscJC09nGJ5zvowoL8ar6af7MUPJzNbgMkfsqPzK3G2YPLzLzdvtdFXgz72RC6uhsdljc8s4eLhx62ndkgGsgin5y1f3-3R0Hy9N7wHTwmhpK-pHRH1p_jijsLAIIwwkjHxe8kAm7hzsTlOOuHk03eMrjsew-FZ2cIQK0aCPhujsbe7lneDNGrP6Vamhzb168sQeF01JPqKPWpcwYCIvQQPfN4PtZd7xHsyBXnwh_mhoYLbHhLD5aub7d_CjyaqjIXvXqZxJ9g_1Ci8aRnlffb2SdnrCPavvF__GAGK4nbDxM9oVcqLHcYB55dyUa7qoXiWXsLirt2gtz9pgP7zmFJnuEa_dqeQOOy99rLxw051LfPECcYt37aiZdaVv7vUNUvxDwDnAG4JNxnZeHKBGsq0dSYwt-whk_Px5KpfK8nkbKuc3VOELBCvWPiSuO00z_lXerFZ4OQYFwhWCrGm28S-1Cmd2S54zBboszruENWA0knNUuinSRbf5Z7ArACR1U2f3n9wwGPg-oLdc0VII2Z2-C9ZK9sKfsUCkse0RkiyvpuybYBh6W6TNwwloWyJbah6aDmSKJtdBF3wcuBttJsPSM7_JYzvdwbAogGJ5aM3Oawy5IErptpcrl2VYSavHfJdBlVOLkp9qAjExCL9_5NXv_wEwVJOVOdu7j8sC8_ZPWaHXr9bDyMnL9gCjzfCowrSNGEUoEnH9VSvrS9F4rv1xa0qmK0_LXr7SRYEj-f4a7Ef7iGyONX_Jd-CZtTlcZLf5YC_nJPeADlj1RNRdJlYnjoLYdU9owTsL6nfkbAWFZ_HJ3m2u4lMzW02JrPAp8OOShbRN0X3fK8lt9poWEuIWYZKYakoEfnPA_LFmTvy01JwXXmmDCU4uPlkTePorzcUGRiOyfGX0omX-4dlDQX0zrgx0qK62SWoYVJ1cbNeLrQYIQHcM8F6h2bw4wzPHvh1w9ArD4fv_X_MWMJCU5yI7aKXBIQE4A43Bd4dXdHq3RWC3ZEAQ_0_WAz3buQcSrNtCmihdB3Zcv603br63wgeC8_btDy24qUIh3z7rwYPZ5hHnKdrGGNdcoSWNWl8orawobssG9DgMWBHza8b8hWaDq9fIfa89thWeGOp93qK3whbTjkp3k48_Sl8m9Hx5vsTx6wDYo9HdA0NP7bJ9A3Zkl1TB3rczlngrSasGy9eIjy_d9yj37WUjs7MqSByae8iW7L7h-Cgw7-mdkL7NwoWqoOrQ-USR9xoqXda5aULhAukCZ6WXNK0j5BRbcr7k8J6mCTcnFcsI_U-ZKE6Xlimuzp4-_Kkjq-SC1P3UUUzC5k__iD3GG9LofEU9t4deZ9RW4voL6GUC0DjVBkqS-41sxk6KhkyJ40g9VbeM_mhT6eo9Dxz6TPc4GDLEODKJBwWDW-5cRRPMX4ijIpPEl2LQhFuxJuI7VcsJjUw0Pm-dI0bw9pZgJ4t-uZJCVi8wt2dhHmxB3aOvdQXnUMPt0XCfgnz5BaI3PjwHXuLgNYKBbS8m0WKuHqX0c1t-IvlmfFKn03pznxAmKVw_FEHeX3yxWDFZ3VEYj_LecArHOlR-l2noFIxtENgnKekt3yl8MGbpbK1s3fCGrjM1XfnYe2_OTX_mZSfCC4jcuhVAg3SFNKvfa8FMnrsuVCvTI2S-ROHQercOSd4fJ4y80QRBn1-23ofFSnSSmzzh4cusi675NgPvzT7LOcXvk4OVxGQl1zMp4gMl6k24szVl6rrziuThNoniU2UY01fuDloKXbXi58lwntyQfiwYsBwN_CDfbDfGJqcOjdOiueTxBU9Va3_pTX5qnUHiQZnsnP9m4Z60cnmfqEgTxonQ4d56L23uyXgzsS4gGUXPsrd61GYoz1nsDD93YbHfLdfJyEplfGYViR_twSS6DlGgxmqpl9SKkVfN2AXneXx1WHLcw3aWRu0ZZax4ndgmq7Xdz2N1wS84Nx_Y0wcipl4KJqf46FPDMh3aRNy3kLCg1e-P364hQb0MD60CzQE_fCurbb9aktV-JgRWniK2E5Y4ccI6xfprLkbJ9A0_ln_-1C479brpZ-sVQXs_LWUN3PAPD1UtUqbRHsoU-sthH1qYa8qcMHH-mfKWXjSLES4FrX8SvkjjC68bpRSvrfdmjY5of-VLFicZOZxntk_9r_wUsv1tDIam91njQdChFrVyvCZBQvSG7bnRq0YiRxMj_skxp-8xTMvQhs3lQvsFRydUfzsLerQ-5MWiiDsiGZ5BubK_1HeoPe8ipge2XLwEqfe8_Of5Am4f1b1sEzdFLsCU5aFsi19_7BQsy_KF37WP9j_3Kh0MTm0BsNfOFPoQLGMot83vLBgpNruNT2vWy8vFzkMQWWgeAWWDeXO5vcgoOEedU0kAqiHs-zIoSzmDW7qi9gMqFQ6fH7fPvx8FtbQnW8jOlNkYztk_n0_RpcPijeZKU_hxc69BwHWduNN4reyl7fmcRYV_chcGh0XrPUDivxDzEoSZ1tLDPBCNIyfLUbw780MwyZjKanOzZnwFkqfCeh49ee9yyWpY56EqYA3d04w==",
+      "summary": []
+    },
+    {
+      "id": "rs_046e9331eb4b4c28016ae8840b605887d2a37801e59b8b9341",
+      "type": "reasoning",
+      "content": [],
+      "encrypted_content": "gAAAAABq6IQVmkPytckX3A6r-h_ybktkZFSKZO63MMUaPuiR5PGqtvWIokV9SKmW-mEH2SEBeZawOdwL0LczaOVpHsUN-WPdSUhiRmg5Q6Xqg-zm56fGg-wxzEbDPYgASb2TLte1zeMz0zfGrjU4MDhe3zzpy4npjRCwgGltmpOvlikFMnGBUmmywpZtB27Vyb772m8YL2-tI0BR2i3cU-3RfKL2OBv68weUYXRKA7WW_wy9a1Vg_NYh_c1sCxFFIrqy1smAyznzARJjzElqbLWM9kKgIuGlO9Wh2c_bgOeV0-6RRtp4D3E_ajLTVFzhDSv93ALQfD6dLOuoUgH9v42ri4-n0Jylqij4UxnMJTjWuCmCrlmQYlDfkRx1byDu4vbRA9QqK9N82Eayl4BdMCoDGosPgunmrpmeAzrJnpQZlukymAwEp2YAZRBMcX9egrLsc6hSk_QWuuZa7C9aufUtspt51u1-6ifumbHK40tuJJbRN6WYnrG7RnzP4cDIjflykY1WOsO8WKYkOkDSIMyg_sFrCIEfkvpXuJEOvZLxNcEFvzlj5g58XA603cXGysvVfi1OzJVl9pdTangpMjvnASvKTe7IWkB50sIRDl1r_-ssm1D39MYGvVD8fzreV_B0pNmaClyZPQ5tf8i79rwEsmZSjUSbFDbegqPZ4G3FTHlFfxGwijUUBVqX--06-TyIPt6k3NEAI45_YPPG78cfmdlD08GA475HuhKXR9pfU-hja_wXNpbwfvEQMb1sHXEvcmRu8N1RE0kXRJzUFUNy8PESYgwpdV864yeObID7GUgZD8qXrTtXKw_w2gUyilzRkw8kJvP3s5xLiVfR9ZfYfIwuxrEwIqXL2JsJCooYg5rAxAOQAZX7gr7gUgGBBylHSrDj-IVuzp9Ocqn2oBlMd2t85Qvnz5NWv3cxOXVGk8rR3GpGi2NTOM0pUOLzfgJ8_eMdh1aZCEfajuPXT9UIocBB5kGoTIgzm3u8BNCR1t-nNaN_ax6zNYu7otUTvUAl6Gxx5YMMxPoglw05KBzbV1cTtmUakp2p6I_KNgE0ihf9sAfXCnmwuDtlV9ZQH_c_oii8rmU8hl_uDyCc5vmVuc-ZZrrNPApT2N_OfoZrufKLuGMEohyV3aV1DZDHjxX-vq6Qs1ZJAwahIzoi_TP9BrW1PevrXcyWrKRtANB6fTdX7G4Ho_aDmAHTPDU-qQ_mJSScjUTBXiHFg7NAwhcY7c8OG3Pdvs3J_mC0lPUtKXypV4Pc_T7wYEJ1CidnSy6IIaaP_sP8Ef2-PPnJYQAwoELsCGH5rb_VOF9Oj1xqriWzTLWfWCQtvCo9l6IhbYio-UnZwPTW-RklYUbU6WuXahxtprLELWksTvjfDsmgO_kw6JbPOIIgtulaVdCWnW9jrO23vP18-Lz-tqvtg8OXfIUa7qQcdt9ACXWC7p6TCaoHModkjjZc_s63-Bt1WTKt-VU_LN6GmQuQHzJkl2UlyH-Gf12sG1EWMGkbjOnIBOqckyAM7yVJuSBv_fZMmLO84mUdZaBjcbT-cqM-xhj403_WTfQBMNjkDxyBlGvo48bLn7i3Wfz5tkOfFhML0LuLwSR9Q_0HQRomRoGGn82g1G8rp8ywRAMJZdzsWLTQrikMZMqQSmGiFqNIRRWF2NSiabO8CzEytqJkU2fhSqFly601_BjCwOCnQei_Hc60BtcOwmZ0Vr-nmzJPRvBqsAfT0d7MMJtUxsih9d42Is_AcKwCSZG_ccUXpZi8LYltZQR3pxJT3jvi9HI5L8XHWA1XvvyoB9IkU0X6RMzBhAH6gD8pZfqM5TMMAu55zfNs4V6avD_bX5gLpRf0PiahU67zFqdVHcTeBkMfhThvi-9MQceiSUYKjB67S9I7aXqDHsQ4EmF3BgBzgic57cDOVif_YK3-PIn3DcWWCuU_PWut5TYbkvVxYs_Rba4wae27pAqWHp09za5heJyaAzQk2qYove4aqev3-DsGqYAObxWJph86KLu_3qV05oqnmkDrJ1vH_Q8UgQtsh9wt8VdJVrjdPAq3hBV5BUmje_vJVZEjMfNsLviVJhrupDSbPkBbIJC8wbbt0IRWymwJzn8__B3qV4KhUWFIVSYFfl3FVNqv5q9PL-voaoVsVb0MSDWNUCKYQ-kaSrarkwg_yO_lwk0wfS7X6DhiNlzrcMzKT5pvxoXUmnKTtNMVyiTsGk-xtzY9ew0VrRddAlgXdbi1wddKhRQGKUFRjtyrj6P3e5tnSMZToeDnjYY7hNBfwLug6sVAPh088V0UoFGMCwyPkLSDXL562-fL5C6xxrWLk2ckjHs1S0qkk9V0UG3v1JjheqLFvjDq7xNBN_lfFfVRvUMTfbQlEbIoTi3ChlwOdaMsGqkjPkbiIWIGf0w9KA_gDIc6gvsNvxHLpbyojyQGeC6v7Po9VoMLTWwPsA-lvmOXbo1nmHqsAVmfbGdBXdFA2z0ocKHD6hakqi1gNRcU_ubjkWCoj7HJLrVj8ZHT3YG6YATLaFIRRK7HGDW8Xp0uc0Dzxs36XjGlbCFccOjgieCTPKpQ5Q1P_2aGMzMdxTSyu7e9ZL-lZnuvTnIVicAuHmkloeNrwMk2iQt4KIJDA1q3dLTqeM45HopjmdB893agv7dEZkVmWaWCIFjJ5c8tTlnlVIsLd06LSxD0JkDBemwzUfzY7m61PHK4cj1o8CmD_VD1vP6kiJ6cFcTLqbmh14Qa0_xopx3mbnEqm4GAJV2-VphEp2EqOXIY3ESnzV0EJGKxAgPr5YLJp5GandE_d6RJbIzhLGxzCYdZ6llQYSockqFBQkLPUuyVntBe1hKnn5VIC8JmmLwIEc1MOIvsW2j3kKPWMAq2nxq3yRNLrWfwSF36_Tef3lU9yOJRO-ZeergrdJKAN5GBTCcbNamB19pCOruU7sHv2-2sKY44XscEx-teFf6HGD-jaeBZdgEg1Zh3nrBfAFvGPFW2IbaGqxOkrSu_frIdueZqGecoElHl3BnCXVy1z7VAV0I1pulXwL4PXnzQT7GwYywsWXn-1BDb2OZiRMGe4E676JgyND3xXkQIJaDljbYLNbjzXH1kiiy4x_PCwT6iD28NyMMzSo3xexX5SvHma8g-Tf_-lHDByf-8E4ftVSgvNtRf_qK9-tn39TUOIj0-7e5L5u9OWnYEMexoGc-oxfVjgdfqLwWeQulQQpnvJ2V1ew62EGFbCYMVOLC4Efhp404elD5DcqeU8W97f_Gydf8KxA0wmMuFoFV-dklIXKHJnm2slZqqobdqVX90eEtnkYYgg-ztEY-LWiK6SqJuo6Z00ANssxFoEp0gIwc1Px1V3Iyizh9eQkF9qUWdaGzhM72N-QgndYo73ab9EPx-045tsfShNMmAQx2Sc7I2AM4oZ_WsSxT91EGHpk-jwGq2QYmFKqm8M_WI4BlUZvOxUo0XC8hSJ8ZS4mpr-TjLtzg7dcJu6Psxagz3bbpajCRDklgK9my2B6eYnsnhM1R7HS9nKLs-p3_fKPX7WY8mRlM6SZNEsNoUsGO1M9Pn0BXSIDx-bmxBIM57mxG_0p1JzN0-a1Ko3PD1XTGjs5eaYu8NLhDMUctWfrV5FUq-65MfvibOgf5K8d_r7EX98lWKGuAZsfZ6HCc8C_TfXRf_jakyujTAamTRb0-ioUz9Et4d4DPyUlfqZ1UCUiod78Wu5UUwHR7KxOsSOgam5KeqROZ_S7KnqNpLrXwPD8vBm8uwEh83CXpNK4mGOLgiLvMMS1libixUDR1nHkReuthnv9Mj9y8e2MQAz-Y3UiA_oygTTXYWEuq8PlZrHY1LRlQ-sIRUCfQBYzfODEy_F-CLrSyNigwrkwirn0P3yVa8EpanA64SaQe1GF5No8TSKhJR9V4espmLy7JW8xObr2cpQIWzaVUQ_BrHsiHCoBfAnBJ4oXWe7Sxnlopwrok93FrUAuaZp0Wf6pt5tSZXQKCf9jVj3Maiztjf7F4c5g5VYKrS5vgkPZv-gIFwiuGsnL7EJLZ0FXY22852kXjF9Vo9Br2YBgGyFaCv2RW2T3C2OYnyoiiAEHWRPC1WYCH23akFb52fdG0i3ge4zMgVTxnn3zl_OrhDv62bQD-aCz6Nd6nEVLB4vbgNPXurNi6N0lD_xKSxRLQlLhQdR6FO7Yofzs5pmW0Ee8-pI3TM2hAcxAiSkfZJ0jxcf8KkPd_SRtpUQSnHpbYOhbP2DUB55qG79hZGfdUH9TxRij0rkxWSIJATbji9kGzBkb50MuQlHeJtUCuoQP0IvYUQDCiYaZLcC2r-EIDxSS-c2fO-vQqfkukR2JKWiqg4YDpBgDOq94D3uTpGBNdFrL5C6sKCInrNvjioItDGGZlXGF2EgKZezQHMyzGzWebnVVWUqKXVtMHCOK9KEyeqSOnCZSqSKUmuMBRa6yKRmdXdU0SfSDmr60lsQpLUULrz6U3Vuy-jwoLiat0Hvw32v8KW6eSosHYzFtmTEzPhKeLc9JA1tGUDudcoV3Nu_GNOQhd4GNaQIMT8k6ch4Fg_dUI8Tcvm7g6yE9bUjS9jY_lP1Q85umTXhPUvFiv9ANdqdgb30kMtWuK2lvG0jFQd-cXQdNHIhNDJ0Do8T-Zlt6JEIKz52SAviLHof9Mxo3uNihh1A9NvKaOGxOpQXxz5-ri8Ho_nWK1wHS8fPDVbHWJRd2ofpH6NGZ4ZxQ9OfZo0CGb87DoRZQMS8-_sasWzjn7BpfEQuFvfGHFLgKfCQmt4nFGhvOdYYElA_edNl12sO2EG5pV78Bmgo4lznc2XDgBrRVNdjFW-2LC5cQD4IbDWQefxBUkTug89V_pkyT6qILjFPTjtMQQ0qqxk4jWqk8zRg79XNT0t_qGaEMMIT1j79p21MdDROD3FDGdxPrCVJR36wXXSxeyqdUASVHkKdMj9rvDkrr46EAOlHxo0aM2tbrt-M3mw14N-0K0kqRuVp3RSEBuTto76vyomZE7JPXqwELqDzDHhq7p4RToGAjCJadJzrzcOXzXqdkK_E0hXZMFjWi6_xFgJNSQ78Oh2jz2-kI3hbtestbmP8qN_L0e5P9mj-Vcgrc7BmdCqcMaMP28bxRvu8InqPy3GN4cFjahs_DSn7CngSHhYOTcOyCHAQ15HB1CR1bzhy5V3i6Y23sJhVwRWj1LCtaZAwLILZ4VUtRkMl0-HK1lvGlRnw8zvCo-obyg_64CggPEOqGFFa5PTY67SXBccBiG4U0E1Cq_2QIyIUPzKjEzAYxJSCSDyYKpZ6HqJRvXbDjzsvOhOuM2RfR8qCU0-SAsgv5KTOwlkhlVdqjMhNOT1e9hVq3mMNyf7r0DdDJqtTuYiwCYoa5Lut_67-tDRY1FE9MH_nik7YwChoMhkZ9zUdCw1uwCOhNMbQEYmbssabnDkSXUEstLyCg_x-r2QiV_5JjfcORBq3oIOvPytN2HcVLRAgs41NITPhBFrhGyYyFu1ASH0Teu8I4nNKe8=",
+      "summary": []
+    },
+    {
+      "id": "msg_046e9331eb4b4c28016ae88415020087d28b7be0a4d8c3ad6f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "{\"actions\":[[0.8,-0.35,0,0,0,0,0],[0.8,-0.35,0,0,0,0,0],[0.8,-0.35,0,0,0,0,0],[0.8,-0.35,0,0,0,0,0],[0.8,-0.35,0,0,0,0,0],[0.8,-0.35,0,0,0,0,0]]}"
+        }
+      ],
+      "phase": "final_answer",
+      "role": "assistant"
+    }
+  ],
+  "parallel_tool_calls": true,
+  "presence_penalty": 0.0,
+  "previous_response_id": null,
+  "prompt_cache_key": null,
+  "prompt_cache_options": {
+    "mode": "implicit",
+    "ttl": "30m"
+  },
+  "prompt_cache_retention": "24h",
+  "reasoning": {
+    "context": "all_turns",
+    "effort": "medium",
+    "mode": "standard",
+    "summary": null
+  },
+  "safety_identifier": null,
+  "service_tier": "default",
+  "store": false,
+  "temperature": 1.0,
+  "text": {
+    "format": {
+      "type": "json_object"
+    },
+    "verbosity": "medium"
+  },
+  "tool_choice": "auto",
+  "tool_usage": {
+    "image_gen": {
+      "input_tokens": 0,
+      "input_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "output_tokens": 0,
+      "output_tokens_details": {
+        "image_tokens": 0,
+        "text_tokens": 0
+      },
+      "total_tokens": 0
+    },
+    "web_search": {
+      "num_requests": 0
+    }
+  },
+  "tools": [],
+  "top_logprobs": 0,
+  "top_p": 0.98,
+  "truncation": "disabled",
+  "usage": {
+    "input_tokens": 9441,
+    "input_tokens_details": {
+      "cache_write_tokens": 8208,
+      "cache_write_tokens_details": {
+        "ttl_12h_tokens": 0,
+        "ttl_30m_tokens": 8208
+      },
+      "cached_tokens": 1230
+    },
+    "output_tokens": 1031,
+    "output_tokens_details": {
+      "reasoning_tokens": 909
+    },
+    "total_tokens": 10472
+  },
+  "user": null,
+  "metadata": {}
+}

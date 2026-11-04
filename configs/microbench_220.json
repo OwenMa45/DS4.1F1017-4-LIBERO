@@ -1,0 +1,18 @@
+{
+  "protocol_version": "ds-libero-direct-v2",
+  "api_provider": "external",
+  "evaluation_scope": "diagnostic",
+  "model": "external-policy",
+  "expected_release": "user-supplied",
+  "endpoint": "",
+  "reasoning_effort": "none",
+  "max_tokens": null,
+  "max_retries": 0,
+  "max_steps": 220,
+  "action_horizon": 8,
+  "visual_history": 2,
+  "camera_geometry": true,
+  "grasp_feedback": true,
+  "gripper_feedback_barrier": true,
+  "geometry_contract": true
+}

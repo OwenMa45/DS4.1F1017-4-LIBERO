@@ -1,0 +1,1480 @@
+[robosuite WARNING] No private macro file found! (macros.py:53)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:54)
+[robosuite WARNING] To setup, run: python /mnt/cpfs/users/mrq/libero_cpu/.venv/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (macros.py:55)
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/mnt/cpfs/users/mrq/libero_cpu/LIBERO/libero/libero/benchmark/__init__.py:164: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  init_states = torch.load(init_states_path)
+Task: pick up the book and place it in the back compartment of the caddy
+Artifacts: /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO/outputs/five-tasks-geometry8-1024-001/runs/episode-0004/episode
+API step=0 attempt=1 retry=0 waiting (timeout=1800s)
+API attempt=1 elapsed=74.179s status=200 finish=stop total_tokens=18521
+step=1/1024 decision=1 success=False
+step=2/1024 decision=1 success=False
+step=3/1024 decision=1 success=False
+step=4/1024 decision=1 success=False
+step=5/1024 decision=1 success=False
+step=6/1024 decision=1 success=False
+API step=6 attempt=2 retry=0 waiting (timeout=1800s)
+API attempt=2 elapsed=158.142s status=200 finish=stop total_tokens=42898
+step=7/1024 decision=2 success=False
+step=8/1024 decision=2 success=False
+step=9/1024 decision=2 success=False
+step=10/1024 decision=2 success=False
+step=11/1024 decision=2 success=False
+step=12/1024 decision=2 success=False
+step=13/1024 decision=2 success=False
+step=14/1024 decision=2 success=False
+API step=14 attempt=3 retry=0 waiting (timeout=1800s)
+API attempt=3 elapsed=196.842s status=200 finish=stop total_tokens=50933
+step=15/1024 decision=3 success=False
+step=16/1024 decision=3 success=False
+step=17/1024 decision=3 success=False
+step=18/1024 decision=3 success=False
+step=19/1024 decision=3 success=False
+API step=19 attempt=4 retry=0 waiting (timeout=1800s)
+API attempt=4 elapsed=152.140s status=200 finish=stop total_tokens=41309
+step=20/1024 decision=4 success=False
+step=21/1024 decision=4 success=False
+step=22/1024 decision=4 success=False
+step=23/1024 decision=4 success=False
+step=24/1024 decision=4 success=False
+step=25/1024 decision=4 success=False
+API step=25 attempt=5 retry=0 waiting (timeout=1800s)
+API attempt=5 elapsed=96.080s status=200 finish=stop total_tokens=27797
+step=26/1024 decision=5 success=False
+step=27/1024 decision=5 success=False
+step=28/1024 decision=5 success=False
+step=29/1024 decision=5 success=False
+API step=29 attempt=6 retry=0 waiting (timeout=1800s)
+API attempt=6 elapsed=106.769s status=200 finish=stop total_tokens=29829
+step=30/1024 decision=6 success=False
+step=31/1024 decision=6 success=False
+step=32/1024 decision=6 success=False
+step=33/1024 decision=6 success=False
+API step=33 attempt=7 retry=0 waiting (timeout=1800s)
+API attempt=7 elapsed=75.997s status=200 finish=stop total_tokens=24949
+step=34/1024 decision=7 success=False
+step=35/1024 decision=7 success=False
+step=36/1024 decision=7 success=False
+step=37/1024 decision=7 success=False
+step=38/1024 decision=7 success=False
+step=39/1024 decision=7 success=False
+step=40/1024 decision=7 success=False
+step=41/1024 decision=7 success=False
+API step=41 attempt=8 retry=0 waiting (timeout=1800s)
+API attempt=8 elapsed=15.928s status=200 finish=stop total_tokens=13417
+step=42/1024 decision=8 success=False
+step=43/1024 decision=8 success=False
+step=44/1024 decision=8 success=False
+API step=44 attempt=9 retry=0 waiting (timeout=1800s)
+API attempt=9 elapsed=57.170s status=200 finish=stop total_tokens=20519
+step=45/1024 decision=9 success=False
+step=46/1024 decision=9 success=False
+step=47/1024 decision=9 success=False
+step=48/1024 decision=9 success=False
+step=49/1024 decision=9 success=False
+step=50/1024 decision=9 success=False
+API step=50 attempt=10 retry=0 waiting (timeout=1800s)
+API attempt=10 elapsed=77.099s status=200 finish=stop total_tokens=23730
+step=51/1024 decision=10 success=False
+step=52/1024 decision=10 success=False
+step=53/1024 decision=10 success=False
+step=54/1024 decision=10 success=False
+step=55/1024 decision=10 success=False
+step=56/1024 decision=10 success=False
+API step=56 attempt=11 retry=0 waiting (timeout=1800s)
+API attempt=11 elapsed=97.280s status=200 finish=stop total_tokens=28140
+step=57/1024 decision=11 success=False
+step=58/1024 decision=11 success=False
+step=59/1024 decision=11 success=False
+step=60/1024 decision=11 success=False
+step=61/1024 decision=11 success=False
+step=62/1024 decision=11 success=False
+API step=62 attempt=12 retry=0 waiting (timeout=1800s)
+API attempt=12 elapsed=174.078s status=200 finish=stop total_tokens=45283
+step=63/1024 decision=12 success=False
+step=64/1024 decision=12 success=False
+step=65/1024 decision=12 success=False
+step=66/1024 decision=12 success=False
+step=67/1024 decision=12 success=False
+step=68/1024 decision=12 success=False
+step=69/1024 decision=12 success=False
+step=70/1024 decision=12 success=False
+API step=70 attempt=13 retry=0 waiting (timeout=1800s)
+API attempt=13 elapsed=96.324s status=200 finish=stop total_tokens=28828
+step=71/1024 decision=13 success=False
+step=72/1024 decision=13 success=False
+step=73/1024 decision=13 success=False
+step=74/1024 decision=13 success=False
+step=75/1024 decision=13 success=False
+step=76/1024 decision=13 success=False
+step=77/1024 decision=13 success=False
+step=78/1024 decision=13 success=False
+API step=78 attempt=14 retry=0 waiting (timeout=1800s)
+API attempt=14 elapsed=21.064s status=200 finish=stop total_tokens=14294
+step=79/1024 decision=14 success=False
+step=80/1024 decision=14 success=False
+step=81/1024 decision=14 success=False
+API step=81 attempt=15 retry=0 waiting (timeout=1800s)
+API attempt=15 elapsed=10.918s status=200 finish=stop total_tokens=12423
+step=82/1024 decision=15 success=False
+step=83/1024 decision=15 success=False
+step=84/1024 decision=15 success=False
+step=85/1024 decision=15 success=False
+API step=85 attempt=16 retry=0 waiting (timeout=1800s)
+API attempt=16 elapsed=66.325s status=200 finish=stop total_tokens=23237
+step=86/1024 decision=16 success=False
+step=87/1024 decision=16 success=False
+step=88/1024 decision=16 success=False
+step=89/1024 decision=16 success=False
+step=90/1024 decision=16 success=False
+step=91/1024 decision=16 success=False
+step=92/1024 decision=16 success=False
+step=93/1024 decision=16 success=False
+API step=93 attempt=17 retry=0 waiting (timeout=1800s)
+API attempt=17 elapsed=82.578s status=200 finish=stop total_tokens=27000
+step=94/1024 decision=17 success=False
+step=95/1024 decision=17 success=False
+step=96/1024 decision=17 success=False
+step=97/1024 decision=17 success=False
+step=98/1024 decision=17 success=False
+step=99/1024 decision=17 success=False
+API step=99 attempt=18 retry=0 waiting (timeout=1800s)
+API attempt=18 elapsed=116.610s status=200 finish=stop total_tokens=32410
+step=100/1024 decision=18 success=False
+step=101/1024 decision=18 success=False
+step=102/1024 decision=18 success=False
+step=103/1024 decision=18 success=False
+step=104/1024 decision=18 success=False
+step=105/1024 decision=18 success=False
+step=106/1024 decision=18 success=False
+step=107/1024 decision=18 success=False
+API step=107 attempt=19 retry=0 waiting (timeout=1800s)
+API attempt=19 elapsed=52.599s status=200 finish=stop total_tokens=20237
+step=108/1024 decision=19 success=False
+step=109/1024 decision=19 success=False
+step=110/1024 decision=19 success=False
+step=111/1024 decision=19 success=False
+step=112/1024 decision=19 success=False
+step=113/1024 decision=19 success=False
+API step=113 attempt=20 retry=0 waiting (timeout=1800s)
+API attempt=20 elapsed=99.215s status=200 finish=stop total_tokens=29218
+step=114/1024 decision=20 success=False
+step=115/1024 decision=20 success=False
+step=116/1024 decision=20 success=False
+step=117/1024 decision=20 success=False
+step=118/1024 decision=20 success=False
+step=119/1024 decision=20 success=False
+step=120/1024 decision=20 success=False
+step=121/1024 decision=20 success=False
+API step=121 attempt=21 retry=0 waiting (timeout=1800s)
+API attempt=21 elapsed=52.351s status=200 finish=stop total_tokens=19937
+step=122/1024 decision=21 success=False
+step=123/1024 decision=21 success=False
+step=124/1024 decision=21 success=False
+step=125/1024 decision=21 success=False
+step=126/1024 decision=21 success=False
+API step=126 attempt=22 retry=0 waiting (timeout=1800s)
+API attempt=22 elapsed=86.255s status=200 finish=stop total_tokens=25738
+step=127/1024 decision=22 success=False
+step=128/1024 decision=22 success=False
+step=129/1024 decision=22 success=False
+step=130/1024 decision=22 success=False
+step=131/1024 decision=22 success=False
+step=132/1024 decision=22 success=False
+API step=132 attempt=23 retry=0 waiting (timeout=1800s)
+API attempt=23 elapsed=11.119s status=200 finish=stop total_tokens=12474
+step=133/1024 decision=23 success=False
+step=134/1024 decision=23 success=False
+step=135/1024 decision=23 success=False
+API step=135 attempt=24 retry=0 waiting (timeout=1800s)
+API attempt=24 elapsed=56.036s status=200 finish=stop total_tokens=20030
+step=136/1024 decision=24 success=False
+step=137/1024 decision=24 success=False
+step=138/1024 decision=24 success=False
+step=139/1024 decision=24 success=False
+step=140/1024 decision=24 success=False
+step=141/1024 decision=24 success=False
+step=142/1024 decision=24 success=False
+step=143/1024 decision=24 success=False
+API step=143 attempt=25 retry=0 waiting (timeout=1800s)
+API attempt=25 elapsed=62.062s status=200 finish=stop total_tokens=22412
+step=144/1024 decision=25 success=False
+step=145/1024 decision=25 success=False
+step=146/1024 decision=25 success=False
+step=147/1024 decision=25 success=False
+step=148/1024 decision=25 success=False
+step=149/1024 decision=25 success=False
+step=150/1024 decision=25 success=False
+step=151/1024 decision=25 success=False
+API step=151 attempt=26 retry=0 waiting (timeout=1800s)
+API attempt=26 elapsed=28.046s status=200 finish=stop total_tokens=16015
+step=152/1024 decision=26 success=False
+step=153/1024 decision=26 success=False
+step=154/1024 decision=26 success=False
+step=155/1024 decision=26 success=False
+step=156/1024 decision=26 success=False
+step=157/1024 decision=26 success=False
+API step=157 attempt=27 retry=0 waiting (timeout=1800s)
+API attempt=27 elapsed=121.955s status=200 finish=stop total_tokens=33465
+step=158/1024 decision=27 success=False
+step=159/1024 decision=27 success=False
+step=160/1024 decision=27 success=False
+step=161/1024 decision=27 success=False
+API step=161 attempt=28 retry=0 waiting (timeout=1800s)
+API attempt=28 elapsed=39.813s status=200 finish=stop total_tokens=17709
+step=162/1024 decision=28 success=False
+step=163/1024 decision=28 success=False
+step=164/1024 decision=28 success=False
+step=165/1024 decision=28 success=False
+step=166/1024 decision=28 success=False
+step=167/1024 decision=28 success=False
+step=168/1024 decision=28 success=False
+step=169/1024 decision=28 success=False
+API step=169 attempt=29 retry=0 waiting (timeout=1800s)
+API attempt=29 elapsed=11.058s status=200 finish=stop total_tokens=12590
+step=170/1024 decision=29 success=False
+API step=170 attempt=30 retry=0 waiting (timeout=1800s)
+API attempt=30 elapsed=8.079s status=200 finish=stop total_tokens=11799
+step=171/1024 decision=30 success=False
+step=172/1024 decision=30 success=False
+step=173/1024 decision=30 success=False
+API step=173 attempt=31 retry=0 waiting (timeout=1800s)
+API attempt=31 elapsed=162.108s status=200 finish=stop total_tokens=41334
+step=174/1024 decision=31 success=False
+step=175/1024 decision=31 success=False
+step=176/1024 decision=31 success=False
+step=177/1024 decision=31 success=False
+step=178/1024 decision=31 success=False
+step=179/1024 decision=31 success=False
+API step=179 attempt=32 retry=0 waiting (timeout=1800s)
+API attempt=32 elapsed=90.246s status=200 finish=stop total_tokens=27038
+step=180/1024 decision=32 success=False
+step=181/1024 decision=32 success=False
+step=182/1024 decision=32 success=False
+step=183/1024 decision=32 success=False
+step=184/1024 decision=32 success=False
+API step=184 attempt=33 retry=0 waiting (timeout=1800s)
+API attempt=33 elapsed=65.576s status=200 finish=stop total_tokens=22311
+step=185/1024 decision=33 success=False
+step=186/1024 decision=33 success=False
+step=187/1024 decision=33 success=False
+step=188/1024 decision=33 success=False
+step=189/1024 decision=33 success=False
+step=190/1024 decision=33 success=False
+API step=190 attempt=34 retry=0 waiting (timeout=1800s)
+API attempt=34 elapsed=12.905s status=200 finish=stop total_tokens=12932
+step=191/1024 decision=34 success=False
+step=192/1024 decision=34 success=False
+step=193/1024 decision=34 success=False
+step=194/1024 decision=34 success=False
+API step=194 attempt=35 retry=0 waiting (timeout=1800s)
+API attempt=35 elapsed=5.637s status=200 finish=stop total_tokens=11322
+step=195/1024 decision=35 success=False
+step=196/1024 decision=35 success=False
+step=197/1024 decision=35 success=False
+step=198/1024 decision=35 success=False
+API step=198 attempt=36 retry=0 waiting (timeout=1800s)
+API attempt=36 elapsed=135.460s status=200 finish=stop total_tokens=35639
+step=199/1024 decision=36 success=False
+step=200/1024 decision=36 success=False
+step=201/1024 decision=36 success=False
+step=202/1024 decision=36 success=False
+step=203/1024 decision=36 success=False
+step=204/1024 decision=36 success=False
+API step=204 attempt=37 retry=0 waiting (timeout=1800s)
+API attempt=37 elapsed=82.236s status=200 finish=stop total_tokens=26298
+step=205/1024 decision=37 success=False
+step=206/1024 decision=37 success=False
+step=207/1024 decision=37 success=False
+API step=207 attempt=38 retry=0 waiting (timeout=1800s)
+API attempt=38 elapsed=135.049s status=200 finish=stop total_tokens=37682
+step=208/1024 decision=38 success=False
+step=209/1024 decision=38 success=False
+step=210/1024 decision=38 success=False
+step=211/1024 decision=38 success=False
+step=212/1024 decision=38 success=False
+API step=212 attempt=39 retry=0 waiting (timeout=1800s)
+API attempt=39 elapsed=44.231s status=200 finish=stop total_tokens=19034
+step=213/1024 decision=39 success=False
+step=214/1024 decision=39 success=False
+step=215/1024 decision=39 success=False
+step=216/1024 decision=39 success=False
+API step=216 attempt=40 retry=0 waiting (timeout=1800s)
+API attempt=40 elapsed=15.004s status=200 finish=stop total_tokens=13271
+step=217/1024 decision=40 success=False
+step=218/1024 decision=40 success=False
+step=219/1024 decision=40 success=False
+step=220/1024 decision=40 success=False
+step=221/1024 decision=40 success=False
+step=222/1024 decision=40 success=False
+API step=222 attempt=41 retry=0 waiting (timeout=1800s)
+API attempt=41 elapsed=11.250s status=200 finish=stop total_tokens=12515
+step=223/1024 decision=41 success=False
+step=224/1024 decision=41 success=False
+API step=224 attempt=42 retry=0 waiting (timeout=1800s)
+API attempt=42 elapsed=4.829s status=200 finish=stop total_tokens=11112
+step=225/1024 decision=42 success=False
+step=226/1024 decision=42 success=False
+API step=226 attempt=43 retry=0 waiting (timeout=1800s)
+API attempt=43 elapsed=11.078s status=200 finish=stop total_tokens=12265
+step=227/1024 decision=43 success=False
+API step=227 attempt=44 retry=0 waiting (timeout=1800s)
+API attempt=44 elapsed=99.450s status=200 finish=stop total_tokens=30222
+step=228/1024 decision=44 success=False
+step=229/1024 decision=44 success=False
+step=230/1024 decision=44 success=False
+step=231/1024 decision=44 success=False
+step=232/1024 decision=44 success=False
+step=233/1024 decision=44 success=False
+step=234/1024 decision=44 success=False
+step=235/1024 decision=44 success=False
+API step=235 attempt=45 retry=0 waiting (timeout=1800s)
+API attempt=45 elapsed=89.740s status=200 finish=stop total_tokens=28140
+step=236/1024 decision=45 success=False
+step=237/1024 decision=45 success=False
+step=238/1024 decision=45 success=False
+API step=238 attempt=46 retry=0 waiting (timeout=1800s)
+API attempt=46 elapsed=53.609s status=200 finish=stop total_tokens=20695
+step=239/1024 decision=46 success=False
+step=240/1024 decision=46 success=False
+step=241/1024 decision=46 success=False
+step=242/1024 decision=46 success=False
+step=243/1024 decision=46 success=False
+step=244/1024 decision=46 success=False
+step=245/1024 decision=46 success=False
+step=246/1024 decision=46 success=False
+API step=246 attempt=47 retry=0 waiting (timeout=1800s)
+API attempt=47 elapsed=55.811s status=200 finish=stop total_tokens=20856
+step=247/1024 decision=47 success=False
+step=248/1024 decision=47 success=False
+step=249/1024 decision=47 success=False
+step=250/1024 decision=47 success=False
+step=251/1024 decision=47 success=False
+step=252/1024 decision=47 success=False
+API step=252 attempt=48 retry=0 waiting (timeout=1800s)
+API attempt=48 elapsed=5.960s status=200 finish=stop total_tokens=11491
+step=253/1024 decision=48 success=False
+step=254/1024 decision=48 success=False
+step=255/1024 decision=48 success=False
+step=256/1024 decision=48 success=False
+step=257/1024 decision=48 success=False
+step=258/1024 decision=48 success=False
+API step=258 attempt=49 retry=0 waiting (timeout=1800s)
+API attempt=49 elapsed=11.715s status=200 finish=stop total_tokens=12479
+step=259/1024 decision=49 success=False
+step=260/1024 decision=49 success=False
+step=261/1024 decision=49 success=False
+step=262/1024 decision=49 success=False
+API step=262 attempt=50 retry=0 waiting (timeout=1800s)
+API attempt=50 elapsed=57.309s status=200 finish=stop total_tokens=20944
+step=263/1024 decision=50 success=False
+step=264/1024 decision=50 success=False
+step=265/1024 decision=50 success=False
+API step=265 attempt=51 retry=0 waiting (timeout=1800s)
+API attempt=51 elapsed=30.679s status=200 finish=stop total_tokens=16110
+step=266/1024 decision=51 success=False
+step=267/1024 decision=51 success=False
+step=268/1024 decision=51 success=False
+step=269/1024 decision=51 success=False
+step=270/1024 decision=51 success=False
+API step=270 attempt=52 retry=0 waiting (timeout=1800s)
+API attempt=52 elapsed=121.943s status=200 finish=stop total_tokens=32723
+step=271/1024 decision=52 success=False
+step=272/1024 decision=52 success=False
+API step=272 attempt=53 retry=0 waiting (timeout=1800s)
+API attempt=53 elapsed=38.680s status=200 finish=stop total_tokens=17285
+step=273/1024 decision=53 success=False
+step=274/1024 decision=53 success=False
+step=275/1024 decision=53 success=False
+API step=275 attempt=54 retry=0 waiting (timeout=1800s)
+API attempt=54 elapsed=78.769s status=200 finish=stop total_tokens=24292
+step=276/1024 decision=54 success=False
+step=277/1024 decision=54 success=False
+step=278/1024 decision=54 success=False
+API step=278 attempt=55 retry=0 waiting (timeout=1800s)
+API attempt=55 elapsed=45.556s status=200 finish=stop total_tokens=18433
+step=279/1024 decision=55 success=False
+step=280/1024 decision=55 success=False
+step=281/1024 decision=55 success=False
+API step=281 attempt=56 retry=0 waiting (timeout=1800s)
+API attempt=56 elapsed=211.443s status=200 finish=stop total_tokens=52808
+step=282/1024 decision=56 success=False
+step=283/1024 decision=56 success=False
+step=284/1024 decision=56 success=False
+step=285/1024 decision=56 success=False
+step=286/1024 decision=56 success=False
+step=287/1024 decision=56 success=False
+step=288/1024 decision=56 success=False
+step=289/1024 decision=56 success=False
+API step=289 attempt=57 retry=0 waiting (timeout=1800s)
+API attempt=57 elapsed=49.312s status=200 finish=stop total_tokens=19297
+step=290/1024 decision=57 success=False
+step=291/1024 decision=57 success=False
+step=292/1024 decision=57 success=False
+step=293/1024 decision=57 success=False
+step=294/1024 decision=57 success=False
+step=295/1024 decision=57 success=False
+step=296/1024 decision=57 success=False
+step=297/1024 decision=57 success=False
+API step=297 attempt=58 retry=0 waiting (timeout=1800s)
+API attempt=58 elapsed=36.983s status=200 finish=stop total_tokens=17665
+step=298/1024 decision=58 success=False
+step=299/1024 decision=58 success=False
+step=300/1024 decision=58 success=False
+API step=300 attempt=59 retry=0 waiting (timeout=1800s)
+API attempt=59 elapsed=144.959s status=200 finish=stop total_tokens=39656
+step=301/1024 decision=59 success=False
+step=302/1024 decision=59 success=False
+step=303/1024 decision=59 success=False
+step=304/1024 decision=59 success=False
+step=305/1024 decision=59 success=False
+API step=305 attempt=60 retry=0 waiting (timeout=1800s)
+API attempt=60 elapsed=57.445s status=200 finish=stop total_tokens=21458
+step=306/1024 decision=60 success=False
+step=307/1024 decision=60 success=False
+step=308/1024 decision=60 success=False
+step=309/1024 decision=60 success=False
+API step=309 attempt=61 retry=0 waiting (timeout=1800s)
+API attempt=61 elapsed=57.667s status=200 finish=stop total_tokens=20637
+step=310/1024 decision=61 success=False
+step=311/1024 decision=61 success=False
+step=312/1024 decision=61 success=False
+API step=312 attempt=62 retry=0 waiting (timeout=1800s)
+API attempt=62 elapsed=50.932s status=200 finish=stop total_tokens=19659
+step=313/1024 decision=62 success=False
+step=314/1024 decision=62 success=False
+step=315/1024 decision=62 success=False
+API step=315 attempt=63 retry=0 waiting (timeout=1800s)
+API attempt=63 elapsed=127.326s status=200 finish=stop total_tokens=32683
+step=316/1024 decision=63 success=False
+step=317/1024 decision=63 success=False
+step=318/1024 decision=63 success=False
+API step=318 attempt=64 retry=0 waiting (timeout=1800s)
+API attempt=64 elapsed=68.544s status=200 finish=stop total_tokens=22588
+step=319/1024 decision=64 success=False
+step=320/1024 decision=64 success=False
+step=321/1024 decision=64 success=False
+step=322/1024 decision=64 success=False
+step=323/1024 decision=64 success=False
+step=324/1024 decision=64 success=False
+API step=324 attempt=65 retry=0 waiting (timeout=1800s)
+API attempt=65 elapsed=32.741s status=200 finish=stop total_tokens=16077
+step=325/1024 decision=65 success=False
+step=326/1024 decision=65 success=False
+step=327/1024 decision=65 success=False
+step=328/1024 decision=65 success=False
+step=329/1024 decision=65 success=False
+step=330/1024 decision=65 success=False
+API step=330 attempt=66 retry=0 waiting (timeout=1800s)
+API attempt=66 elapsed=21.480s status=200 finish=stop total_tokens=14317
+step=331/1024 decision=66 success=False
+step=332/1024 decision=66 success=False
+step=333/1024 decision=66 success=False
+API step=333 attempt=67 retry=0 waiting (timeout=1800s)
+API attempt=67 elapsed=9.314s status=200 finish=stop total_tokens=12205
+step=334/1024 decision=67 success=False
+step=335/1024 decision=67 success=False
+step=336/1024 decision=67 success=False
+step=337/1024 decision=67 success=False
+API step=337 attempt=68 retry=0 waiting (timeout=1800s)
+API attempt=68 elapsed=70.200s status=200 finish=stop total_tokens=23724
+step=338/1024 decision=68 success=False
+step=339/1024 decision=68 success=False
+step=340/1024 decision=68 success=False
+step=341/1024 decision=68 success=False
+step=342/1024 decision=68 success=False
+step=343/1024 decision=68 success=False
+step=344/1024 decision=68 success=False
+step=345/1024 decision=68 success=False
+API step=345 attempt=69 retry=0 waiting (timeout=1800s)
+API attempt=69 elapsed=192.568s status=200 finish=stop total_tokens=51637
+step=346/1024 decision=69 success=False
+step=347/1024 decision=69 success=False
+step=348/1024 decision=69 success=False
+step=349/1024 decision=69 success=False
+step=350/1024 decision=69 success=False
+step=351/1024 decision=69 success=False
+step=352/1024 decision=69 success=False
+step=353/1024 decision=69 success=False
+API step=353 attempt=70 retry=0 waiting (timeout=1800s)
+API attempt=70 elapsed=11.059s status=200 finish=stop total_tokens=12698
+step=354/1024 decision=70 success=False
+step=355/1024 decision=70 success=False
+step=356/1024 decision=70 success=False
+step=357/1024 decision=70 success=False
+step=358/1024 decision=70 success=False
+step=359/1024 decision=70 success=False
+step=360/1024 decision=70 success=False
+step=361/1024 decision=70 success=False
+API step=361 attempt=71 retry=0 waiting (timeout=1800s)
+API attempt=71 elapsed=6.550s status=200 finish=stop total_tokens=11732
+step=362/1024 decision=71 success=False
+step=363/1024 decision=71 success=False
+step=364/1024 decision=71 success=False
+step=365/1024 decision=71 success=False
+API step=365 attempt=72 retry=0 waiting (timeout=1800s)
+API attempt=72 elapsed=89.956s status=200 finish=stop total_tokens=26831
+step=366/1024 decision=72 success=False
+step=367/1024 decision=72 success=False
+step=368/1024 decision=72 success=False
+step=369/1024 decision=72 success=False
+API step=369 attempt=73 retry=0 waiting (timeout=1800s)
+API attempt=73 elapsed=94.217s status=200 finish=stop total_tokens=27865
+step=370/1024 decision=73 success=False
+step=371/1024 decision=73 success=False
+step=372/1024 decision=73 success=False
+step=373/1024 decision=73 success=False
+API step=373 attempt=74 retry=0 waiting (timeout=1800s)
+API attempt=74 elapsed=184.974s status=200 finish=stop total_tokens=44071
+step=374/1024 decision=74 success=False
+step=375/1024 decision=74 success=False
+step=376/1024 decision=74 success=False
+step=377/1024 decision=74 success=False
+step=378/1024 decision=74 success=False
+step=379/1024 decision=74 success=False
+step=380/1024 decision=74 success=False
+step=381/1024 decision=74 success=False
+API step=381 attempt=75 retry=0 waiting (timeout=1800s)
+API attempt=75 elapsed=14.601s status=200 finish=stop total_tokens=13206
+step=382/1024 decision=75 success=False
+step=383/1024 decision=75 success=False
+step=384/1024 decision=75 success=False
+step=385/1024 decision=75 success=False
+step=386/1024 decision=75 success=False
+step=387/1024 decision=75 success=False
+API step=387 attempt=76 retry=0 waiting (timeout=1800s)
+API attempt=76 elapsed=5.907s status=200 finish=stop total_tokens=11479
+step=388/1024 decision=76 success=False
+step=389/1024 decision=76 success=False
+step=390/1024 decision=76 success=False
+API step=390 attempt=77 retry=0 waiting (timeout=1800s)
+API attempt=77 elapsed=57.588s status=200 finish=stop total_tokens=20811
+step=391/1024 decision=77 success=False
+step=392/1024 decision=77 success=False
+step=393/1024 decision=77 success=False
+API step=393 attempt=78 retry=0 waiting (timeout=1800s)
+API attempt=78 elapsed=62.632s status=200 finish=stop total_tokens=21424
+step=394/1024 decision=78 success=False
+step=395/1024 decision=78 success=False
+step=396/1024 decision=78 success=False
+API step=396 attempt=79 retry=0 waiting (timeout=1800s)
+API attempt=79 elapsed=55.433s status=200 finish=stop total_tokens=20225
+step=397/1024 decision=79 success=False
+step=398/1024 decision=79 success=False
+step=399/1024 decision=79 success=False
+API step=399 attempt=80 retry=0 waiting (timeout=1800s)
+API attempt=80 elapsed=67.580s status=200 finish=stop total_tokens=22649
+step=400/1024 decision=80 success=False
+step=401/1024 decision=80 success=False
+step=402/1024 decision=80 success=False
+step=403/1024 decision=80 success=False
+API step=403 attempt=81 retry=0 waiting (timeout=1800s)
+API attempt=81 elapsed=53.664s status=200 finish=stop total_tokens=19884
+step=404/1024 decision=81 success=False
+step=405/1024 decision=81 success=False
+API step=405 attempt=82 retry=0 waiting (timeout=1800s)
+API attempt=82 elapsed=98.831s status=200 finish=stop total_tokens=29527
+step=406/1024 decision=82 success=False
+step=407/1024 decision=82 success=False
+step=408/1024 decision=82 success=False
+step=409/1024 decision=82 success=False
+step=410/1024 decision=82 success=False
+step=411/1024 decision=82 success=False
+API step=411 attempt=83 retry=0 waiting (timeout=1800s)
+API attempt=83 elapsed=9.884s status=200 finish=stop total_tokens=12271
+step=412/1024 decision=83 success=False
+step=413/1024 decision=83 success=False
+step=414/1024 decision=83 success=False
+API step=414 attempt=84 retry=0 waiting (timeout=1800s)
+API attempt=84 elapsed=140.377s status=200 finish=stop total_tokens=36002
+step=415/1024 decision=84 success=False
+step=416/1024 decision=84 success=False
+step=417/1024 decision=84 success=False
+step=418/1024 decision=84 success=False
+API step=418 attempt=85 retry=0 waiting (timeout=1800s)
+API attempt=85 elapsed=144.442s status=200 finish=stop total_tokens=39670
+step=419/1024 decision=85 success=False
+step=420/1024 decision=85 success=False
+step=421/1024 decision=85 success=False
+step=422/1024 decision=85 success=False
+step=423/1024 decision=85 success=False
+step=424/1024 decision=85 success=False
+step=425/1024 decision=85 success=False
+step=426/1024 decision=85 success=False
+API step=426 attempt=86 retry=0 waiting (timeout=1800s)
+API attempt=86 elapsed=121.908s status=200 finish=stop total_tokens=33082
+step=427/1024 decision=86 success=False
+step=428/1024 decision=86 success=False
+step=429/1024 decision=86 success=False
+step=430/1024 decision=86 success=False
+step=431/1024 decision=86 success=False
+step=432/1024 decision=86 success=False
+step=433/1024 decision=86 success=False
+step=434/1024 decision=86 success=False
+API step=434 attempt=87 retry=0 waiting (timeout=1800s)
+API attempt=87 elapsed=109.529s status=200 finish=stop total_tokens=31548
+step=435/1024 decision=87 success=False
+step=436/1024 decision=87 success=False
+step=437/1024 decision=87 success=False
+step=438/1024 decision=87 success=False
+API step=438 attempt=88 retry=0 waiting (timeout=1800s)
+API attempt=88 elapsed=91.915s status=200 finish=stop total_tokens=28740
+step=439/1024 decision=88 success=False
+step=440/1024 decision=88 success=False
+step=441/1024 decision=88 success=False
+step=442/1024 decision=88 success=False
+step=443/1024 decision=88 success=False
+step=444/1024 decision=88 success=False
+step=445/1024 decision=88 success=False
+step=446/1024 decision=88 success=False
+API step=446 attempt=89 retry=0 waiting (timeout=1800s)
+API attempt=89 elapsed=78.540s status=200 finish=stop total_tokens=24883
+step=447/1024 decision=89 success=False
+step=448/1024 decision=89 success=False
+step=449/1024 decision=89 success=False
+API step=449 attempt=90 retry=0 waiting (timeout=1800s)
+API attempt=90 elapsed=132.728s status=200 finish=stop total_tokens=33657
+step=450/1024 decision=90 success=False
+step=451/1024 decision=90 success=False
+step=452/1024 decision=90 success=False
+API step=452 attempt=91 retry=0 waiting (timeout=1800s)
+API attempt=91 elapsed=98.775s status=200 finish=stop total_tokens=28379
+step=453/1024 decision=91 success=False
+step=454/1024 decision=91 success=False
+step=455/1024 decision=91 success=False
+API step=455 attempt=92 retry=0 waiting (timeout=1800s)
+API attempt=92 elapsed=73.399s status=200 finish=stop total_tokens=22581
+step=456/1024 decision=92 success=False
+step=457/1024 decision=92 success=False
+step=458/1024 decision=92 success=False
+step=459/1024 decision=92 success=False
+step=460/1024 decision=92 success=False
+API step=460 attempt=93 retry=0 waiting (timeout=1800s)
+API attempt=93 elapsed=37.648s status=200 finish=stop total_tokens=17341
+step=461/1024 decision=93 success=False
+step=462/1024 decision=93 success=False
+step=463/1024 decision=93 success=False
+API step=463 attempt=94 retry=0 waiting (timeout=1800s)
+API attempt=94 elapsed=58.163s status=200 finish=stop total_tokens=21197
+step=464/1024 decision=94 success=False
+step=465/1024 decision=94 success=False
+step=466/1024 decision=94 success=False
+step=467/1024 decision=94 success=False
+API step=467 attempt=95 retry=0 waiting (timeout=1800s)
+API attempt=95 elapsed=174.539s status=200 finish=stop total_tokens=43173
+step=468/1024 decision=95 success=False
+step=469/1024 decision=95 success=False
+step=470/1024 decision=95 success=False
+step=471/1024 decision=95 success=False
+step=472/1024 decision=95 success=False
+step=473/1024 decision=95 success=False
+step=474/1024 decision=95 success=False
+step=475/1024 decision=95 success=False
+API step=475 attempt=96 retry=0 waiting (timeout=1800s)
+API attempt=96 elapsed=207.277s status=200 finish=stop total_tokens=51291
+step=476/1024 decision=96 success=False
+step=477/1024 decision=96 success=False
+step=478/1024 decision=96 success=False
+step=479/1024 decision=96 success=False
+step=480/1024 decision=96 success=False
+step=481/1024 decision=96 success=False
+step=482/1024 decision=96 success=False
+step=483/1024 decision=96 success=False
+API step=483 attempt=97 retry=0 waiting (timeout=1800s)
+API attempt=97 elapsed=59.656s status=200 finish=stop total_tokens=21318
+step=484/1024 decision=97 success=False
+step=485/1024 decision=97 success=False
+API step=485 attempt=98 retry=0 waiting (timeout=1800s)
+API attempt=98 elapsed=70.259s status=200 finish=stop total_tokens=23357
+step=486/1024 decision=98 success=False
+step=487/1024 decision=98 success=False
+API step=487 attempt=99 retry=0 waiting (timeout=1800s)
+API attempt=99 elapsed=128.798s status=200 finish=stop total_tokens=34848
+step=488/1024 decision=99 success=False
+step=489/1024 decision=99 success=False
+step=490/1024 decision=99 success=False
+step=491/1024 decision=99 success=False
+API step=491 attempt=100 retry=0 waiting (timeout=1800s)
+API attempt=100 elapsed=30.947s status=200 finish=stop total_tokens=16173
+step=492/1024 decision=100 success=False
+step=493/1024 decision=100 success=False
+step=494/1024 decision=100 success=False
+step=495/1024 decision=100 success=False
+API step=495 attempt=101 retry=0 waiting (timeout=1800s)
+API attempt=101 elapsed=49.375s status=200 finish=stop total_tokens=19473
+step=496/1024 decision=101 success=False
+step=497/1024 decision=101 success=False
+step=498/1024 decision=101 success=False
+API step=498 attempt=102 retry=0 waiting (timeout=1800s)
+API attempt=102 elapsed=104.886s status=200 finish=stop total_tokens=30226
+step=499/1024 decision=102 success=False
+step=500/1024 decision=102 success=False
+step=501/1024 decision=102 success=False
+step=502/1024 decision=102 success=False
+step=503/1024 decision=102 success=False
+step=504/1024 decision=102 success=False
+API step=504 attempt=103 retry=0 waiting (timeout=1800s)
+API attempt=103 elapsed=44.300s status=200 finish=stop total_tokens=17752
+step=505/1024 decision=103 success=False
+step=506/1024 decision=103 success=False
+step=507/1024 decision=103 success=False
+step=508/1024 decision=103 success=False
+step=509/1024 decision=103 success=False
+step=510/1024 decision=103 success=False
+step=511/1024 decision=103 success=False
+step=512/1024 decision=103 success=False
+API step=512 attempt=104 retry=0 waiting (timeout=1800s)
+API attempt=104 elapsed=5.740s status=200 finish=stop total_tokens=11609
+step=513/1024 decision=104 success=False
+step=514/1024 decision=104 success=False
+step=515/1024 decision=104 success=False
+API step=515 attempt=105 retry=0 waiting (timeout=1800s)
+API attempt=105 elapsed=17.775s status=200 finish=stop total_tokens=13600
+step=516/1024 decision=105 success=False
+step=517/1024 decision=105 success=False
+step=518/1024 decision=105 success=False
+step=519/1024 decision=105 success=False
+API step=519 attempt=106 retry=0 waiting (timeout=1800s)
+API attempt=106 elapsed=135.605s status=200 finish=stop total_tokens=35711
+step=520/1024 decision=106 success=False
+step=521/1024 decision=106 success=False
+step=522/1024 decision=106 success=False
+step=523/1024 decision=106 success=False
+step=524/1024 decision=106 success=False
+step=525/1024 decision=106 success=False
+step=526/1024 decision=106 success=False
+step=527/1024 decision=106 success=False
+API step=527 attempt=107 retry=0 waiting (timeout=1800s)
+API attempt=107 elapsed=70.721s status=200 finish=stop total_tokens=24181
+step=528/1024 decision=107 success=False
+step=529/1024 decision=107 success=False
+step=530/1024 decision=107 success=False
+step=531/1024 decision=107 success=False
+step=532/1024 decision=107 success=False
+API step=532 attempt=108 retry=0 waiting (timeout=1800s)
+API attempt=108 elapsed=56.588s status=200 finish=stop total_tokens=20903
+step=533/1024 decision=108 success=False
+step=534/1024 decision=108 success=False
+step=535/1024 decision=108 success=False
+step=536/1024 decision=108 success=False
+API step=536 attempt=109 retry=0 waiting (timeout=1800s)
+API attempt=109 elapsed=106.419s status=200 finish=stop total_tokens=31276
+step=537/1024 decision=109 success=False
+step=538/1024 decision=109 success=False
+step=539/1024 decision=109 success=False
+step=540/1024 decision=109 success=False
+API step=540 attempt=110 retry=0 waiting (timeout=1800s)
+API attempt=110 elapsed=16.225s status=200 finish=stop total_tokens=13189
+step=541/1024 decision=110 success=False
+step=542/1024 decision=110 success=False
+step=543/1024 decision=110 success=False
+step=544/1024 decision=110 success=False
+step=545/1024 decision=110 success=False
+API step=545 attempt=111 retry=0 waiting (timeout=1800s)
+API attempt=111 elapsed=11.359s status=200 finish=stop total_tokens=12290
+step=546/1024 decision=111 success=False
+step=547/1024 decision=111 success=False
+step=548/1024 decision=111 success=False
+step=549/1024 decision=111 success=False
+API step=549 attempt=112 retry=0 waiting (timeout=1800s)
+API attempt=112 elapsed=32.673s status=200 finish=stop total_tokens=16051
+step=550/1024 decision=112 success=False
+step=551/1024 decision=112 success=False
+step=552/1024 decision=112 success=False
+step=553/1024 decision=112 success=False
+API step=553 attempt=113 retry=0 waiting (timeout=1800s)
+API attempt=113 elapsed=29.036s status=200 finish=stop total_tokens=15693
+step=554/1024 decision=113 success=False
+step=555/1024 decision=113 success=False
+API step=555 attempt=114 retry=0 waiting (timeout=1800s)
+API attempt=114 elapsed=272.985s status=200 finish=stop total_tokens=61558
+step=556/1024 decision=114 success=False
+step=557/1024 decision=114 success=False
+step=558/1024 decision=114 success=False
+step=559/1024 decision=114 success=False
+step=560/1024 decision=114 success=False
+step=561/1024 decision=114 success=False
+step=562/1024 decision=114 success=False
+step=563/1024 decision=114 success=False
+API step=563 attempt=115 retry=0 waiting (timeout=1800s)
+API attempt=115 elapsed=131.255s status=200 finish=stop total_tokens=35117
+step=564/1024 decision=115 success=False
+step=565/1024 decision=115 success=False
+step=566/1024 decision=115 success=False
+API step=566 attempt=116 retry=0 waiting (timeout=1800s)
+API attempt=116 elapsed=67.009s status=200 finish=stop total_tokens=22069
+step=567/1024 decision=116 success=False
+step=568/1024 decision=116 success=False
+step=569/1024 decision=116 success=False
+step=570/1024 decision=116 success=False
+step=571/1024 decision=116 success=False
+step=572/1024 decision=116 success=False
+step=573/1024 decision=116 success=False
+step=574/1024 decision=116 success=False
+API step=574 attempt=117 retry=0 waiting (timeout=1800s)
+API attempt=117 elapsed=6.601s status=200 finish=stop total_tokens=11588
+step=575/1024 decision=117 success=False
+step=576/1024 decision=117 success=False
+step=577/1024 decision=117 success=False
+step=578/1024 decision=117 success=False
+API step=578 attempt=118 retry=0 waiting (timeout=1800s)
+API attempt=118 elapsed=54.968s status=200 finish=stop total_tokens=19900
+step=579/1024 decision=118 success=False
+step=580/1024 decision=118 success=False
+step=581/1024 decision=118 success=False
+step=582/1024 decision=118 success=False
+step=583/1024 decision=118 success=False
+step=584/1024 decision=118 success=False
+API step=584 attempt=119 retry=0 waiting (timeout=1800s)
+API attempt=119 elapsed=125.783s status=200 finish=stop total_tokens=33521
+step=585/1024 decision=119 success=False
+step=586/1024 decision=119 success=False
+step=587/1024 decision=119 success=False
+API step=587 attempt=120 retry=0 waiting (timeout=1800s)
+API attempt=120 elapsed=50.765s status=200 finish=stop total_tokens=19653
+step=588/1024 decision=120 success=False
+step=589/1024 decision=120 success=False
+step=590/1024 decision=120 success=False
+API step=590 attempt=121 retry=0 waiting (timeout=1800s)
+API attempt=121 elapsed=82.825s status=200 finish=stop total_tokens=24651
+step=591/1024 decision=121 success=False
+step=592/1024 decision=121 success=False
+step=593/1024 decision=121 success=False
+step=594/1024 decision=121 success=False
+step=595/1024 decision=121 success=False
+API step=595 attempt=122 retry=0 waiting (timeout=1800s)
+API attempt=122 elapsed=10.152s status=200 finish=stop total_tokens=12190
+step=596/1024 decision=122 success=False
+step=597/1024 decision=122 success=False
+step=598/1024 decision=122 success=False
+API step=598 attempt=123 retry=0 waiting (timeout=1800s)
+API attempt=123 elapsed=8.691s status=200 finish=stop total_tokens=11867
+step=599/1024 decision=123 success=False
+step=600/1024 decision=123 success=False
+step=601/1024 decision=123 success=False
+step=602/1024 decision=123 success=False
+API step=602 attempt=124 retry=0 waiting (timeout=1800s)
+API attempt=124 elapsed=68.085s status=200 finish=stop total_tokens=22258
+step=603/1024 decision=124 success=False
+step=604/1024 decision=124 success=False
+step=605/1024 decision=124 success=False
+step=606/1024 decision=124 success=False
+step=607/1024 decision=124 success=False
+step=608/1024 decision=124 success=False
+step=609/1024 decision=124 success=False
+step=610/1024 decision=124 success=False
+API step=610 attempt=125 retry=0 waiting (timeout=1800s)
+API attempt=125 elapsed=224.110s status=200 finish=stop total_tokens=53040
+step=611/1024 decision=125 success=False
+step=612/1024 decision=125 success=False
+step=613/1024 decision=125 success=False
+step=614/1024 decision=125 success=False
+step=615/1024 decision=125 success=False
+step=616/1024 decision=125 success=False
+step=617/1024 decision=125 success=False
+step=618/1024 decision=125 success=False
+API step=618 attempt=126 retry=0 waiting (timeout=1800s)
+API attempt=126 elapsed=106.046s status=200 finish=stop total_tokens=30533
+step=619/1024 decision=126 success=False
+step=620/1024 decision=126 success=False
+step=621/1024 decision=126 success=False
+step=622/1024 decision=126 success=False
+step=623/1024 decision=126 success=False
+step=624/1024 decision=126 success=False
+step=625/1024 decision=126 success=False
+step=626/1024 decision=126 success=False
+API step=626 attempt=127 retry=0 waiting (timeout=1800s)
+API attempt=127 elapsed=111.008s status=200 finish=stop total_tokens=33784
+step=627/1024 decision=127 success=False
+step=628/1024 decision=127 success=False
+step=629/1024 decision=127 success=False
+step=630/1024 decision=127 success=False
+step=631/1024 decision=127 success=False
+API step=631 attempt=128 retry=0 waiting (timeout=1800s)
+API attempt=128 elapsed=59.988s status=200 finish=stop total_tokens=21872
+step=632/1024 decision=128 success=False
+step=633/1024 decision=128 success=False
+step=634/1024 decision=128 success=False
+step=635/1024 decision=128 success=False
+step=636/1024 decision=128 success=False
+API step=636 attempt=129 retry=0 waiting (timeout=1800s)
+API attempt=129 elapsed=141.117s status=200 finish=stop total_tokens=36668
+step=637/1024 decision=129 success=False
+step=638/1024 decision=129 success=False
+step=639/1024 decision=129 success=False
+API step=639 attempt=130 retry=0 waiting (timeout=1800s)
+API attempt=130 elapsed=106.812s status=200 finish=stop total_tokens=29505
+step=640/1024 decision=130 success=False
+step=641/1024 decision=130 success=False
+step=642/1024 decision=130 success=False
+API step=642 attempt=131 retry=0 waiting (timeout=1800s)
+API attempt=131 elapsed=4.852s status=200 finish=stop total_tokens=11226
+step=643/1024 decision=131 success=False
+step=644/1024 decision=131 success=False
+step=645/1024 decision=131 success=False
+step=646/1024 decision=131 success=False
+step=647/1024 decision=131 success=False
+API step=647 attempt=132 retry=0 waiting (timeout=1800s)
+API attempt=132 elapsed=4.715s status=200 finish=stop total_tokens=11258
+step=648/1024 decision=132 success=False
+step=649/1024 decision=132 success=False
+step=650/1024 decision=132 success=False
+step=651/1024 decision=132 success=False
+API step=651 attempt=133 retry=0 waiting (timeout=1800s)
+API attempt=133 elapsed=93.548s status=200 finish=stop total_tokens=27294
+step=652/1024 decision=133 success=False
+step=653/1024 decision=133 success=False
+step=654/1024 decision=133 success=False
+step=655/1024 decision=133 success=False
+step=656/1024 decision=133 success=False
+step=657/1024 decision=133 success=False
+API step=657 attempt=134 retry=0 waiting (timeout=1800s)
+API attempt=134 elapsed=65.834s status=200 finish=stop total_tokens=22656
+step=658/1024 decision=134 success=False
+step=659/1024 decision=134 success=False
+step=660/1024 decision=134 success=False
+step=661/1024 decision=134 success=False
+step=662/1024 decision=134 success=False
+step=663/1024 decision=134 success=False
+step=664/1024 decision=134 success=False
+step=665/1024 decision=134 success=False
+API step=665 attempt=135 retry=0 waiting (timeout=1800s)
+API attempt=135 elapsed=52.371s status=200 finish=stop total_tokens=21208
+step=666/1024 decision=135 success=False
+step=667/1024 decision=135 success=False
+step=668/1024 decision=135 success=False
+step=669/1024 decision=135 success=False
+step=670/1024 decision=135 success=False
+step=671/1024 decision=135 success=False
+step=672/1024 decision=135 success=False
+step=673/1024 decision=135 success=False
+API step=673 attempt=136 retry=0 waiting (timeout=1800s)
+API attempt=136 elapsed=91.480s status=200 finish=stop total_tokens=27665
+step=674/1024 decision=136 success=False
+step=675/1024 decision=136 success=False
+step=676/1024 decision=136 success=False
+step=677/1024 decision=136 success=False
+step=678/1024 decision=136 success=False
+step=679/1024 decision=136 success=False
+API step=679 attempt=137 retry=0 waiting (timeout=1800s)
+API attempt=137 elapsed=5.623s status=200 finish=stop total_tokens=11492
+step=680/1024 decision=137 success=False
+step=681/1024 decision=137 success=False
+step=682/1024 decision=137 success=False
+step=683/1024 decision=137 success=False
+step=684/1024 decision=137 success=False
+API step=684 attempt=138 retry=0 waiting (timeout=1800s)
+API attempt=138 elapsed=7.777s status=200 finish=stop total_tokens=11912
+step=685/1024 decision=138 success=False
+step=686/1024 decision=138 success=False
+step=687/1024 decision=138 success=False
+step=688/1024 decision=138 success=False
+API step=688 attempt=139 retry=0 waiting (timeout=1800s)
+API attempt=139 elapsed=9.829s status=200 finish=stop total_tokens=12017
+step=689/1024 decision=139 success=False
+step=690/1024 decision=139 success=False
+step=691/1024 decision=139 success=False
+step=692/1024 decision=139 success=False
+step=693/1024 decision=139 success=False
+API step=693 attempt=140 retry=0 waiting (timeout=1800s)
+API attempt=140 elapsed=54.845s status=200 finish=stop total_tokens=19502
+step=694/1024 decision=140 success=False
+step=695/1024 decision=140 success=False
+step=696/1024 decision=140 success=False
+step=697/1024 decision=140 success=False
+step=698/1024 decision=140 success=False
+API step=698 attempt=141 retry=0 waiting (timeout=1800s)
+API attempt=141 elapsed=37.113s status=200 finish=stop total_tokens=17160
+step=699/1024 decision=141 success=False
+step=700/1024 decision=141 success=False
+step=701/1024 decision=141 success=False
+step=702/1024 decision=141 success=False
+step=703/1024 decision=141 success=False
+API step=703 attempt=142 retry=0 waiting (timeout=1800s)
+API attempt=142 elapsed=8.650s status=200 finish=stop total_tokens=12032
+step=704/1024 decision=142 success=False
+step=705/1024 decision=142 success=False
+step=706/1024 decision=142 success=False
+API step=706 attempt=143 retry=0 waiting (timeout=1800s)
+API attempt=143 elapsed=10.645s status=200 finish=stop total_tokens=12315
+step=707/1024 decision=143 success=False
+step=708/1024 decision=143 success=False
+step=709/1024 decision=143 success=False
+API step=709 attempt=144 retry=0 waiting (timeout=1800s)
+API attempt=144 elapsed=66.311s status=200 finish=stop total_tokens=22594
+step=710/1024 decision=144 success=False
+step=711/1024 decision=144 success=False
+step=712/1024 decision=144 success=False
+step=713/1024 decision=144 success=False
+step=714/1024 decision=144 success=False
+API step=714 attempt=145 retry=0 waiting (timeout=1800s)
+API attempt=145 elapsed=102.574s status=200 finish=stop total_tokens=29998
+step=715/1024 decision=145 success=False
+step=716/1024 decision=145 success=False
+step=717/1024 decision=145 success=False
+API step=717 attempt=146 retry=0 waiting (timeout=1800s)
+API attempt=146 elapsed=10.609s status=200 finish=stop total_tokens=12188
+step=718/1024 decision=146 success=False
+API step=718 attempt=147 retry=0 waiting (timeout=1800s)
+API attempt=147 elapsed=77.967s status=200 finish=stop total_tokens=24066
+step=719/1024 decision=147 success=False
+step=720/1024 decision=147 success=False
+step=721/1024 decision=147 success=False
+step=722/1024 decision=147 success=False
+step=723/1024 decision=147 success=False
+step=724/1024 decision=147 success=False
+step=725/1024 decision=147 success=False
+step=726/1024 decision=147 success=False
+API step=726 attempt=148 retry=0 waiting (timeout=1800s)
+API attempt=148 elapsed=34.040s status=200 finish=stop total_tokens=17515
+step=727/1024 decision=148 success=False
+step=728/1024 decision=148 success=False
+step=729/1024 decision=148 success=False
+step=730/1024 decision=148 success=False
+step=731/1024 decision=148 success=False
+API step=731 attempt=149 retry=0 waiting (timeout=1800s)
+API attempt=149 elapsed=50.047s status=200 finish=stop total_tokens=19791
+step=732/1024 decision=149 success=False
+step=733/1024 decision=149 success=False
+step=734/1024 decision=149 success=False
+step=735/1024 decision=149 success=False
+API step=735 attempt=150 retry=0 waiting (timeout=1800s)
+API attempt=150 elapsed=241.160s status=200 finish=stop total_tokens=55765
+step=736/1024 decision=150 success=False
+step=737/1024 decision=150 success=False
+step=738/1024 decision=150 success=False
+step=739/1024 decision=150 success=False
+API step=739 attempt=151 retry=0 waiting (timeout=1800s)
+API attempt=151 elapsed=18.356s status=200 finish=stop total_tokens=13764
+step=740/1024 decision=151 success=False
+step=741/1024 decision=151 success=False
+step=742/1024 decision=151 success=False
+step=743/1024 decision=151 success=False
+step=744/1024 decision=151 success=False
+API step=744 attempt=152 retry=0 waiting (timeout=1800s)
+API attempt=152 elapsed=208.411s status=200 finish=stop total_tokens=48209
+step=745/1024 decision=152 success=False
+step=746/1024 decision=152 success=False
+step=747/1024 decision=152 success=False
+step=748/1024 decision=152 success=False
+step=749/1024 decision=152 success=False
+step=750/1024 decision=152 success=False
+step=751/1024 decision=152 success=False
+step=752/1024 decision=152 success=False
+API step=752 attempt=153 retry=0 waiting (timeout=1800s)
+API attempt=153 elapsed=26.829s status=200 finish=stop total_tokens=15436
+step=753/1024 decision=153 success=False
+step=754/1024 decision=153 success=False
+step=755/1024 decision=153 success=False
+step=756/1024 decision=153 success=False
+step=757/1024 decision=153 success=False
+step=758/1024 decision=153 success=False
+step=759/1024 decision=153 success=False
+step=760/1024 decision=153 success=False
+API step=760 attempt=154 retry=0 waiting (timeout=1800s)
+API attempt=154 elapsed=7.611s status=200 finish=stop total_tokens=11906
+step=761/1024 decision=154 success=False
+step=762/1024 decision=154 success=False
+step=763/1024 decision=154 success=False
+API step=763 attempt=155 retry=0 waiting (timeout=1800s)
+API attempt=155 elapsed=21.273s status=200 finish=stop total_tokens=14066
+step=764/1024 decision=155 success=False
+step=765/1024 decision=155 success=False
+step=766/1024 decision=155 success=False
+API step=766 attempt=156 retry=0 waiting (timeout=1800s)
+API attempt=156 elapsed=123.945s status=200 finish=stop total_tokens=33382
+step=767/1024 decision=156 success=False
+step=768/1024 decision=156 success=False
+step=769/1024 decision=156 success=False
+step=770/1024 decision=156 success=False
+step=771/1024 decision=156 success=False
+step=772/1024 decision=156 success=False
+step=773/1024 decision=156 success=False
+step=774/1024 decision=156 success=False
+API step=774 attempt=157 retry=0 waiting (timeout=1800s)
+API attempt=157 elapsed=325.778s status=200 finish=length total_tokens=76191
+{
+  "schema_version": 2,
+  "command": "run",
+  "finished_utc": "2026-11-01T20:45:37.953012+00:00",
+  "status": "invalid_output",
+  "scored": true,
+  "task_success": false,
+  "reason": "incomplete or unsupported response: finish_reason='length'",
+  "control_steps": 774,
+  "policy_decisions": 157,
+  "settle_steps": 10,
+  "simulated_control_seconds": 38.7,
+  "simulation_step_seconds": 189.34585784748197,
+  "reset_and_settle_seconds": 4.007850119844079,
+  "control_loop_wall_seconds": 11765.582258323207,
+  "task_execution_wall_seconds": 11761.5744070746,
+  "last_step_may_have_executed": false,
+  "command_wall_seconds": 11775.988652728498,
+  "task_identity": {
+    "suite": "libero_10",
+    "task_id": 5,
+    "task_order_index": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "task_name": "STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy"
+  },
+  "protocol": {
+    "protocol_version": "ds-libero-direct-v2",
+    "suite": "libero_10",
+    "task_order_index": 0,
+    "task_id": 5,
+    "init_state_id": 0,
+    "seed": 0,
+    "settle_steps": 10,
+    "max_steps": 1024,
+    "image_size": 256,
+    "history_steps": 4,
+    "control_freq": 20,
+    "model": "deepseek-flash",
+    "expected_release": "DeepSeek-V4.1-Flash-1017",
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "reasoning_effort": "high",
+    "max_tokens": null,
+    "timeout_seconds": 1800,
+    "max_retries": 2,
+    "max_http_requests": 1024,
+    "action_horizon": 8,
+    "visual_history": 2,
+    "camera_geometry": true,
+    "evaluation_scope": "diagnostic",
+    "grasp_feedback": true,
+    "gripper_feedback_barrier": true,
+    "geometry_contract": true,
+    "expected_task_name": "STUDY_SCENE1_pick_up_the_book_and_place_it_in_the_back_compartment_of_the_caddy"
+  },
+  "config_sha256": "dd06cb06459275a71d0fc328c5566e306ab07e9d1864073d5cd14a2ce825fa88",
+  "source_sha256": "bc076b0c800abb2b5cd38a99d448b8f65a45b4119e7102e18293c74f679649ef",
+  "environment_sha256": "1db81e1697572d284f9ff86cf2defbdc33bc81cc761fdc8f05fe0435a70ed388",
+  "scope": "single episode diagnostic; not an aggregate LIBERO benchmark score",
+  "http_requests": 157,
+  "completed_http_requests": 157,
+  "unfinished_http_attempts": [],
+  "decision_requests": 157,
+  "model_outputs": 157,
+  "valid_model_outputs": 156,
+  "action_validity_rate": 0.9936305732484076,
+  "executed_action_count": 774,
+  "gripper_motion_diagnostics": {
+    "closing_bouts": [
+      {
+        "start_step": 33,
+        "initial_joint_separation_m": 0.07946112386140047,
+        "stationary_close_steps_before_first_arm_motion": 8,
+        "first_arm_motion_step": 41,
+        "joint_separation_before_first_arm_motion_m": 0.024791936217561296,
+        "last_step": 55,
+        "final_joint_separation_m": 0.02402427207472828
+      },
+      {
+        "start_step": 70,
+        "initial_joint_separation_m": 0.07907471504004071,
+        "stationary_close_steps_before_first_arm_motion": 8,
+        "first_arm_motion_step": 78,
+        "joint_separation_before_first_arm_motion_m": 0.03501598916579517,
+        "last_step": 112,
+        "final_joint_separation_m": 0.023001320569866087
+      },
+      {
+        "start_step": 126,
+        "initial_joint_separation_m": 0.0769231265328993,
+        "stationary_close_steps_before_first_arm_motion": 6,
+        "first_arm_motion_step": 132,
+        "joint_separation_before_first_arm_motion_m": 0.040837726789594395,
+        "last_step": 150,
+        "final_joint_separation_m": 0.021347647426505963
+      },
+      {
+        "start_step": 161,
+        "initial_joint_separation_m": 0.07608215556664899,
+        "stationary_close_steps_before_first_arm_motion": 8,
+        "first_arm_motion_step": 169,
+        "joint_separation_before_first_arm_motion_m": 0.021401756459714392,
+        "last_step": 172,
+        "final_joint_separation_m": 0.0039505140989641845
+      },
+      {
+        "start_step": 184,
+        "initial_joint_separation_m": 0.07451159914786606,
+        "stationary_close_steps_before_first_arm_motion": 10,
+        "first_arm_motion_step": 194,
+        "joint_separation_before_first_arm_motion_m": 0.008228278009384233,
+        "last_step": 197,
+        "final_joint_separation_m": 0.002609427508649555
+      },
+      {
+        "start_step": 216,
+        "initial_joint_separation_m": 0.07800109463615701,
+        "stationary_close_steps_before_first_arm_motion": 6,
+        "first_arm_motion_step": 222,
+        "joint_separation_before_first_arm_motion_m": 0.04088288852376026,
+        "last_step": 226,
+        "final_joint_separation_m": 0.005495320474413685
+      },
+      {
+        "start_step": 246,
+        "initial_joint_separation_m": 0.07808224895414466,
+        "stationary_close_steps_before_first_arm_motion": 12,
+        "first_arm_motion_step": 258,
+        "joint_separation_before_first_arm_motion_m": 0.003953830058304971,
+        "last_step": 261,
+        "final_joint_separation_m": 0.002190908515102232
+      },
+      {
+        "start_step": 265,
+        "initial_joint_separation_m": 0.012847130957336545,
+        "stationary_close_steps_before_first_arm_motion": 5,
+        "first_arm_motion_step": 270,
+        "joint_separation_before_first_arm_motion_m": 0.005806567679050431,
+        "last_step": 288,
+        "final_joint_separation_m": 0.0011914513241873832
+      },
+      {
+        "start_step": 318,
+        "initial_joint_separation_m": 0.07880025504049909,
+        "stationary_close_steps_before_first_arm_motion": 12,
+        "first_arm_motion_step": 330,
+        "joint_separation_before_first_arm_motion_m": 0.003954613992204763,
+        "last_step": 344,
+        "final_joint_separation_m": 0.0013424526568778753
+      },
+      {
+        "start_step": 353,
+        "initial_joint_separation_m": 0.05841627976405726,
+        "stationary_close_steps_before_first_arm_motion": 8,
+        "first_arm_motion_step": 361,
+        "joint_separation_before_first_arm_motion_m": 0.021174123405959824,
+        "last_step": 364,
+        "final_joint_separation_m": 0.0039297044831853615
+      },
+      {
+        "start_step": 381,
+        "initial_joint_separation_m": 0.07620306998817708,
+        "stationary_close_steps_before_first_arm_motion": 6,
+        "first_arm_motion_step": 387,
+        "joint_separation_before_first_arm_motion_m": 0.04080851933929637,
+        "last_step": 398,
+        "final_joint_separation_m": 0.0020041020694517627
+      },
+      {
+        "start_step": 405,
+        "initial_joint_separation_m": 0.03246238084434408,
+        "stationary_close_steps_before_first_arm_motion": 6,
+        "first_arm_motion_step": 411,
+        "joint_separation_before_first_arm_motion_m": 0.007305307399389402,
+        "last_step": 417,
+        "final_joint_separation_m": 0.002066162723885344
+      },
+      {
+        "start_step": 455,
+        "initial_joint_separation_m": 0.07913219240872846,
+        "stationary_close_steps_before_first_arm_motion": 5,
+        "first_arm_motion_step": 460,
+        "joint_separation_before_first_arm_motion_m": 0.05035041964193322,
+        "last_step": 474,
+        "final_joint_separation_m": 0.03155806616534105
+      },
+      {
+        "start_step": 504,
+        "initial_joint_separation_m": 0.07893039688929301,
+        "stationary_close_steps_before_first_arm_motion": 8,
+        "first_arm_motion_step": 512,
+        "joint_separation_before_first_arm_motion_m": 0.021441059135097862,
+        "last_step": 526,
+        "final_joint_separation_m": 0.0016096013472789873
+      },
+      {
+        "start_step": 540,
+        "initial_joint_separation_m": 0.0769058963851322,
+        "stationary_close_steps_before_first_arm_motion": 9,
+        "first_arm_motion_step": 549,
+        "joint_separation_before_first_arm_motion_m": 0.013128253738502255,
+        "last_step": 554,
+        "final_joint_separation_m": 0.002342614442849937
+      },
+      {
+        "start_step": 566,
+        "initial_joint_separation_m": 0.07450784450025758,
+        "stationary_close_steps_before_first_arm_motion": 8,
+        "first_arm_motion_step": 574,
+        "joint_separation_before_first_arm_motion_m": 0.021381838658299818,
+        "last_step": 577,
+        "final_joint_separation_m": 0.003949161661395802
+      },
+      {
+        "start_step": 590,
+        "initial_joint_separation_m": 0.057408134869204014,
+        "stationary_close_steps_before_first_arm_motion": 5,
+        "first_arm_motion_step": 595,
+        "joint_separation_before_first_arm_motion_m": 0.030218036038517023,
+        "last_step": 617,
+        "final_joint_separation_m": 0.0011355021059489794
+      },
+      {
+        "start_step": 642,
+        "initial_joint_separation_m": 0.07848193534600248,
+        "stationary_close_steps_before_first_arm_motion": 5,
+        "first_arm_motion_step": 647,
+        "joint_separation_before_first_arm_motion_m": 0.05030085060676043,
+        "last_step": 692,
+        "final_joint_separation_m": 0.0018912795463988758
+      },
+      {
+        "start_step": 698,
+        "initial_joint_separation_m": 0.02972625572085539,
+        "stationary_close_steps_before_first_arm_motion": 5,
+        "first_arm_motion_step": 703,
+        "joint_separation_before_first_arm_motion_m": 0.018937053440280776,
+        "last_step": 708,
+        "final_joint_separation_m": 0.0025353219609206656
+      },
+      {
+        "start_step": 717,
+        "initial_joint_separation_m": 0.05848409414005175,
+        "stationary_close_steps_before_first_arm_motion": 9,
+        "first_arm_motion_step": 726,
+        "joint_separation_before_first_arm_motion_m": 0.012995475579715011,
+        "last_step": 734,
+        "final_joint_separation_m": 0.002002309001441444
+      },
+      {
+        "start_step": 739,
+        "initial_joint_separation_m": 0.020841006036037887,
+        "stationary_close_steps_before_first_arm_motion": 5,
+        "first_arm_motion_step": null,
+        "joint_separation_before_first_arm_motion_m": null,
+        "last_step": 743,
+        "final_joint_separation_m": 0.010615396614966747
+      },
+      {
+        "start_step": 752,
+        "initial_joint_separation_m": 0.05868246331112639,
+        "stationary_close_steps_before_first_arm_motion": 8,
+        "first_arm_motion_step": 760,
+        "joint_separation_before_first_arm_motion_m": 0.021178082781763106,
+        "last_step": 765,
+        "final_joint_separation_m": 0.0026046327268184153
+      }
+    ],
+    "skipped_incomplete_steps": 0,
+    "note": "Command timing and robot joint separation only; not a grasp success detector."
+  },
+  "feedback_boundaries": 1,
+  "discarded_actions_at_feedback_boundaries": 1,
+  "executed_actions_per_decision": {
+    "count": 157,
+    "mean": 4.929936305732484,
+    "p50": 5.0,
+    "p95": 8.0,
+    "max": 8,
+    "total": 774
+  },
+  "actions_per_valid_decision": {
+    "count": 156,
+    "mean": 4.967948717948718,
+    "p50": 5.0,
+    "p95": 8.0,
+    "max": 8,
+    "total": 775
+  },
+  "truncated_outputs": 1,
+  "finish_reasons": {
+    "length": 1,
+    "stop": 156
+  },
+  "system_fingerprints": [
+    "bc19ba97cbe016479903222bb1578db6"
+  ],
+  "reported_usage": {
+    "prompt_tokens": 1645986,
+    "completion_tokens": 2158238,
+    "total_tokens": 3804224,
+    "reasoning_tokens": 2143080,
+    "prompt_cache_hit_tokens": 183552,
+    "prompt_cache_miss_tokens": 1462434
+  },
+  "usage_available_attempts": 157,
+  "usage_field_available_attempts": {
+    "prompt_tokens": 157,
+    "completion_tokens": 157,
+    "total_tokens": 157,
+    "reasoning_tokens": 157,
+    "prompt_cache_hit_tokens": 157,
+    "prompt_cache_miss_tokens": 157
+  },
+  "usage_incomplete": false,
+  "api_cost": {
+    "currency": "CNY",
+    "priced_attempts": 157,
+    "unknown_cost_attempts": 0,
+    "incomplete": false,
+    "pricing_available": true,
+    "known_cost_range_cny": [
+      10.09905704,
+      20.19811408
+    ],
+    "total_cost_range_cny": [
+      10.09905704,
+      20.19811408
+    ],
+    "note": "Published off-peak/peak estimate range, not actual billing; unknown requests are excluded from known subtotal."
+  },
+  "api_pricing": {
+    "schema_version": 1,
+    "model": "deepseek-flash",
+    "currency": "CNY",
+    "verified_date": "2026-10-29",
+    "source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "per_million_tokens": {
+      "off_peak": {
+        "prompt_cache_hit_tokens": "0.02",
+        "prompt_cache_miss_tokens": "1",
+        "completion_tokens": "4"
+      },
+      "peak": {
+        "prompt_cache_hit_tokens": "0.04",
+        "prompt_cache_miss_tokens": "2",
+        "completion_tokens": "8"
+      }
+    },
+    "method": "Range at published off-peak/peak rates, not an invoice; no holiday or billing-time guess.",
+    "note": "Reasoning is included in completion_tokens and is never billed twice. Prices may change."
+  },
+  "usage_note": "Reasoning is a subset of completion tokens; unknown usage is not zero cost.",
+  "returned_models": [
+    "deepseek-flash"
+  ],
+  "http_latency_seconds": {
+    "count": 157,
+    "mean": 73.52054205592603,
+    "p50": 59.988113744184375,
+    "p95": 193.42276116907593,
+    "max": 325.77773142419755,
+    "total": 11542.725102780387
+  },
+  "http_latency_incomplete": false,
+  "decision_latency_seconds": {
+    "count": 157,
+    "mean": 73.55306825332438,
+    "p50": 60.01863330043852,
+    "p95": 193.45321988351637,
+    "max": 325.81265181675553,
+    "total": 11547.831715771928
+  },
+  "decision_latency_incomplete": false,
+  "retry_backoff_seconds": 0,
+  "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
+  "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
+  "warnings": [],
+  "replay": "replay.gif"
+}
+RESULT: invalid_output | /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO/outputs/five-tasks-geometry8-1024-001/runs/episode-0004/episode/summary.json

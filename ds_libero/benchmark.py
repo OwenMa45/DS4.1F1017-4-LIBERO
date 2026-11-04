@@ -125,6 +125,8 @@ def load_plan(directory):
 
 def run_plan_episode(directory, index):
     root, plan = load_plan(directory)
+    if "microbench" in plan:
+        raise ExperimentError("Use microbench run for this plan so its policy metadata is verified")
     if source_fingerprint() != plan["source_sha256"]:
         raise ExperimentError("Code changed since plan creation; freeze code and create a new plan")
     if not 0 <= index < len(plan["episodes"]):
@@ -139,6 +141,8 @@ def run_plan_episode(directory, index):
 def run_plan_all(directory):
     """Continue only unstarted tasks; never silently retry an already paid trial."""
     root, plan = load_plan(directory)
+    if "microbench" in plan:
+        raise ExperimentError("Use microbench run for this plan so its policy metadata is verified")
     if source_fingerprint() != plan["source_sha256"]:
         raise ExperimentError("Code changed since plan creation; create a new plan")
 

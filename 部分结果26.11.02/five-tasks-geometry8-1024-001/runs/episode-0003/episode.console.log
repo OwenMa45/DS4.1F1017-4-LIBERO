@@ -1,0 +1,296 @@
+[robosuite WARNING] No private macro file found! (macros.py:53)
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:54)
+[robosuite WARNING] To setup, run: python /mnt/cpfs/users/mrq/libero_cpu/.venv/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (macros.py:55)
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+/mnt/cpfs/users/mrq/libero_cpu/LIBERO/libero/libero/benchmark/__init__.py:164: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  init_states = torch.load(init_states_path)
+Task: push the plate to the front of the stove
+Artifacts: /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO/outputs/five-tasks-geometry8-1024-001/runs/episode-0003/episode
+API step=0 attempt=1 retry=0 waiting (timeout=1800s)
+API attempt=1 elapsed=98.801s status=200 finish=stop total_tokens=23972
+step=1/1024 decision=1 success=False
+step=2/1024 decision=1 success=False
+step=3/1024 decision=1 success=False
+step=4/1024 decision=1 success=False
+step=5/1024 decision=1 success=False
+step=6/1024 decision=1 success=False
+step=7/1024 decision=1 success=False
+step=8/1024 decision=1 success=False
+API step=8 attempt=2 retry=0 waiting (timeout=1800s)
+API attempt=2 elapsed=234.502s status=200 finish=stop total_tokens=55209
+step=9/1024 decision=2 success=False
+step=10/1024 decision=2 success=False
+step=11/1024 decision=2 success=False
+step=12/1024 decision=2 success=False
+step=13/1024 decision=2 success=False
+step=14/1024 decision=2 success=False
+step=15/1024 decision=2 success=False
+step=16/1024 decision=2 success=False
+API step=16 attempt=3 retry=0 waiting (timeout=1800s)
+API attempt=3 elapsed=119.618s status=200 finish=stop total_tokens=34985
+step=17/1024 decision=3 success=False
+step=18/1024 decision=3 success=False
+step=19/1024 decision=3 success=False
+step=20/1024 decision=3 success=False
+step=21/1024 decision=3 success=False
+step=22/1024 decision=3 success=False
+step=23/1024 decision=3 success=False
+step=24/1024 decision=3 success=False
+API step=24 attempt=4 retry=0 waiting (timeout=1800s)
+API attempt=4 elapsed=90.921s status=200 finish=stop total_tokens=28920
+step=25/1024 decision=4 success=False
+step=26/1024 decision=4 success=False
+step=27/1024 decision=4 success=False
+step=28/1024 decision=4 success=False
+step=29/1024 decision=4 success=False
+step=30/1024 decision=4 success=False
+step=31/1024 decision=4 success=False
+step=32/1024 decision=4 success=False
+API step=32 attempt=5 retry=0 waiting (timeout=1800s)
+API attempt=5 elapsed=178.384s status=200 finish=stop total_tokens=47339
+step=33/1024 decision=5 success=False
+step=34/1024 decision=5 success=False
+step=35/1024 decision=5 success=False
+step=36/1024 decision=5 success=False
+step=37/1024 decision=5 success=False
+step=38/1024 decision=5 success=False
+step=39/1024 decision=5 success=False
+step=40/1024 decision=5 success=False
+API step=40 attempt=6 retry=0 waiting (timeout=1800s)
+API attempt=6 elapsed=174.487s status=200 finish=stop total_tokens=46291
+step=41/1024 decision=6 success=False
+step=42/1024 decision=6 success=False
+step=43/1024 decision=6 success=False
+step=44/1024 decision=6 success=False
+step=45/1024 decision=6 success=False
+API step=45 attempt=7 retry=0 waiting (timeout=1800s)
+API attempt=7 elapsed=160.222s status=200 finish=stop total_tokens=43674
+step=46/1024 decision=7 success=False
+step=47/1024 decision=7 success=False
+step=48/1024 decision=7 success=False
+step=49/1024 decision=7 success=False
+API step=49 attempt=8 retry=0 waiting (timeout=1800s)
+API attempt=8 elapsed=188.964s status=200 finish=stop total_tokens=48285
+step=50/1024 decision=8 success=False
+step=51/1024 decision=8 success=False
+step=52/1024 decision=8 success=False
+step=53/1024 decision=8 success=False
+step=54/1024 decision=8 success=False
+step=55/1024 decision=8 success=False
+API step=55 attempt=9 retry=0 waiting (timeout=1800s)
+API attempt=9 elapsed=52.354s status=200 finish=stop total_tokens=19560
+step=56/1024 decision=9 success=False
+step=57/1024 decision=9 success=False
+step=58/1024 decision=9 success=False
+step=59/1024 decision=9 success=False
+step=60/1024 decision=9 success=False
+API step=60 attempt=10 retry=0 waiting (timeout=1800s)
+API attempt=10 elapsed=103.319s status=200 finish=stop total_tokens=30776
+step=61/1024 decision=10 success=False
+step=62/1024 decision=10 success=False
+step=63/1024 decision=10 success=False
+step=64/1024 decision=10 success=False
+step=65/1024 decision=10 success=False
+step=66/1024 decision=10 success=False
+step=67/1024 decision=10 success=False
+step=68/1024 decision=10 success=False
+API step=68 attempt=11 retry=0 waiting (timeout=1800s)
+API attempt=11 elapsed=189.914s status=200 finish=stop total_tokens=42159
+step=69/1024 decision=11 success=False
+step=70/1024 decision=11 success=False
+API step=70 attempt=12 retry=0 waiting (timeout=1800s)
+API attempt=12 elapsed=287.909s status=200 finish=stop total_tokens=65838
+{
+  "schema_version": 2,
+  "command": "run",
+  "finished_utc": "2026-11-01T17:26:12.035602+00:00",
+  "status": "invalid_output",
+  "scored": true,
+  "task_success": false,
+  "reason": "action must be a JSON array of exactly seven numbers",
+  "control_steps": 70,
+  "policy_decisions": 12,
+  "settle_steps": 10,
+  "simulated_control_seconds": 3.5,
+  "simulation_step_seconds": 27.89167246595025,
+  "reset_and_settle_seconds": 5.511239264160395,
+  "control_loop_wall_seconds": 1915.688760444522,
+  "task_execution_wall_seconds": 1910.177520222962,
+  "last_step_may_have_executed": false,
+  "command_wall_seconds": 1926.8745213411748,
+  "task_identity": {
+    "suite": "libero_goal",
+    "task_id": 5,
+    "task_order_index": 0,
+    "init_state_id": 0,
+    "seed": 0,
+    "task_name": "push_the_plate_to_the_front_of_the_stove"
+  },
+  "protocol": {
+    "protocol_version": "ds-libero-direct-v2",
+    "suite": "libero_goal",
+    "task_order_index": 0,
+    "task_id": 5,
+    "init_state_id": 0,
+    "seed": 0,
+    "settle_steps": 10,
+    "max_steps": 1024,
+    "image_size": 256,
+    "history_steps": 4,
+    "control_freq": 20,
+    "model": "deepseek-flash",
+    "expected_release": "DeepSeek-V4.1-Flash-1017",
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "reasoning_effort": "high",
+    "max_tokens": null,
+    "timeout_seconds": 1800,
+    "max_retries": 2,
+    "max_http_requests": 1024,
+    "action_horizon": 8,
+    "visual_history": 2,
+    "camera_geometry": true,
+    "evaluation_scope": "diagnostic",
+    "grasp_feedback": true,
+    "gripper_feedback_barrier": true,
+    "geometry_contract": true,
+    "expected_task_name": "push_the_plate_to_the_front_of_the_stove"
+  },
+  "config_sha256": "18ea8e51f39c740d40081da43ee6db2905253419f5e419dc23f9e9c8af12483c",
+  "source_sha256": "bc076b0c800abb2b5cd38a99d448b8f65a45b4119e7102e18293c74f679649ef",
+  "environment_sha256": "ebde55af1d35c273dfb848378922547add50157b671b36374a4bf64c8f34599c",
+  "scope": "single episode diagnostic; not an aggregate LIBERO benchmark score",
+  "http_requests": 12,
+  "completed_http_requests": 12,
+  "unfinished_http_attempts": [],
+  "decision_requests": 12,
+  "model_outputs": 12,
+  "valid_model_outputs": 11,
+  "action_validity_rate": 0.9166666666666666,
+  "executed_action_count": 70,
+  "gripper_motion_diagnostics": {
+    "closing_bouts": [
+      {
+        "start_step": 8,
+        "initial_joint_separation_m": 0.07833907089477753,
+        "stationary_close_steps_before_first_arm_motion": 8,
+        "first_arm_motion_step": 16,
+        "joint_separation_before_first_arm_motion_m": 0.02143150606585628,
+        "last_step": 69,
+        "final_joint_separation_m": 0.0009997079164196343
+      }
+    ],
+    "skipped_incomplete_steps": 0,
+    "note": "Command timing and robot joint separation only; not a grasp success detector."
+  },
+  "feedback_boundaries": 0,
+  "discarded_actions_at_feedback_boundaries": 0,
+  "executed_actions_per_decision": {
+    "count": 12,
+    "mean": 5.833333333333333,
+    "p50": 7.0,
+    "p95": 8.0,
+    "max": 8,
+    "total": 70
+  },
+  "actions_per_valid_decision": {
+    "count": 11,
+    "mean": 6.363636363636363,
+    "p50": 8.0,
+    "p95": 8.0,
+    "max": 8,
+    "total": 70
+  },
+  "truncated_outputs": 0,
+  "finish_reasons": {
+    "stop": 12
+  },
+  "system_fingerprints": [
+    "bc19ba97cbe016479903222bb1578db6"
+  ],
+  "reported_usage": {
+    "prompt_tokens": 118056,
+    "completion_tokens": 368952,
+    "total_tokens": 487008,
+    "reasoning_tokens": 367375,
+    "prompt_cache_hit_tokens": 16512,
+    "prompt_cache_miss_tokens": 101544
+  },
+  "usage_available_attempts": 12,
+  "usage_field_available_attempts": {
+    "prompt_tokens": 12,
+    "completion_tokens": 12,
+    "total_tokens": 12,
+    "reasoning_tokens": 12,
+    "prompt_cache_hit_tokens": 12,
+    "prompt_cache_miss_tokens": 12
+  },
+  "usage_incomplete": false,
+  "api_cost": {
+    "currency": "CNY",
+    "priced_attempts": 12,
+    "unknown_cost_attempts": 0,
+    "incomplete": false,
+    "pricing_available": true,
+    "known_cost_range_cny": [
+      1.57768224,
+      3.15536448
+    ],
+    "total_cost_range_cny": [
+      1.57768224,
+      3.15536448
+    ],
+    "note": "Published off-peak/peak estimate range, not actual billing; unknown requests are excluded from known subtotal."
+  },
+  "api_pricing": {
+    "schema_version": 1,
+    "model": "deepseek-flash",
+    "currency": "CNY",
+    "verified_date": "2026-10-29",
+    "source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+    "per_million_tokens": {
+      "off_peak": {
+        "prompt_cache_hit_tokens": "0.02",
+        "prompt_cache_miss_tokens": "1",
+        "completion_tokens": "4"
+      },
+      "peak": {
+        "prompt_cache_hit_tokens": "0.04",
+        "prompt_cache_miss_tokens": "2",
+        "completion_tokens": "8"
+      }
+    },
+    "method": "Range at published off-peak/peak rates, not an invoice; no holiday or billing-time guess.",
+    "note": "Reasoning is included in completion_tokens and is never billed twice. Prices may change."
+  },
+  "usage_note": "Reasoning is a subset of completion tokens; unknown usage is not zero cost.",
+  "returned_models": [
+    "deepseek-flash"
+  ],
+  "http_latency_seconds": {
+    "count": 12,
+    "mean": 156.61618404850984,
+    "p50": 167.35453455150127,
+    "p95": 258.5350120775401,
+    "max": 287.9088626746088,
+    "total": 1879.3942085821182
+  },
+  "http_latency_incomplete": false,
+  "decision_latency_seconds": {
+    "count": 12,
+    "mean": 156.6563322978715,
+    "p50": 167.40177352167666,
+    "p95": 258.56512263175097,
+    "max": 287.9411049615592,
+    "total": 1879.8759875744581
+  },
+  "decision_latency_incomplete": false,
+  "retry_backoff_seconds": 0,
+  "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
+  "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
+  "warnings": [],
+  "replay": "replay.gif"
+}
+RESULT: invalid_output | /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO/outputs/five-tasks-geometry8-1024-001/runs/episode-0003/episode/summary.json
