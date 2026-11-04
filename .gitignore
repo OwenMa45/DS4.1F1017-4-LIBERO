@@ -5,6 +5,12 @@ __pycache__/
 .env.*
 !.env.example
 outputs/
+# Local results, downloaded materials, and report exports.
+/output/
+/部分结果26.11.02/
+/local_materials/
+/rollout-report/
+/Rollout-Atlas-*.tar.gz
 dist/
 *.egg-info/
 .pytest_cache/
