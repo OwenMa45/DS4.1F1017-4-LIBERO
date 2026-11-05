@@ -84,18 +84,101 @@ class ToolLoopTests(unittest.TestCase):
         self.assertEqual(result["control_steps"], 1)
         self.assertEqual(result["policy_decisions"], 1)
         self.assertEqual(len(tool.seen), 3)
-        self.assertEqual([p["tool_choice"] for p in sent], ["auto", "auto", "none"])
+        self.assertEqual([p.get("tool_choice") for p in sent], ["auto", "auto", None])
         self.assertNotIn("response_format", sent[0])
         self.assertEqual(sent[-1]["response_format"], {"type": "json_object"})
-        assistants = [m for m in sent[-1]["messages"] if m["role"] == "assistant"]
-        self.assertEqual([m["reasoning_content"] for m in assistants], ["opaque test reasoning", "second opaque trace"])
+        assistants = [m for m in sent[1]["messages"] if m["role"] == "assistant"]
+        self.assertEqual([m["reasoning_content"] for m in assistants], ["opaque test reasoning"])
         self.assertEqual(assistants[0]["content"], "Inspecting the two visible objects.")
-        self.assertEqual([m["tool_call_id"] for m in sent[-1]["messages"] if m["role"] == "tool"], ["a", "b", "c"])
+        self.assertEqual([m["tool_call_id"] for m in sent[1]["messages"] if m["role"] == "tool"], ["a", "b"])
+        self.assertNotIn("tools", sent[-1])
+        self.assertEqual([m["role"] for m in sent[-1]["messages"]], ["system", "user", "user"])
+        self.assertEqual(sent[-1]["messages"][1], sent[0]["messages"][1])
+        self.assertIn("SAM3 action phase", sent[-1]["messages"][0]["content"])
+        texts = [p["text"] for p in sent[-1]["messages"][-1]["content"]]
+        self.assertEqual(sum('"sam3_query"' in t for t in texts), 3)
+        self.assertNotIn("second opaque trace", json.dumps(sent[-1]))
         for args, obs, step, _ in tool.seen:
             self.assertEqual(obs.images, observation().images)
             self.assertEqual(step, 0)
         self.assertEqual(len([e for e in store.events if e["event"] == "decision"]), 1)
         self.assertEqual(len([e for e in store.events if e["event"] == "api_attempt"]), 3)
+
+    def test_thinking_history_is_preserved_across_three_perception_rounds(self):
+        tool = FakeTool({"max_tool_rounds": 3})
+        result, sent, _, _ = self.run_policy([
+            tool_reply([("a", "agentview", "bowl")]),
+            tool_reply([("b", "agentview", "plate")], reasoning_content="second trace"),
+            tool_reply([("c", "agentview", "handle")]), reply(json.dumps({"actions": [ACTION]}))], tool=tool)
+        self.assertEqual(result["status"], "success")
+        self.assertEqual([m["reasoning_content"] for m in sent[2]["messages"] if m["role"] == "assistant"],
+                         ["opaque test reasoning", "second trace"])
+        self.assertNotIn("tools", sent[3])
+
+    def test_blank_or_dsml_final_is_retried_once_without_repeating_perception(self):
+        # Observed exp01 final responses: whitespace-only, or action JSON + DSML.
+        action_json = json.dumps({"actions": [ACTION]})
+        for malformed in ("\n\n                \n                                     ",
+                          action_json + '</DSML parameter><DSML parameter name="type">json_object</DSML parameter>'):
+            with self.subTest(content=malformed[:30]):
+                tool = FakeTool({"max_tool_rounds": 1})
+                result, sent, tool, store = self.run_policy([tool_reply(), reply(malformed), reply(action_json)], tool=tool)
+                self.assertEqual((result["status"], result["control_steps"]), ("success", 1))
+                self.assertEqual(len(tool.seen), 1)
+                self.assertEqual(len(sent), 3)
+                self.assertEqual(sent[1]["messages"], sent[2]["messages"][:-1])
+                self.assertNotIn("DSML", json.dumps(sent[2]))
+                retries = [e for e in store.events if e["event"] == "sam3_action_format_retry"]
+                self.assertEqual(len(retries), 1)
+                self.assertEqual(len([e for e in store.events if e["event"] == "api_attempt"]), 3)
+
+    def test_format_retry_is_bounded_optional_and_shares_http_budget(self):
+        for options, budget, statuses in (({"max_format_retries": 1}, 10, ["invalid_output", 3]),
+                                           ({"max_format_retries": 0}, 10, ["invalid_output", 2]),
+                                           ({"max_format_retries": 1}, 2, ["budget_exhausted", 2])):
+            with self.subTest(options=options, budget=budget):
+                tool = FakeTool({"max_tool_rounds": 1, **options})
+                result, sent, tool, _ = self.run_policy([tool_reply(), reply("   "), reply("   ")],
+                                                       cfg=config(max_http_requests=budget), tool=tool)
+                self.assertEqual(result["status"], statuses[0])
+                self.assertEqual(len(sent), statuses[1])
+                self.assertEqual(result["control_steps"], 0)
+                self.assertEqual(len(tool.seen), 1)
+
+    def test_malformed_early_stop_after_perception_hands_off_to_clean_action_request(self):
+        result, sent, tool, _ = self.run_policy([tool_reply(), reply("   "),
+                                               reply(json.dumps({"actions": [ACTION]}))])
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(len(tool.seen), 1)
+        self.assertEqual([p.get("tool_choice") for p in sent], ["auto", "auto", None])
+        self.assertEqual([m["role"] for m in sent[-1]["messages"]], ["system", "user", "user"])
+
+    def test_illegal_actions_truncation_and_duplicate_keys_are_not_repaired(self):
+        for response in (reply('{"actions":[[2,0,0,0,0,0,-1]]}'),
+                         reply('{"actions":[],"actions":[]}'), reply(" ", finish="length")):
+            tool = FakeTool({"max_tool_rounds": 1})
+            result, sent, _, store = self.run_policy([tool_reply(), response], tool=tool)
+            self.assertEqual(result["status"], "invalid_output")
+            self.assertEqual(result["control_steps"], 0)
+            self.assertEqual(len(sent), 2)
+            self.assertFalse(any(e["event"] == "sam3_action_format_retry" for e in store.events))
+
+    def test_action_request_keeps_overlay_and_does_not_mutate_original_payload(self):
+        tool = FakeTool({"max_tool_rounds": 1})
+        parts = [{"type": "text", "text": '{"camera":"agentview","detections":[]}'},
+                 {"type": "image_url", "image_url": {"url": "data:image/png;base64,fixture", "detail": "original"}}]
+        tool.execute = Mock(return_value=parts)
+        cfg = config()
+        original = request_payload(cfg, "task", observation(), [], 0)
+        saved = copy.deepcopy(original)
+        sent, replies = [], [tool_reply(), reply(json.dumps({"actions": [ACTION]}))]
+        def send(endpoint, body, key, timeout):
+            sent.append(json.loads(body))
+            return replies.pop(0)
+        client = Client(cfg, MemoryStore(), api_key="fixture", send=send)
+        complete_with_sam3(client, original, observation(), 0, tool)
+        self.assertEqual(original, saved)
+        self.assertEqual(sent[-1]["messages"][-1]["content"][-2:], parts)
 
     def test_retry_uses_identical_tool_context_and_shared_http_budget(self):
         result, sent, _, _ = self.run_policy([tool_reply(), HTTPResponse(503, b"{}"), reply('{"actions": [[0,0,0,0,0,0,-1]]}')])
@@ -184,6 +267,7 @@ class ConfigurationTests(unittest.TestCase):
 
     def test_settings_reject_unknown_or_invalid_values(self):
         for value in ({"device": "cuda"}, {"timeout_seconds": True}, {"max_tool_rounds": 0},
+                      {"max_format_retries": True}, {"max_format_retries": 2},
                       {"max_instances": 100}, {"require_call": "yes"}, {"confidence_threshold": float("nan")},
                       {"service_url": "http://external.example:80"}, {"service_url": "http://x@y:80"}):
             with self.subTest(value=value), self.assertRaises(ExperimentError):
@@ -204,7 +288,7 @@ class ConfigurationTests(unittest.TestCase):
             sam = MicroBench("configs/deepseek_sam3_220.json").prepare(Path(temp) / "sam", policy_id="ds-sam3")
             self.assertEqual(base["microbench"]["protocol_sha256"], sam["microbench"]["protocol_sha256"])
             self.assertNotEqual(base["episodes"][0]["config_sha256"], sam["episodes"][0]["config_sha256"])
-            self.assertEqual(sam["max_http_requests_per_episode_including_api_check"], 1989)
+            self.assertEqual(sam["max_http_requests_per_episode_including_api_check"], 1992)
             self.assertEqual(base["max_http_requests_per_episode_including_api_check"], 1983)
             self.assertEqual(len(sam["episodes"]), 5)
 

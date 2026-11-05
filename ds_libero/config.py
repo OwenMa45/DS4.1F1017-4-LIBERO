@@ -75,7 +75,8 @@ class Config:
         rounds = 1
         if self.sam3:
             from .sam3_tools import settings
-            rounds += settings(self.sam3)["max_tool_rounds"]
+            options = settings(self.sam3)
+            rounds += options["max_tool_rounds"] + options["max_format_retries"]
         return rounds * (self.max_retries + 1)
 
     @classmethod

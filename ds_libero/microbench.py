@@ -251,13 +251,10 @@ def _phase(root, entry, phase, meta, factory, replay):
 
 
 def _recorded(campaign):
-    for phase in ("episode", "api-check"):
-        path = campaign / phase / "result.json"
-        if path.is_file():
-            status = json.loads(path.read_text(encoding="utf-8"))["status"]
-            return status in (("success", "failure", "invalid_output", "budget_exhausted")
-                              if phase == "episode" else ("invalid_output",))
-    return False
+    # A rejected preflight is not a completed trial and must stop batch/resume.
+    path = campaign / "episode" / "result.json"
+    return path.is_file() and json.loads(path.read_text(encoding="utf-8"))["status"] in (
+        "success", "failure", "invalid_output", "budget_exhausted")
 
 
 class MicroBench:
@@ -414,6 +411,7 @@ class MicroBench:
                          "decision_latency_seconds": row["decision_latency_seconds"],
                          "task_wall_seconds": row["task_execution_wall_seconds"],
                          "http_requests": None if external else row["http_requests"],
+                         "campaign_http_requests": None if external else row["campaign_http_requests"],
                          "usage": None if external else row["reported_usage"],
                          "api_cost": None if external else row["api_cost"],
                          "campaign_api_cost": None if external or not row["campaign"] else row["campaign"]["api_cost"],
@@ -427,14 +425,16 @@ class MicroBench:
                   "score": aggregate["macro_task_success_rate"], "coverage": aggregate["coverage"],
                   "planned_success_bounds": aggregate["planned_success_bounds"],
                   "status_counts": aggregate["status_counts"], "episodes": rows,
+                  "campaign_http_requests": None if external else sum(r["campaign_http_requests"] for r in rows),
                   "inference_accounting": "not_instrumented" if external else "built_in_client",
                   "notes": ["Score is 0..1; null means at least one of the five tasks is unscored.",
+                            "http_requests counts the control episode; campaign_http_requests also includes paid preflight.",
                             "Compare protocol_sha256 before comparing experiments; horizons and feedback settings affect the protocol.",
                             "External inference usage/cost is unknown, not zero. Detailed legacy logs contain recorded events only.",
                             "Policy revision is user-declared; adapter file hashing does not pin weights or transitive dependencies."]}
         write_json(root / "microbench.json", report)
         fields = ("index", "task", "label", "status", "scored", "success", "reason", "control_steps",
-                  "policy_decisions", "action_validity_rate", "task_wall_seconds", "http_requests", "artifacts")
+                  "policy_decisions", "action_validity_rate", "task_wall_seconds", "http_requests", "campaign_http_requests", "artifacts")
         with (root / "scores.csv").open("w", encoding="utf-8", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
             writer.writeheader()

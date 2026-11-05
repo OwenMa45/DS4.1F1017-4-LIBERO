@@ -135,6 +135,7 @@ def build_report(path, replay=True):
                "warnings": warnings}
     if manifest["config"].get("sam3"):
         summary["sam3"] = {
+            "action_format_retries": sum(e.get("event") == "sam3_action_format_retry" for e in events),
             "calls": len(sam3) + len(sam3_unfinished),
             "successful_calls": sum(e.get("status") == "ok" for e in sam3),
             "empty_detections": sum(e.get("status") == "ok" and e.get("detections") == 0 for e in sam3),

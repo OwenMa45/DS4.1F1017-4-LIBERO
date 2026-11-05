@@ -19,6 +19,7 @@
     "service_url": "http://127.0.0.1:8765",
     "timeout_seconds": 120,
     "max_tool_rounds": 2,
+    "max_format_retries": 1,
     "max_calls_per_round": 4,
     "max_instances": 6,
     "confidence_threshold": 0.35,

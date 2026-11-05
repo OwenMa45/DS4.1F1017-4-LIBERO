@@ -24,7 +24,7 @@ from .protocol import CAMERAS, _unique_object
 WIRE_VERSION = "sam3-rgb-v1"
 DEFAULTS = {"service_url": "http://127.0.0.1:8765", "timeout_seconds": 120,
             "max_tool_rounds": 2, "max_calls_per_round": 4, "max_instances": 6,
-            "confidence_threshold": 0.35, "require_call": True}
+            "confidence_threshold": 0.35, "require_call": True, "max_format_retries": 1}
 MAX_RESPONSE_BYTES = 16 * 1024 * 1024
 TOOL = {"type": "function", "function": {
     "name": "sam3_segment",
@@ -43,7 +43,8 @@ def settings(values):
         raise ExperimentError("Unknown SAM3 configuration field")
     result = {**DEFAULTS, **values}
     for key, lo, hi in (("timeout_seconds", 1, 3600), ("max_tool_rounds", 1, 4),
-                        ("max_calls_per_round", 1, 8), ("max_instances", 1, 16)):
+                        ("max_calls_per_round", 1, 8), ("max_instances", 1, 16),
+                        ("max_format_retries", 0, 1)):
         if type(result[key]) is not int or not lo <= result[key] <= hi:
             raise ExperimentError(f"sam3.{key} must be an integer in {lo}..{hi}")
     threshold = result["confidence_threshold"]
@@ -91,9 +92,13 @@ success or cross-camera correspondence is provided. Detection IDs are local to
 one call, NOT tracking IDs. Compare masks, fingerpad projections and both RGB
 views; retain the existing conservative feedback boundaries near contact.
 Overlays have the same size and orientation as their original camera image.
+The harness may start a separate action phase with completed SAM3 observations.
+In that phase perception is already complete: use the supplied observations and
+return actions directly, without attempting another tool call.
 '''
     if options["require_call"]:
-        prompt += "Every control decision MUST call SAM3 at least once before returning actions.\n"
+        prompt += ("Every control decision MUST call SAM3 at least once before returning actions,\n"
+                   "unless the harness supplies completed SAM3 observations for its action phase.\n")
     return prompt
 
 
@@ -222,38 +227,99 @@ class Sam3Tool:
             self.store.event(event)
 
 
+def _choice(reply):
+    try:
+        choice = reply["choices"][0]
+        message, finish = choice["message"], choice["finish_reason"]
+        if not isinstance(message, dict) or message.get("role", "assistant") != "assistant":
+            raise TypeError()
+        return message, finish
+    except (KeyError, IndexError, TypeError) as exc:
+        raise InvalidAction("Malformed DeepSeek tool response") from exc
+
+
+def _format_problem(message, finish):
+    # Retry serialization failures only. Valid JSON with illegal actions, duplicate
+    # keys, truncated replies and unexpected tool calls still fail normal validation.
+    if finish != "stop" or message.get("tool_calls"):
+        return None
+    content = message.get("content")
+    if content is None or isinstance(content, str) and not content.strip():
+        return "blank_action_content"
+    if isinstance(content, str):
+        try:
+            json.loads(content, object_pairs_hook=_unique_object)
+        except ValueError:
+            return "non_json_action_content"
+    return None
+
+
+def _action_reply(client, base_payload, observations, step, options):
+    # Start a fresh, tool-free JSON request. Do not mix JSON mode/tool_choice=none
+    # with tool-protocol messages, or reinterpret reasoning/DSML as robot actions.
+    payload = copy.deepcopy(base_payload)
+    payload.pop("tools", None)
+    payload.pop("tool_choice", None)
+    payload["response_format"] = {"type": "json_object"}
+    instruction = (
+        "\nSAM3 action phase: perception calls for this decision are complete. "
+        "The supplied SAM3 observations refer to the same current camera images. "
+        "No tools are available in this request. Use those observations, the original "
+        "images and robot state to choose actions under the existing control rules. "
+        "Return only a JSON object with the sole key actions, containing 1.."
+        "max_actions_this_response arrays of seven numbers. A shape-only example is "
+        '{"actions":[[0,0,0,0,0,0,-1]]}; choose the actual values from the observations. '
+        "Write the JSON directly in content, with no prose, code fence or tool markup.\n")
+    payload["messages"][0]["content"] += instruction
+    content = [{"type": "text", "text": f"Completed SAM3 observations for control step {step}:"}]
+    for arguments, parts in observations:
+        content.append({"type": "text", "text": json.dumps({"sam3_query": arguments}, allow_nan=False)})
+        content.extend(copy.deepcopy(parts))
+    payload["messages"].append({"role": "user", "content": content})
+    client.store.event({"event": "sam3_action_phase", "step": step, "perception_calls": len(observations)})
+    for retry in range(options["max_format_retries"] + 1):
+        reply = client.complete(payload, step)
+        message, finish = _choice(reply)
+        if message.get("tool_calls"):
+            raise InvalidAction("Tool call returned during the tool-free action phase")
+        problem = _format_problem(message, finish)
+        if problem is None or retry == options["max_format_retries"]:
+            return reply
+        client.store.event({"event": "sam3_action_format_retry", "step": step,
+                            "retry": retry + 1, "reason": problem})
+        payload["messages"].append({"role": "user", "content":
+            "The previous response did not contain a complete JSON action object. "
+            "Perception is complete and the robot has not moved. Return the action JSON "
+            "directly in content, without tool calls, protocol markup, prose or markdown."})
+    raise AssertionError("unreachable")
+
+
 def complete_with_sam3(client, payload, obs, step, tool):
     """One decision, bounded inference rounds, zero simulator actions."""
     options = settings(tool.options)
-    payload = copy.deepcopy(payload)
+    base_payload = payload
+    payload = copy.deepcopy(base_payload)
     payload["tools"] = [copy.deepcopy(TOOL)]
+    payload["tool_choice"] = "auto"
+    payload.pop("response_format", None)
     seen_ids = set()
     calls_made = 0
-    for turn in range(options["max_tool_rounds"] + 1):
-        final = turn == options["max_tool_rounds"]
+    observations = []
+    for turn in range(options["max_tool_rounds"]):
         # DeepSeek thinking rejects required/named choices. The prompt and
         # require_call validation enforce our experiment's perception contract.
-        payload["tool_choice"] = "none" if final else "auto"
-        if final:
-            payload["response_format"] = {"type": "json_object"}
-        else:
-            payload.pop("response_format", None)
         reply = client.complete(payload, step)
-        try:
-            choice = reply["choices"][0]
-            message, finish = choice["message"], choice["finish_reason"]
-            if not isinstance(message, dict) or message.get("role", "assistant") != "assistant":
-                raise TypeError()
-        except (KeyError, IndexError, TypeError) as exc:
-            raise InvalidAction("Malformed DeepSeek tool response") from exc
+        message, finish = _choice(reply)
         calls = message.get("tool_calls")
         if not calls:
             if finish == "tool_calls":
                 raise InvalidAction("Empty tool_calls response")
             if finish == "stop" and options["require_call"] and not calls_made:
                 raise InvalidAction("SAM3 experiment requires a perception call before actions")
+            if calls_made and _format_problem(message, finish):
+                return _action_reply(client, base_payload, observations, step, options)
             return reply  # Existing action parser checks finish reason and all actions.
-        if final or finish != "tool_calls":
+        if finish != "tool_calls":
             raise InvalidAction("Unexpected, truncated or over-budget tool call response")
         if (not isinstance(calls, list) or not 1 <= len(calls) <= options["max_calls_per_round"]
                 or (message.get("content") is not None and not isinstance(message["content"], str))
@@ -282,5 +348,6 @@ def complete_with_sam3(client, payload, obs, step, tool):
         for call_id, arguments in parsed:
             content = tool.execute(arguments, obs, step, call_id)
             calls_made += 1
+            observations.append((copy.deepcopy(arguments), copy.deepcopy(content)))
             payload["messages"].append({"role": "tool", "tool_call_id": call_id, "content": content})
-    raise AssertionError("unreachable")
+    return _action_reply(client, base_payload, observations, step, options)

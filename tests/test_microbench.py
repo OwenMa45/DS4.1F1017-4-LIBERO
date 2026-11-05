@@ -218,6 +218,30 @@ class MicroBenchTests(unittest.TestCase):
         self.assertEqual(result['episodes'][0]['preflight_status']['status'], 'calibration_failed')
         self.assertEqual(result['batch_exit_code'], 2)
 
+    def test_invalid_api_preflight_stops_batch_and_preserves_reason_and_paid_calls(self):
+        from ds_libero.client import Client
+        from test_experiment import reply
+        bench = MicroBench(Config.from_dict({"protocol_version": "ds-libero-direct-v2",
+                                             "max_steps": 5, "action_horizon": 3}))
+        bench.prepare(self.root)
+        with patch('ds_libero.client.resolve_api_key', return_value='fixture'), patch(
+                'ds_libero.client.Client', side_effect=lambda cfg, store: Client(
+                    cfg, store, api_key='fixture', send=lambda *args: reply('   '))):
+            result = bench.run(self.root, replay=False)
+        self.assertEqual(result['status_counts'], {'preflight_incomplete': 1, 'not_started': 4})
+        self.assertEqual(result['batch_exit_code'], 2)
+        self.assertEqual(result['scored'], 0)
+        first = result['episodes'][0]
+        self.assertEqual(first['preflight_status'], {'phase': 'api-check', 'status': 'invalid_output'})
+        self.assertIn('api-check: model returned empty/non-text content', first['reason'])
+        self.assertEqual(first['http_requests'], 0)
+        self.assertEqual(first['campaign_http_requests'], 1)
+        self.assertEqual(result['campaign_http_requests'], 1)
+        self.assertFalse((self.root / 'runs/episode-0000/episode').exists())
+        self.assertFalse((self.root / 'runs/episode-0001').exists())
+        with self.assertRaisesRegex(ExperimentError, 'incomplete/error artifacts'):
+            bench.run(self.root, replay=False)
+
     def test_recorded_trials_are_not_rerun_and_new_evaluate_cannot_overwrite(self):
         self.evaluate()
         calls = self.environment.call_count
@@ -335,8 +359,8 @@ class MicroBenchTests(unittest.TestCase):
             result = bench.evaluate(out=self.root, replay=False)
         self.assertEqual(result['scored'], 0)
         self.assertIsNone(result['score'])
-        self.assertEqual(result['status_counts'], {'preflight_incomplete': 5})
-        self.assertEqual(result['batch_exit_code'], 0)
+        self.assertEqual(result['status_counts'], {'preflight_incomplete': 1, 'not_started': 4})
+        self.assertEqual(result['batch_exit_code'], 2)
 
     def test_invalid_configuration_and_missing_identity_fail_before_outputs(self):
         for budget in (0, 2049, True):

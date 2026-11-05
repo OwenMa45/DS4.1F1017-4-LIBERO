@@ -255,7 +255,9 @@ def report_plan(directory):
             for phase in ("api-check", "calibration"):
                 result = campaign / phase / "result.json"
                 if result.is_file():
-                    row["preflight_status"] = {"phase": phase, "status": json.loads(result.read_text(encoding="utf-8"))["status"]}
+                    preflight = json.loads(result.read_text(encoding="utf-8"))
+                    row["preflight_status"] = {"phase": phase, "status": preflight["status"]}
+                    row["reason"] = f"{phase}: {preflight.get('reason') or preflight['status']}"
                     break
         row["campaign"] = (build_campaign_report(campaign, entry["config_sha256"], plan["source_sha256"], currency)
                            if campaign.exists() else None)

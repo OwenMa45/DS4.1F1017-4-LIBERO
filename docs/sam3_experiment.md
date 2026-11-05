@@ -138,7 +138,7 @@ bash "$SIM" -u -B -m ds_libero.sam3_server check \
 # 离线冻结五任务，不调用模型。
 bash "$SIM" -B -m ds_libero microbench plan \
   --config configs/deepseek_sam3_220.json \
-  --policy-id deepseek-v4.1-flash-1017-sam3 --revision sam3-tools-v1 --out "$OUT"
+  --policy-id deepseek-v4.1-flash-1017-sam3 --revision sam3-tools-v2-action-phase --out "$OUT"
 
 # 使用既有 DEEPSEEK_API_KEY 或项目根目录 ds_API.txt。
 # 这一项会依次执行动作标定、真实 API+SAM3 检查、黑碗正式回合。
@@ -183,9 +183,21 @@ bash scripts/run_sam3_five.sh outputs/deepseek-sam3-220-all-001
 
 默认 `require_call=true`：每次控制决策至少调用一次 SAM3，否则输出按本实验契约视为 `invalid_output`。工具选择使用 `auto`，通过系统提示词要求调用；[DeepSeek thinking 模式不支持 `required` 或指定工具名称的强制选择](https://api-docs.deepseek.com/api/create-chat-completion/)。如需研究“可选使用工具”，改为 `false` 并新建计划，它是另一项策略消融。
 
-最多 2 轮工具调用后，使用 `tool_choice=none` 和 JSON mode 要求最终动作；任一 HTTP 重试仍计入同一请求预算。默认每回合最多 1980 次 HTTP 尝试，覆盖极端情况下 `220 × 3 轮请求 × 3 次尝试`，并非预先发送这些请求。API-check 单独最多 9 次，所以单任务含 preflight 的上限为 1989。基线设相同回合请求上限，实际通常远少于此。`max_tokens=null` 沿用已有 high 基线，不限制服务端默认输出；费用以日志为准。
+最多 2 轮工具调用后，启动独立动作请求：保留原始图像、状态、控制约定，将本次所有 SAM3 JSON 结果与叠加图作为带相机/目标标识的观测提供；不携带 `tools`、`tool_choice` 或工具对话消息，只开启 JSON mode。动作阶段明确说明感知已经完成。工具阶段若已返回合法动作，仍可提前结束。
 
-单个动作块未执行完时不会再调用工具。等待 SAM3、DeepSeek 或重试均不推进仿真。每次 `act` 从新观测构造对话，仅在该次决策内部保留完整工具消息与 [`reasoning_content`](https://api-docs.deepseek.com/guides/thinking_mode/)。
+仅对 `finish_reason=stop` 时的空白/null 内容或不能解析为完整 JSON 的文本，允许一次格式重试（`sam3.max_format_retries=1`，可设为 0 禁用）。重试使用同一观测，不重复分割、不推进仿真；原始失败响应保留，并记录 `sam3_action_format_retry`。不从 reasoning/DSML 中提取动作，不修补非法数值、重复键或截断输出；再次失败仍为 `invalid_output`。
+
+每次决策最多 4 轮 DeepSeek 请求（2 轮工具 + 1 轮动作 + 1 次格式重试），HTTP 重试也进入既有总预算。每回合上限仍为 1980 次 HTTP 尝试，达到即停止，不保证极端重试情况下可用满 220 控制步。API-check 最多 12 次，所以单任务含 preflight 的上限为 1992。基线回合上限仍为 1980；两组不是等推理算力。`max_tokens=null` 沿用 high 基线；费用以日志为准。
+
+单个动作块未执行完时不会再调用工具。等待 SAM3、DeepSeek 或重试均不推进仿真。每次 `act` 从新观测构造对话，工具阶段的连续请求保留完整工具消息与 [`reasoning_content`](https://api-docs.deepseek.com/guides/thinking_mode/)。独立动作阶段重新提供当前观测和实际分割结果，不把上一阶段的推理文本作为动作或观测。
+
+### exp01 的空白动作输出与前置失败
+
+用户返回的 exp01 中，五项标定均通过，38 次 SAM3 调用全部成功（其中 11 次为空检测）。8 次动作输出中有 4 次为空白字符串，1 次混有 DSML 工具协议标记，只有 3 次为合法动作 JSON。黑碗、推盘、书本停在 API-check；汤罐和抽屉进入 episode 后分别在 0 步和 4 步停止。这轮不能用于判断 SAM3 是否提升任务成功率。
+
+[DeepSeek JSON Output 文档](https://api-docs.deepseek.com/guides/json_mode/)说明：不可识别的非 JSON 输出可能被服务端替换为空格，即使 `finish_reason=stop`。日志确认的是输出序列化失败；无法仅凭响应断定服务端内部触发机制。新版通过独立动作阶段、显式 JSON 格式说明和有预算的重试处理这一问题，真实 API 稳定性仍需用新实验验收。
+
+`microbench run` 现在遇到任何前置检查失败（包括 `invalid_output`）会立即停止当前批次，退出码 2。`scores.csv` 的 `reason` 显示具体前置阶段与原因；`campaign_http_requests` 包含 API-check 的付费请求，原 `http_requests` 仍只计正式控制回合。旧 exp01 产物保留；修复后重启 worker，再用新目录（例如 `outputs/deepseek-sam3-220-exp02`）生成计划，先运行 `--episode 0` 验收。
 
 运行基线：
 
