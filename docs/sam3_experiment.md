@@ -6,15 +6,45 @@
 
 ## 运行环境与路径
 
-- SAM3 包目录：`/mnt/cpfs/users/mrq/package/sam3/sam3`。导入时加入 Python 搜索路径的是它的父目录 `/mnt/cpfs/users/mrq/package/sam3`。
+- 默认源码入口：`/mnt/cpfs/users/mrq/package/sam3/sam3`。可为 Git 仓库根目录或包含 `model_builder.py` 的 Python 包目录；worker 自动解析实际包目录，将包的父目录加入 Python 搜索路径，启动时打印 `Using local SAM3 package: ...`。
 - 权重目录：`/mnt/cpfs/users/mrq/package/sam3/checkpoints`。优先选 `sam3.pt`；否则只在恰有一个 `.pt` / `.pth` 文件时自动选择。多个候选必须传 `--checkpoint /绝对路径/文件.pt`。
 - 默认词表：包目录中的 `assets/bpe_simple_vocab_16e6.txt.gz`；位置不同时用 `--bpe FILE`。
-- 权重按官方 SAM3 的 `model` / `detector.*` 格式提取 image detector，并做严格键/形状校验；也接受完整 image model state dict。文件与本地代码不匹配时停止，不使用部分随机初始化的模型继续跑分。
+- 权重按官方 SAM3 的 `model` / `detector.*` 格式提取 image detector；也接受完整 image model state dict。只有在 SAM2 neck 和实例交互 predictor 均明确关闭时，才排除模型未注册的 `backbone.vision_backbone.sam2_convs.*` 额外权重；其余权重仍以 `strict=True` 校验键和形状。缺少任何已启用参数、形状不匹配或出现其他未知键都会停止。
 - SAM3 使用你已准备的 GPU Python，常驻一个独立进程。默认 CUDA + bfloat16；不支持 bfloat16 的 GPU 可以传 `--precision float32`。用 `CUDA_VISIBLE_DEVICES` 选择显卡。
 - LIBERO 继续由 `/mnt/cpfs/users/mrq/libero_cpu/run_cpu.sh` 启动。**不要向它的固定 Python 3.10 / CPU 环境安装 SAM3 或替换 torch。** 仿真端仅使用已有 Pillow 和标准库 HTTP 客户端。
 - 服务仅监听 `127.0.0.1:8765`，默认要求服务与仿真在同一节点；跨节点时用 SSH 本地端口转发。不会自动下载权重，找不到本地文件会直接失败。
 
 SAM3 接口按[官方 image builder](https://github.com/facebookresearch/sam3/blob/main/sam3/model_builder.py)和[image processor](https://github.com/facebookresearch/sam3/blob/main/sam3/model/sam3_image_processor.py)核对。你的本地版本若不同，启动失败时请回传 worker 日志，不要修改仿真环境来迁就它。
+
+### 启动报 `Unexpected key(s): ...sam2_convs...`
+
+重复的 `sam3` 目录名不表示安装错误。用户返回的 `environment.json` 中 `sam3_repo` 为 `/mnt/cpfs/users/mrq/package/sam3/sam3`；按安装脚本的校验，这是包含 `pyproject.toml` 和 `sam3/model_builder.py` 的 Git 仓库根目录。因此该节点的结构应为：
+
+```text
+/mnt/cpfs/users/mrq/package/sam3/
+├── checkpoints/sam3.pt
+└── sam3/                  # Git 仓库根目录；传给 --sam3-code 即可
+    ├── pyproject.toml
+    └── sam3/              # 实际 Python 包
+        └── model_builder.py
+```
+
+`--sam3-code` 可以传 Git 仓库根目录或实际 Python 包目录，worker 会解析并校验导入来源；不需要移动文件。直接在存储目录下放 Python 包的布局也受支持，以实际 `model_builder.py` 位置为准。
+
+官方 checkpoint 的 detector 中还带有 SAM2 交互分支的 neck 权重，而本实验只使用文本提示图像分割，设置了 `enable_inst_interactivity=False`。[官方 dual neck](https://github.com/facebookresearch/sam3/blob/main/sam3/model/necks.py) 在此模式下不注册 `sam2_convs`。旧版 harness 将这些额外键一并严格加载，导致正常 checkpoint 被拒绝；这类仅含 `sam2_convs` 额外键的错误不需要重建虚拟环境或重新下载权重。
+
+更新 harness 并重启 worker：
+
+```bash
+cd /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO
+git pull --ff-only origin codex/direct-policy-v2
+export SAM3_PYTHON=/mnt/cpfs/users/mrq/envs/sam3/bin/python
+mkdir -p outputs
+set -o pipefail
+bash scripts/start_sam3.sh --precision float32 2>&1 | tee outputs/sam3-worker-003.log
+```
+
+修复后的日志会显示 `SAM3 image weights loaded (strict): ... keys; ignored 22 disabled SAM2 neck keys`（数量以 checkpoint 为准）。`/health` 的 `identity.checkpoint_load` 记录实际加载数量及排除的完整键名，并纳入 runtime ID；没有全局放宽为 `strict=False`。随后等待 `SAM3 ready at http://127.0.0.1:8765`，再按第 2 节执行真实前向检查，使用新的输出目录。仅加载成功还不代表 PPU 上的完整推理已通过。
 
 ## 没有 Conda：复用节点加速器栈创建 venv
 
@@ -25,7 +55,7 @@ cd /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO
 git pull --ff-only origin codex/direct-policy-v2
 /usr/local/bin/python scripts/setup_sam3_env.py \
   --env /mnt/cpfs/users/mrq/envs/sam3 \
-  --sam3-repo /mnt/cpfs/users/mrq/package/sam3 \
+  --sam3-repo /mnt/cpfs/users/mrq/package/sam3/sam3 \
   --out outputs/sam3-env-001
 ```
 

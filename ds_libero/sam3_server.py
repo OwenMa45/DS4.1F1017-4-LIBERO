@@ -25,6 +25,7 @@ from .sam3_tools import WIRE_VERSION, Sam3Tool, validate_arguments
 
 DEFAULT_CODE = "/mnt/cpfs/users/mrq/package/sam3/sam3"
 DEFAULT_CHECKPOINT = "/mnt/cpfs/users/mrq/package/sam3/checkpoints"
+SAM2_NECK_PREFIX = "backbone.vision_backbone.sam2_convs."
 MAX_REQUEST_BYTES = 4 * 1024 * 1024
 
 
@@ -69,8 +70,9 @@ def png_bytes(image):
 def load_local_image_weights(model, checkpoint, torch):
     """Official SAM3 checkpoints bundle detector and tracker; only detector is used.
 
-    Upstream's convenience loader is non-strict. An experiment must not silently
-    run partially initialized image weights when a different .pt is selected.
+    Detector weights also contain an optional SAM2 neck. Exclude that branch only
+    when the model explicitly disables it; strictly validate all active weights.
+    Upstream's blanket non-strict load could accept partially initialized weights.
     """
     state = torch.load(str(checkpoint), map_location="cpu", weights_only=True)
     if isinstance(state, dict) and isinstance(state.get("model"), dict):
@@ -79,10 +81,21 @@ def load_local_image_weights(model, checkpoint, torch):
         raise ExperimentError("SAM3 checkpoint has no state dictionary")
     if any(key.startswith("detector.") for key in state):
         state = {key[len("detector."):]: value for key, value in state.items() if key.startswith("detector.")}
+    neck = getattr(getattr(model, "backbone", None), "vision_backbone", None)
+    disabled_sam2 = (getattr(neck, "sam2_convs", False) is None
+                     and getattr(model, "inst_interactive_predictor", False) is None)
+    expected_keys = set(model.state_dict())
+    ignored = sorted(key for key in state if disabled_sam2
+                     and key.startswith(SAM2_NECK_PREFIX) and key not in expected_keys)
+    if ignored:
+        state = dict(state)
+        for key in ignored:
+            del state[key]
     try:
         model.load_state_dict(state, strict=True)
     except RuntimeError as exc:
         raise ExperimentError(f"SAM3 image weights do not match the local code (strict load): {exc}") from exc
+    return {"strict": True, "loaded_keys": len(state), "ignored_disabled_sam2_keys": ignored}
 
 
 def encode_predictions(image, masks, boxes, scores, max_instances):
@@ -153,12 +166,15 @@ class Sam3Backend:
         if precision == "bfloat16" and not torch.cuda.is_bf16_supported():
             raise ExperimentError("This GPU does not support bfloat16; use --precision float32")
         self.torch, self.device, self.precision = torch, device, precision
+        print(f"Using local SAM3 package: {code}", flush=True)
         print(f"Loading local SAM3 checkpoint: {checkpoint}", flush=True)
         # No downloads and no random-weight fallback when the local file is absent.
         self.model = build_sam3_image_model(checkpoint_path=None, bpe_path=str(bpe),
             device="cpu", eval_mode=True, load_from_HF=False, enable_segmentation=True,
             enable_inst_interactivity=False, compile=False)
-        load_local_image_weights(self.model, checkpoint, torch)
+        checkpoint_load = load_local_image_weights(self.model, checkpoint, torch)
+        print(f"SAM3 image weights loaded (strict): {checkpoint_load['loaded_keys']} keys; "
+              f"ignored {len(checkpoint_load['ignored_disabled_sam2_keys'])} disabled SAM2 neck keys", flush=True)
         self.model.to(device).eval()
         self.processor = Sam3Processor(self.model, device=device, confidence_threshold=0.35)
         self.cache = OrderedDict()  # At most the two current camera embeddings.
@@ -170,6 +186,7 @@ class Sam3Backend:
                 versions[name] = None
         self.identity = {"schema": WIRE_VERSION, "code_path": str(code), "checkpoint_path": str(checkpoint),
             "checkpoint_sha256": file_hash(checkpoint), "bpe_sha256": file_hash(bpe),
+            "checkpoint_load": checkpoint_load,
             "sam3_source_sha256": digest({p.relative_to(code).as_posix(): file_hash(p) for p in sorted(code.rglob("*.py"))}),
             "worker_source_sha256": file_hash(Path(__file__)), "torch": torch.__version__,
             "tool_source_sha256": file_hash(Path(__file__).with_name("sam3_tools.py")), "dependencies": versions,

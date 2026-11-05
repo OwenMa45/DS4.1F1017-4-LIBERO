@@ -9,7 +9,8 @@ import threading
 import unittest
 from collections import OrderedDict
 from pathlib import Path
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 from ds_libero.artifacts import Store, write_json
 from ds_libero.client import Client, HTTPResponse, ModelPolicy
@@ -209,8 +210,9 @@ class ConfigurationTests(unittest.TestCase):
 
     def test_local_paths_package_parent_checkpoint_selection_and_ambiguity(self):
         with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
-            code, checkpoints = root / "sam3", root / "checkpoints"
+            # Match a sam3/ storage directory with separate checkout and weights.
+            root = Path(temp) / "sam3" / "sam3"
+            code, checkpoints = root / "sam3", root.parent / "checkpoints"
             (code / "assets").mkdir(parents=True)
             (code / "model_builder.py").write_text("")
             (code / "assets/bpe_simple_vocab_16e6.txt.gz").write_bytes(b"vocab")
@@ -219,6 +221,8 @@ class ConfigurationTests(unittest.TestCase):
                 resolve_paths(code, checkpoints)
             (checkpoints / "one.pt").write_bytes(b"weights")
             self.assertEqual(resolve_paths(root, checkpoints)[1].name, "one.pt")
+            self.assertEqual(resolve_paths(root, checkpoints)[0], code.resolve())
+            self.assertEqual(resolve_paths(code, checkpoints)[0], code.resolve())
             (checkpoints / "two.pt").write_bytes(b"weights")
             with self.assertRaises(ExperimentError):
                 resolve_paths(code, checkpoints)
@@ -284,6 +288,74 @@ class BenchIntegrationTests(unittest.TestCase):
 
 
 class LoaderTests(unittest.TestCase):
+    @staticmethod
+    def image_model(keys=("weight",)):
+        return SimpleNamespace(
+            backbone=SimpleNamespace(vision_backbone=SimpleNamespace(sam2_convs=None)),
+            inst_interactive_predictor=None, state_dict=lambda: dict.fromkeys(keys),
+            load_state_dict=Mock())
+
+    @staticmethod
+    def sam2_neck_weights():
+        # The 22 extra keys reported by the real checkpoint, not a model fixture.
+        layers = [("dconv_2x2_0", "dconv_2x2_1", "conv_1x1", "conv_3x3"),
+                  ("dconv_2x2", "conv_1x1", "conv_3x3"),
+                  ("conv_1x1", "conv_3x3"), ("conv_1x1", "conv_3x3")]
+        return {f"backbone.vision_backbone.sam2_convs.{index}.{layer}.{field}": "unused"
+                for index, names in enumerate(layers) for layer in names for field in ("weight", "bias")}
+
+    def test_full_checkpoint_and_image_state_ignore_only_disabled_sam2_neck(self):
+        extras = self.sam2_neck_weights()
+        self.assertEqual(len(extras), 22)
+        active = {"backbone.vision_backbone.convs.0.conv_1x1.weight": "active", "weight": "active"}
+        image = {**active, **extras}
+        full = {"model": {**{"detector." + key: value for key, value in image.items()},
+                          "tracker.weight": "unused tracker"}}
+        for checkpoint in (full, image):
+            with self.subTest(wrapped="model" in checkpoint):
+                model = self.image_model(active)
+                torch = SimpleNamespace(load=Mock(return_value=checkpoint))
+                audit = load_local_image_weights(model, "unused.pt", torch)
+                model.load_state_dict.assert_called_once_with(active, strict=True)
+                self.assertEqual(audit, {"strict": True, "loaded_keys": len(active),
+                                        "ignored_disabled_sam2_keys": sorted(extras)})
+                self.assertEqual(len(image), len(active) + 22)  # Never mutate the checkpoint.
+
+    def test_unknown_disabled_state_or_enabled_branch_does_not_filter(self):
+        state = {"weight": "active", **self.sam2_neck_weights()}
+        for branch in ("active_neck", "active_predictor", "unknown_neck", "unknown_predictor"):
+            with self.subTest(branch=branch):
+                model = self.image_model()
+                if branch == "active_neck":
+                    model.backbone.vision_backbone.sam2_convs = object()
+                elif branch == "active_predictor":
+                    model.inst_interactive_predictor = object()
+                elif branch == "unknown_neck":
+                    del model.backbone.vision_backbone.sam2_convs
+                else:
+                    del model.inst_interactive_predictor
+                load_local_image_weights(model, "unused.pt", SimpleNamespace(load=lambda *a, **kw: state))
+                model.load_state_dict.assert_called_once_with(state, strict=True)
+
+    def test_registered_sam2_keys_are_never_discarded(self):
+        state = {"weight": "active", **self.sam2_neck_weights()}
+        model = self.image_model(state)
+        audit = load_local_image_weights(model, "unused.pt", SimpleNamespace(load=lambda *a, **kw: state))
+        model.load_state_dict.assert_called_once_with(state, strict=True)
+        self.assertEqual(audit["ignored_disabled_sam2_keys"], [])
+
+    def test_other_extra_missing_and_wrong_shape_weights_still_fail_strictly(self):
+        for active, error in (({"weight": "active", "unrecognized.weight": 1}, "Unexpected key(s)"),
+                              ({}, "Missing key(s)"), ({"weight": "wrong shape"}, "size mismatch")):
+            with self.subTest(error=error):
+                model = self.image_model()
+                model.load_state_dict.side_effect = RuntimeError(error)
+                state = {**active, **self.sam2_neck_weights()}
+                with self.assertRaisesRegex(ExperimentError, "strict load") as raised:
+                    load_local_image_weights(model, "unused.pt", SimpleNamespace(load=lambda *a, **kw: state))
+                self.assertIn(error, str(raised.exception))
+                model.load_state_dict.assert_called_once_with(active, strict=True)
+
     def test_builder_uses_supplied_package_local_checkpoint_and_no_hf(self):
         import types
         with tempfile.TemporaryDirectory() as temp:
@@ -300,6 +372,9 @@ class LoaderTests(unittest.TestCase):
             calls = []
             loaded = []
             class Model:
+                backbone = SimpleNamespace(vision_backbone=SimpleNamespace(sam2_convs=None))
+                inst_interactive_predictor = None
+                def state_dict(self): return {"weight": None}
                 def load_state_dict(self, state, strict): loaded.append((state, strict))
                 def to(self, device): return self
                 def eval(self): return self
@@ -315,7 +390,8 @@ class LoaderTests(unittest.TestCase):
             def load(path, **kwargs):
                 self.assertEqual(path, str(checkpoint.resolve()))
                 self.assertEqual(kwargs, {"map_location": "cpu", "weights_only": True})
-                return {"model": {"detector.weight": "image weights", "tracker.weight": "not used"}}
+                return {"model": {"detector.weight": "image weights", "tracker.weight": "not used",
+                                  **{"detector." + key: value for key, value in self.sam2_neck_weights().items()}}}
             torch.load = load
             with patch.dict("sys.modules", {"torch": torch, "sam3": package, "sam3.model_builder": builder,
                                            "sam3.model.sam3_image_processor": processor}), patch("sys.path", list(__import__("sys").path)):
@@ -326,11 +402,16 @@ class LoaderTests(unittest.TestCase):
             self.assertFalse(calls[0]["load_from_HF"])
             self.assertFalse(calls[0]["enable_inst_interactivity"])
             self.assertEqual(backend.health()["identity"]["checkpoint_sha256"], hashlib.sha256(checkpoint.read_bytes()).hexdigest())
+            audit = backend.health()["identity"]["checkpoint_load"]
+            self.assertEqual(audit["ignored_disabled_sam2_keys"], sorted(self.sam2_neck_weights()))
+            self.assertTrue(audit["strict"])
+            self.assertEqual(backend.runtime_id, digest(backend.health()["identity"]))
 
     def test_incompatible_weights_fail_instead_of_serving_partial_model(self):
         import types
         torch = types.SimpleNamespace(load=lambda *args, **kwargs: {"model": {"detector.bad": 1}})
         class Model:
+            def state_dict(self): return {"weight": None}
             def load_state_dict(self, state, strict):
                 if strict:
                     raise RuntimeError("Missing image weights")
