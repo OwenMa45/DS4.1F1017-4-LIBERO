@@ -16,6 +16,33 @@
 
 SAM3 接口按[官方 image builder](https://github.com/facebookresearch/sam3/blob/main/sam3/model_builder.py)和[image processor](https://github.com/facebookresearch/sam3/blob/main/sam3/model/sam3_image_processor.py)核对。你的本地版本若不同，启动失败时请回传 worker 日志，不要修改仿真环境来迁就它。
 
+## 没有 Conda：复用节点加速器栈创建 venv
+
+对用户当前的 Python 3.12.3 / PPU-ZW805 节点，`nvidia-smi` 显示的是 PPU-SMI / HGGC 信息，不应据此安装或升级公共 NVIDIA CUDA torch wheel。提供了 `scripts/setup_sam3_env.py`：用 `venv --system-site-packages` 继承节点现有包，在新环境内补 SAM3 依赖，不改动 LIBERO 或基础 Python。该环境依赖当前节点的基础解释器和加速器库，不能搬到另一种节点直接使用。
+
+```bash
+cd /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO
+git pull --ff-only origin codex/direct-policy-v2
+/usr/local/bin/python scripts/setup_sam3_env.py \
+  --env /mnt/cpfs/users/mrq/envs/sam3 \
+  --sam3-repo /mnt/cpfs/users/mrq/package/sam3 \
+  --out outputs/sam3-env-001
+```
+
+脚本先验证基础 torch / torchvision 导入及 `torch.cuda` 接口，再创建环境。根据**你本地** SAM3 的 `pyproject.toml` 解析依赖，固定已装加速器包版本，先审查 pip dry-run：任何将安装 torch、torchvision、Triton、PPU、NVIDIA/CUDA 包的计划都会停止。实际依赖安装使用审核后的版本和 `--no-deps`；SAM3 本体也使用 `--no-deps --no-build-isolation`。安装后再次校验加速器模块路径和版本，最后仅做 SAM3 导入及 2×2 矩阵运算，不加载模型权重、不调用 DeepSeek。
+
+看到 `READY` 后，不必激活环境，显式指定解释器即可：
+
+```bash
+export SAM3_PYTHON=/mnt/cpfs/users/mrq/envs/sam3/bin/python
+set -o pipefail
+bash scripts/start_sam3.sh --precision float32 2>&1 | tee outputs/sam3-worker-002.log
+```
+
+先以 `float32` 验证 PPU 上的真实前向推理，再另建实验评估 bfloat16；成功创建环境不代表所有 SAM3 算子均已在 PPU 上验证。加速器仍通过框架兼容的 `cuda` 接口使用，不安装 NVIDIA 驱动。也可 `source /mnt/cpfs/users/mrq/envs/sam3/bin/activate` 进入环境。
+
+脚本不会覆盖已有环境或日志目录；失败时先回传 `/mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO/outputs/sam3-env-001/environment.json` 和其中失败阶段对应的 `.log`，不要在基础 Python 上逐个重装 torch。若基础环境探测失败，需要节点的厂商运行时支持，不能仅靠 venv 修复。本脚本的保护逻辑经过离线测试，PPU 实机结果以你的返回为准。
+
 ## 1. 更新仓库并启动 SAM3（终端 A）
 
 先激活你准备好的 **SAM3 环境**，然后执行：
