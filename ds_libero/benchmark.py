@@ -44,7 +44,7 @@ def create_plan(base, suite, task_ids, init_state_ids, seed, out):
             "execution": "one explicitly selected episode at a time; no API call during plan creation",
             "initial_states_note": "Official state availability is verified by the remote runtime",
             "max_http_requests_per_episode_including_api_check": (base.max_http_requests +
-                min(base.max_http_requests, base.max_retries + 1))}
+                min(base.max_http_requests, base.max_http_attempts_per_decision))}
     plan["plan_sha256"] = digest(plan)
     write_json(root / "plan.json", plan)
     return plan
@@ -67,7 +67,7 @@ def create_five_plan(base, out):
             "execution": "sequential tasks, or one selected episode; no API during plan creation",
             "initial_states_note": "Official initial state 0 for each task, checked by the runtime",
             "max_control_steps_per_episode": base.max_steps,
-            "max_http_requests_per_episode_including_api_check": base.max_http_requests + min(base.max_http_requests, base.max_retries + 1)}
+            "max_http_requests_per_episode_including_api_check": base.max_http_requests + min(base.max_http_requests, base.max_http_attempts_per_decision)}
     plan["plan_sha256"] = digest(plan)
     write_json(root / "plan.json", plan)
     return plan
@@ -236,7 +236,7 @@ def report_plan(directory):
                         "command_wall_seconds", "simulated_control_seconds", "task_execution_wall_seconds",
                         "retry_backoff_seconds", "reported_usage", "api_cost", "http_latency_incomplete",
                         "usage_field_available_attempts", "control_steps", "policy_decisions", "reason",
-                        "decision_latency_seconds"):
+                        "decision_latency_seconds", "sam3"):
                 if key in summary:
                     row[key] = summary[key]
             row["reported_total_tokens"] = summary["reported_usage"]["total_tokens"]

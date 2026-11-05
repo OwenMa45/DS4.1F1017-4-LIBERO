@@ -1,5 +1,7 @@
 # LIBERO-Five v1 微型 bench
 
+内置 DeepSeek + SAM3 策略已接入：`--config configs/deepseek_sam3_220.json`，无需自定义 factory。SAM3 在独立进程运行，调用与 DeepSeek 子轮统一留痕；参见 [SAM3 实验运行说明](sam3_experiment.md)。
+
 五个既有任务现在有统一的 Python 接口和命令行入口。新实验实现 `create_policy(context)`，返回具有 `act(request)` 方法的策略，即可复用任务初始化、观测、动作检查、官方成功判定、日志和报告。原有 DeepSeek / GPT 配置也可通过同一入口运行。
 
 实现位于 `ds_libero/microbench.py`，无需新 SDK；从仓库根目录导入即可。列任务、生成计划、读报告只需 Python 标准库。实际仿真仍使用已固定的远程 Python 3.10 / CPU / OSMesa 环境，不在 Windows 系统 Python 中启动 LIBERO。

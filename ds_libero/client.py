@@ -219,6 +219,10 @@ class ModelPolicy:
         self.cfg, self.task, self.client, self.store = cfg, task, client, store
         self.visual_history = []
         self.previous_decision = None
+        self.sam3 = None
+        if cfg.sam3:
+            from .sam3_tools import Sam3Tool
+            self.sam3 = Sam3Tool(cfg.sam3, store)
 
     def act(self, obs, history, step, frame_refs):
         started = time.perf_counter()
@@ -232,8 +236,13 @@ class ModelPolicy:
                 event["control_feedback"] = feedback
             event["visual_history_frames"] = [{"step": s, "frames": refs}
                                                for s, _, refs in self.visual_history]
-            reply = self.client.complete(request_payload(self.cfg, self.task, obs, history, step,
-                [(s, o) for s, o, _ in self.visual_history], feedback), step)
+            payload = request_payload(self.cfg, self.task, obs, history, step,
+                [(s, o) for s, o, _ in self.visual_history], feedback)
+            if self.sam3 is None:
+                reply = self.client.complete(payload, step)
+            else:
+                from .sam3_tools import complete_with_sam3
+                reply = complete_with_sam3(self.client, payload, obs, step, self.sam3)
             content, finish = response_content(self.cfg, reply)
             event.update(finish_reason=finish, content_characters=len(content) if isinstance(content, str) else None)
             v2 = self.cfg.protocol_version == "ds-libero-direct-v2"

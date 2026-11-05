@@ -77,6 +77,10 @@ class Store:
 
     def request(self, step, encoded):
         path = self.path / "requests" / f"step_{step:05d}.json"
+        # Tool rounds share a control step, but not a payload. Retain every
+        # request so earlier api_attempt hashes and exact replays stay valid.
+        if path.exists() and path.read_bytes() != encoded:
+            path = path.with_name(f"step_{step:05d}_{hashlib.sha256(encoded).hexdigest()}.json")
         path.write_bytes(encoded)
         return str(path.relative_to(self.path)).replace("\\", "/")
 

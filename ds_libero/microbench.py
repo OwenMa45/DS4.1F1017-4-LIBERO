@@ -213,6 +213,11 @@ def _phase(root, entry, phase, meta, factory, replay):
                 if phase == "episode":
                     verify_gate(campaign / "api-check", "api-check", cfg, env.provenance)
                 policy = ModelPolicy(cfg, env.task, Client(cfg, store), store)
+                if cfg.sam3:
+                    policy.sam3.verify_runtime(json.loads((root / "sam3_runtime.json").read_text(encoding="utf-8")))
+                    if phase == "episode":
+                        checked = json.loads((campaign / "api-check" / "manifest.json").read_text(encoding="utf-8"))
+                        policy.sam3.verify_runtime(checked.get("sam3_worker"))
             if phase == "api-check":
                 obs = env.reset()
                 refs = store.observe(0, obs)
@@ -355,6 +360,16 @@ class MicroBench:
                 raise ExperimentError("A custom factory requires an external profile")
             from .client import resolve_api_key
             resolve_api_key(provider=cfg.api_provider)
+            if cfg.sam3:
+                from .sam3_tools import worker_health
+                health = worker_health(cfg.sam3)
+                runtime_path = root / "sam3_runtime.json"
+                if runtime_path.exists():
+                    old = json.loads(runtime_path.read_text(encoding="utf-8"))
+                    if old.get("runtime_id") != health["runtime_id"]:
+                        raise ExperimentError("SAM3 runtime changed across this five-task experiment")
+                else:
+                    write_json(runtime_path, health)
             factory = None
         exit_code = 0
         for entry in pending:
@@ -403,6 +418,7 @@ class MicroBench:
                          "api_cost": None if external else row["api_cost"],
                          "campaign_api_cost": None if external or not row["campaign"] else row["campaign"]["api_cost"],
                          "preflight_status": row.get("preflight_status"),
+                         "sam3": row.get("sam3"),
                          "artifacts": plan["episodes"][task.index]["run_directory"]})
         report = {"schema_version": 1, "benchmark": BENCH_ID, **copy.deepcopy(plan["microbench"]),
                   "plan_sha256": plan["plan_sha256"], "source_sha256": plan["source_sha256"],

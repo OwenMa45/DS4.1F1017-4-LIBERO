@@ -177,6 +177,9 @@ actuation within one phase; use shorter chunks for alignment, contact and test
 lifts. Never pad a chunk to its maximum length when fresh feedback is needed.
 Respect max_actions_this_response, which shrinks near the total control-step limit.
 '''
+    if cfg.sam3:
+        from .sam3_tools import augment_prompt
+        prompt = augment_prompt(prompt, cfg.sam3)
     return prompt
 
 

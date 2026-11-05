@@ -171,6 +171,9 @@ def main(argv=None):
             if args.command == "run":
                 verify_gate(args.api_check, "api-check", cfg, env.provenance)
             policy = ModelPolicy(cfg, env.task, Client(cfg, store), store)
+            if cfg.sam3 and args.command == "run":
+                checked = json.loads((args.api_check / "manifest.json").read_text(encoding="utf-8"))
+                policy.sam3.verify_runtime(checked.get("sam3_worker"))
             if args.command == "api-check":
                 obs = env.reset()
                 refs = store.observe(0, obs)

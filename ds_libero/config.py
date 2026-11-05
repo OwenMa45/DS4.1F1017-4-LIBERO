@@ -2,7 +2,7 @@
 
 import hashlib
 import json
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, field, fields, replace
 from pathlib import Path
 
 from .errors import ExperimentError
@@ -48,9 +48,12 @@ class Config:
     geometry_contract: bool = False
     expected_task_name: str = ""
     api_provider: str = "deepseek"
+    sam3: dict = field(default_factory=dict)
 
     def to_dict(self):
         values = asdict(self)
+        if not self.sam3:
+            values.pop("sam3")
         if self.api_provider == "deepseek":
             values.pop("api_provider")
         # Old profile hashes must remain replayable.
@@ -66,6 +69,14 @@ class Config:
     @property
     def fingerprint(self):
         return digest(self.to_dict())
+
+    @property
+    def max_http_attempts_per_decision(self):
+        rounds = 1
+        if self.sam3:
+            from .sam3_tools import settings
+            rounds += settings(self.sam3)["max_tool_rounds"]
+        return rounds * (self.max_retries + 1)
 
     @classmethod
     def load(cls, path=None):
@@ -83,6 +94,11 @@ class Config:
             if type(value) is not type(getattr(default, key)):
                 raise ExperimentError(f"Wrong type for config field {key}")
         cfg = cls(**values)
+        if cfg.sam3:
+            from .sam3_tools import settings
+            if cfg.api_provider != "deepseek" or cfg.protocol_version != "ds-libero-direct-v2":
+                raise ExperimentError("SAM3 tools require the built-in DeepSeek v2 policy")
+            cfg = replace(cfg, sam3=settings(cfg.sam3))
         # v1 deliberately runs one fixed episode, not an accidentally expanded benchmark.
         if cfg.protocol_version not in ("ds-libero-direct-v1", "ds-libero-direct-v2"):
             raise ExperimentError("Unknown protocol_version")

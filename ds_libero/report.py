@@ -89,6 +89,9 @@ def build_report(path, replay=True):
     http_times = [e["elapsed_seconds"] for e in attempts if e.get("elapsed_seconds") is not None]
     decision_times = [e["elapsed_seconds"] for e in decisions if e.get("elapsed_seconds") is not None]
     backoff = sum(e["elapsed_seconds"] for e in events if e.get("event") == "retry_backoff")
+    sam3 = [e for e in events if e.get("event") == "sam3_call"]
+    sam3_done = {e["call"] for e in sam3}
+    sam3_unfinished = [e for e in events if e.get("event") == "sam3_started" and e["call"] not in sam3_done]
     identity = {k: manifest["config"][k] for k in ("suite", "task_id", "task_order_index", "init_state_id", "seed")}
     identity["task_name"] = manifest.get("environment", {}).get("task_name")
     summary = {"schema_version": 2, "command": manifest["command"], **result,
@@ -130,6 +133,17 @@ def build_report(path, replay=True):
                "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
                "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
                "warnings": warnings}
+    if manifest["config"].get("sam3"):
+        summary["sam3"] = {
+            "calls": len(sam3) + len(sam3_unfinished),
+            "successful_calls": sum(e.get("status") == "ok" for e in sam3),
+            "empty_detections": sum(e.get("status") == "ok" and e.get("detections") == 0 for e in sam3),
+            "failed_calls": sum(e.get("status") != "ok" for e in sam3),
+            "unfinished_calls": len(sam3_unfinished),
+            "decisions_with_sam3": len({e["step"] for e in sam3}),
+            "latency_seconds": distribution([e["elapsed_seconds"] for e in sam3]),
+            "worker": manifest.get("sam3_worker"), "compute_cost": None,
+            "note": "Local GPU cost is not estimated. Tool latency is included in decision latency; do not add them."}
     if replay:
         try:
             summary["replay"] = make_replay(root, events, manifest["config"]["control_freq"])
