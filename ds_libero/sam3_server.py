@@ -14,9 +14,9 @@ import platform
 import sys
 import time
 from collections import OrderedDict
-from contextlib import nullcontext
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
+from types import MethodType
 
 from .config import Config, digest
 from .errors import ExperimentError
@@ -98,6 +98,28 @@ def load_local_image_weights(model, checkpoint, torch):
     return {"strict": True, "loaded_keys": len(state), "ignored_disabled_sam2_keys": ignored}
 
 
+def _native_vit_mlp_forward(self, x):
+    """Preserve the MLP layers without SAM3 addmm_act's unconditional BF16 cast."""
+    x = self.act(self.fc1(x))
+    x = self.norm(self.drop1(x))
+    return self.drop2(self.fc2(x))
+
+
+def configure_model_precision(model, precision):
+    policy = {"autocast_enabled": precision == "bfloat16", "float32_mlp_modules": [],
+              "vit_mlp_implementation": "upstream"}
+    if precision == "float32":
+        from sam3.model.vitdet import Mlp
+        # Module.float() preserves complex RoPE buffers; .to(dtype=float32) would not.
+        model.float()
+        for name, module in model.named_modules():
+            if type(module) is Mlp:
+                module.forward = MethodType(_native_vit_mlp_forward, module)
+                policy["float32_mlp_modules"].append(name)
+        policy["vit_mlp_implementation"] = "pytorch_float32"
+    return policy
+
+
 def encode_predictions(image, masks, boxes, scores, max_instances):
     """Convert original-resolution predictions to bounded, auditable 2D results."""
     import numpy as np
@@ -175,6 +197,9 @@ class Sam3Backend:
         checkpoint_load = load_local_image_weights(self.model, checkpoint, torch)
         print(f"SAM3 image weights loaded (strict): {checkpoint_load['loaded_keys']} keys; "
               f"ignored {len(checkpoint_load['ignored_disabled_sam2_keys'])} disabled SAM2 neck keys", flush=True)
+        precision_policy = configure_model_precision(self.model, precision)
+        print(f"SAM3 precision: {precision}; ViT MLP: {precision_policy['vit_mlp_implementation']} "
+              f"({len(precision_policy['float32_mlp_modules'])} float32 overrides)", flush=True)
         self.model.to(device).eval()
         self.processor = Sam3Processor(self.model, device=device, confidence_threshold=0.35)
         self.cache = OrderedDict()  # At most the two current camera embeddings.
@@ -187,6 +212,7 @@ class Sam3Backend:
         self.identity = {"schema": WIRE_VERSION, "code_path": str(code), "checkpoint_path": str(checkpoint),
             "checkpoint_sha256": file_hash(checkpoint), "bpe_sha256": file_hash(bpe),
             "checkpoint_load": checkpoint_load,
+            "precision_policy": precision_policy,
             "sam3_source_sha256": digest({p.relative_to(code).as_posix(): file_hash(p) for p in sorted(code.rglob("*.py"))}),
             "worker_source_sha256": file_hash(Path(__file__)), "torch": torch.__version__,
             "tool_source_sha256": file_hash(Path(__file__).with_name("sam3_tools.py")), "dependencies": versions,
@@ -215,8 +241,9 @@ class Sam3Backend:
             image = source.convert("RGB")  # Already upright; NEVER flip again.
         key = hashlib.sha256(raw).hexdigest()
         started = time.perf_counter()
-        autocast = (self.torch.autocast(device_type="cuda", dtype=self.torch.bfloat16)
-                    if self.precision == "bfloat16" else nullcontext())
+        autocast = (self.torch.autocast(device_type=self.device, dtype=self.torch.bfloat16)
+                    if self.precision == "bfloat16"
+                    else self.torch.autocast(device_type=self.device, enabled=False))
         with self.torch.inference_mode(), autocast:
             cached = key in self.cache
             if not cached:

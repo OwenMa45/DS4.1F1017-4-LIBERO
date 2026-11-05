@@ -371,11 +371,14 @@ class LoaderTests(unittest.TestCase):
             builder = types.ModuleType("sam3.model_builder")
             calls = []
             loaded = []
+            float_calls = []
             class Model:
                 backbone = SimpleNamespace(vision_backbone=SimpleNamespace(sam2_convs=None))
                 inst_interactive_predictor = None
                 def state_dict(self): return {"weight": None}
                 def load_state_dict(self, state, strict): loaded.append((state, strict))
+                def float(self): float_calls.append(True); return self
+                def named_modules(self): return []
                 def to(self, device): return self
                 def eval(self): return self
             def build(**kwargs):
@@ -384,6 +387,8 @@ class LoaderTests(unittest.TestCase):
             builder.build_sam3_image_model = build
             processor = types.ModuleType("sam3.model.sam3_image_processor")
             processor.Sam3Processor = lambda *args, **kwargs: object()
+            vitdet = types.ModuleType("sam3.model.vitdet")
+            vitdet.Mlp = type("Mlp", (), {})
             torch = types.ModuleType("torch")
             torch.__version__ = "fixture"
             torch.cuda = types.SimpleNamespace(is_available=lambda: False)
@@ -394,6 +399,7 @@ class LoaderTests(unittest.TestCase):
                                   **{"detector." + key: value for key, value in self.sam2_neck_weights().items()}}}
             torch.load = load
             with patch.dict("sys.modules", {"torch": torch, "sam3": package, "sam3.model_builder": builder,
+                                           "sam3.model.vitdet": vitdet,
                                            "sam3.model.sam3_image_processor": processor}), patch("sys.path", list(__import__("sys").path)):
                 backend = Sam3Backend(code, checkpoint, device="cpu", precision="float32")
             self.assertIsNone(calls[0]["checkpoint_path"])
@@ -405,6 +411,8 @@ class LoaderTests(unittest.TestCase):
             audit = backend.health()["identity"]["checkpoint_load"]
             self.assertEqual(audit["ignored_disabled_sam2_keys"], sorted(self.sam2_neck_weights()))
             self.assertTrue(audit["strict"])
+            self.assertEqual(float_calls, [True])
+            self.assertEqual(backend.identity["precision_policy"]["vit_mlp_implementation"], "pytorch_float32")
             self.assertEqual(backend.runtime_id, digest(backend.health()["identity"]))
 
     def test_incompatible_weights_fail_instead_of_serving_partial_model(self):
@@ -538,7 +546,9 @@ class WorkerTests(unittest.TestCase):
 
         backend = Sam3Backend.__new__(Sam3Backend)
         backend.processor, backend.cache = Processor(), OrderedDict()
-        backend.torch = type("Torch", (), {"inference_mode": staticmethod(contextlib.nullcontext)})()
+        backend.torch = SimpleNamespace(inference_mode=contextlib.nullcontext,
+                                        autocast=Mock(side_effect=lambda **kw: contextlib.nullcontext()))
+        backend.device = "cpu"
         backend.precision, backend.runtime_id = "float32", "fake"
         request = {"schema": WIRE_VERSION, "image_base64": base64.b64encode(self.png).decode(),
                    "prompt": "bowl", "confidence_threshold": 0.35, "max_instances": 6}
@@ -551,6 +561,8 @@ class WorkerTests(unittest.TestCase):
         self.assertEqual(backend.processor.resets, 4)
         self.assertEqual(backend.processor.threshold, 0.5)
         self.assertEqual(first["image_sha256"], hashlib.sha256(self.png).hexdigest())
+        self.assertEqual(backend.torch.autocast.call_count, 2)
+        backend.torch.autocast.assert_called_with(device_type="cpu", enabled=False)
 
 
 if __name__ == "__main__":

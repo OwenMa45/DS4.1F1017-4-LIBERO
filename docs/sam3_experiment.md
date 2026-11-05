@@ -46,6 +46,32 @@ bash scripts/start_sam3.sh --precision float32 2>&1 | tee outputs/sam3-worker-00
 
 修复后的日志会显示 `SAM3 image weights loaded (strict): ... keys; ignored 22 disabled SAM2 neck keys`（数量以 checkpoint 为准）。`/health` 的 `identity.checkpoint_load` 记录实际加载数量及排除的完整键名，并纳入 runtime ID；没有全局放宽为 `strict=False`。随后等待 `SAM3 ready at http://127.0.0.1:8765`，再按第 2 节执行真实前向检查，使用新的输出目录。仅加载成功还不代表 PPU 上的完整推理已通过。
 
+### 前向报 `mat1 and mat2 must have the same dtype ... BFloat16 and Float`
+
+若堆栈指向 `vitdet.py` 的 `Mlp.forward → fc2`，原因是 SAM3 的 [fused addmm_act](https://github.com/facebookresearch/sam3/blob/main/sam3/perflib/fused.py) 无条件将 fc1 的输入、权重和输出转为 BF16；后续 fc2 权重仍为 FP32。旧 worker 的 `--precision float32` 只是不启用 autocast，没有避开这条内部转换路径，因此仍会在真实图像编码时报 dtype 不匹配。这不是 DeepSeek 密钥错误，也不是这条异常所能证明的 PPU 算子故障。
+
+Float32 模式现改为：将模型浮点参数/缓冲区转为 FP32（保留复数 RoPE 缓冲区），仅在当前模型的 SAM3 ViT `Mlp` 实例上使用 `fc1 → act → drop1 → norm → fc2 → drop2` 普通 PyTorch 运算，并在整个请求处理中显式关闭 autocast。保留原层、权重和 state dict 键名，不修改外部 SAM3 文件；BF16 模式保持上游 MLP 和 BF16 autocast。`identity.precision_policy` 记录实际选择和替换的模块名，纳入 runtime ID。
+
+更新 harness 后，在终端 A 用 Ctrl+C 停止旧 worker，再启动：
+
+```bash
+cd /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO
+git pull --ff-only origin codex/direct-policy-v2
+export SAM3_PYTHON=/mnt/cpfs/users/mrq/envs/sam3/bin/python
+set -o pipefail
+bash scripts/start_sam3.sh --precision float32 2>&1 | tee outputs/sam3-worker-004.log
+```
+
+应出现 `SAM3 precision: float32; ViT MLP: pytorch_float32 (32 float32 overrides)`（数量取决于本地模型结构），随后为 `SAM3 ready`。保留该终端，在终端 B 运行：
+
+```bash
+cd /mnt/cpfs/users/mrq/DS4.1F1017-4-LIBERO
+bash /mnt/cpfs/users/mrq/libero_cpu/run_cpu.sh -u -B -m ds_libero.sam3_server check \
+  --config configs/deepseek_sam3_220.json --out outputs/sam3-check-004
+```
+
+结果应为 `status=pass`。此检查不调用 DeepSeek、不读取 `ds_API.txt`；`api_error` 是旧有通用 HTTP 错误分类，也用于本机 SAM3 服务。若继续返回 HTTP 500，回传新 worker 日志中的完整 traceback；检查结果 JSON 只保留了 HTTP 错误，不能代替 worker 堆栈。已用 CPU PyTorch 小张量测试复现原 dtype 错误并验证替代路径，完整 PPU/SAM3 前向仍以节点验收为准。
+
 ## 没有 Conda：复用节点加速器栈创建 venv
 
 对用户当前的 Python 3.12.3 / PPU-ZW805 节点，`nvidia-smi` 显示的是 PPU-SMI / HGGC 信息，不应据此安装或升级公共 NVIDIA CUDA torch wheel。提供了 `scripts/setup_sam3_env.py`：用 `venv --system-site-packages` 继承节点现有包，在新环境内补 SAM3 依赖，不改动 LIBERO 或基础 Python。该环境依赖当前节点的基础解释器和加速器库，不能搬到另一种节点直接使用。
@@ -205,3 +231,5 @@ python -m ds_libero.sam3_server --help
 ```
 
 核心测试覆盖原有控制约定兼容性、五任务计划、thinking 工具上下文、HTTP/工具预算、非法输出不执行、服务故障不计模型失败、请求日志不覆盖、掩膜像素坐标/方向、服务通信与结果落盘。需要 NumPy 和 Pillow，无需 torch、SAM3 权重或 API 密钥；这些测试不能替代上述真实 GPU/API 验收。
+
+`tests/test_sam3_precision.py` 另用 CPU PyTorch 2.9 小张量复现 BF16/FP32 边界错误，检查普通 MLP 数值结果、权重不变、复数 RoPE 保留和 BF16 模式兼容。无 torch 时跳过，由 CI 的独立 `sam3-precision` 作业实际执行；不需要 SAM3 权重或 PPU。
