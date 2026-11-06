@@ -236,7 +236,7 @@ def report_plan(directory):
                         "command_wall_seconds", "simulated_control_seconds", "task_execution_wall_seconds",
                         "retry_backoff_seconds", "reported_usage", "api_cost", "http_latency_incomplete",
                         "usage_field_available_attempts", "control_steps", "policy_decisions", "reason",
-                        "decision_latency_seconds", "sam3"):
+                        "decision_latency_seconds", "sam3", "dimension_fallback_decisions", "dimension_fallback_steps"):
                 if key in summary:
                     row[key] = summary[key]
             row["reported_total_tokens"] = summary["reported_usage"]["total_tokens"]

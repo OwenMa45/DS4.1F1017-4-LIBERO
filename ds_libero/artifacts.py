@@ -115,3 +115,4 @@ def verify_gate(path, command, cfg, environment):
             raise ExperimentError(f"{command} gate mismatch: {key}; rerun it with this code/config/runtime")
     if result.get("status") != "pass":
         raise ExperimentError(f"{command} has not passed")
+    return result

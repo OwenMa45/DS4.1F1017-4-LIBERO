@@ -134,6 +134,10 @@ def build_report(path, replay=True):
                "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
                "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
                "warnings": warnings}
+    if manifest["config"].get("zero_on_dimension_error"):
+        replacements = {e["step"] for e in decisions if e.get("action_source") == "dimension_guard"}
+        summary["dimension_fallback_decisions"] = len(replacements)
+        summary["dimension_fallback_steps"] = sum(s.get("decision_step", s["step"]) in replacements for s in steps)
     if manifest["config"].get("retry_incomplete_actions") or action_retries:
         retried_steps = {e["step"] for e in action_retries}
         summary["action_output_recovery"] = {

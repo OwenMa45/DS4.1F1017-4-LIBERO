@@ -11,7 +11,7 @@ from .client import Client, ModelPolicy, resolve_api_key
 from .config import Config, SUITE_HORIZONS
 from .errors import ExperimentError
 from .report import build_report
-from .runner import run_episode
+from .runner import check_policy, run_episode
 
 
 def parser():
@@ -168,21 +168,15 @@ def main(argv=None):
             result = calibrate(env, store)
         else:
             verify_gate(args.calibration, "calibrate", cfg, env.provenance)
+            gate = {}
             if args.command == "run":
-                verify_gate(args.api_check, "api-check", cfg, env.provenance)
-            policy = ModelPolicy(cfg, env.task, Client(cfg, store), store)
+                gate = verify_gate(args.api_check, "api-check", cfg, env.provenance)
+            policy = ModelPolicy(cfg, env.task, Client(cfg, store), store, gate.get("action_dimension_feedback"))
             if cfg.sam3 and args.command == "run":
                 checked = json.loads((args.api_check / "manifest.json").read_text(encoding="utf-8"))
                 policy.sam3.verify_runtime(checked.get("sam3_worker"))
             if args.command == "api-check":
-                obs = env.reset()
-                refs = store.observe(0, obs)
-                if env.check_success():
-                    raise ExperimentError("Initial state already succeeds")
-                action = policy.act(obs, [], 0, refs)
-                result = {"status": "pass", "scored": False, "task_success": None,
-                          "proposed_action": action, "model_actions_executed": 0,
-                          "note": "Image request and JSON contract accepted; this is not a vision-accuracy or task-success test."}
+                result = check_policy(env, policy, store)
             else:
                 result = run_episode(env, policy, store, cfg)
     except ExperimentError as exc:

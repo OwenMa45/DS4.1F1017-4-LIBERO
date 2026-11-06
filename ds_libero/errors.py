@@ -14,6 +14,12 @@ class ActionFormatError(InvalidAction):
         self.kind = kind
 
 
+class ActionDimensionError(ActionFormatError):
+    def __init__(self, kind, message, dimensions):
+        super().__init__(kind, message)
+        self.dimensions = dimensions
+
+
 class APIError(ExperimentError):
     status = "api_error"
 

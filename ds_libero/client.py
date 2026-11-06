@@ -1,5 +1,6 @@
 """No SDK dependency; transport retries never execute simulator actions."""
 
+import copy
 import hashlib
 import getpass
 import json
@@ -14,8 +15,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .artifacts import utc_now
-from .errors import APIError, ActionFormatError, BudgetExhausted, ExperimentError, InvalidAction
-from .protocol import parse_action, parse_actions, request_payload
+from .errors import APIError, ActionDimensionError, ActionFormatError, BudgetExhausted, ExperimentError, InvalidAction
+from .protocol import ACTION_WIDTH, parse_action, parse_actions, request_payload, validate_actions
 
 
 @dataclass
@@ -228,7 +229,11 @@ def deepseek_choice(reply):
 def action_format_problem(cfg, message, finish, step):
     """Use the controller's actual parser, including the shrinking chunk limit."""
     try:
-        parse_actions(message.get("content"), finish, min(cfg.action_horizon, cfg.max_steps - step))
+        parse_actions(message.get("content"), finish, min(cfg.action_horizon, cfg.max_steps - step),
+                      classify_dimensions=cfg.zero_on_dimension_error)
+    except ActionDimensionError:
+        # The zero-action policy handles this reply at the controller boundary, on this step.
+        return None
     except ActionFormatError as exc:
         if cfg.retry_incomplete_actions or exc.kind in ("blank_action_content", "non_json_action_content"):
             return exc
@@ -270,10 +275,11 @@ def complete_deepseek_actions(client, payload, step, retries, *, rejected=None):
 
 
 class ModelPolicy:
-    def __init__(self, cfg, task, client, store):
+    def __init__(self, cfg, task, client, store, preflight_dimension_error=None):
         self.cfg, self.task, self.client, self.store = cfg, task, client, store
         self.visual_history = []
         self.previous_decision = None
+        self.last_dimension_error = copy.deepcopy(preflight_dimension_error) if cfg.zero_on_dimension_error else None
         self.sam3 = None
         if cfg.sam3:
             from .sam3_tools import Sam3Tool
@@ -291,22 +297,45 @@ class ModelPolicy:
                 event["control_feedback"] = feedback
             event["visual_history_frames"] = [{"step": s, "frames": refs}
                                                for s, _, refs in self.visual_history]
+            dimension_feedback = None
+            if self.last_dimension_error is not None:
+                prior = self.last_dimension_error
+                last_step = history[-1] if history else {}
+                executed = (prior.get("source_phase") != "api-check" and step == prior["decision_step"] + 1
+                            and last_step.get("step") == prior["decision_step"]
+                            and last_step.get("action") == prior["replacement_action"])
+                dimension_feedback = {**prior, "source_phase": prior.get("source_phase", "episode"),
+                                      "replacement_executed": executed}
+                event["previous_action_dimension_error"] = dimension_feedback
             payload = request_payload(self.cfg, self.task, obs, history, step,
-                [(s, o) for s, o, _ in self.visual_history], feedback)
+                [(s, o) for s, o, _ in self.visual_history], feedback,
+                previous_action_dimension_error=dimension_feedback)
             if self.sam3 is not None:
                 from .sam3_tools import complete_with_sam3
                 reply = complete_with_sam3(self.client, payload, obs, step, self.sam3)
-            elif self.cfg.retry_incomplete_actions:
-                reply = complete_deepseek_actions(self.client, payload, step, retries=1)
+            elif self.cfg.retry_incomplete_actions or self.cfg.zero_on_dimension_error:
+                reply = complete_deepseek_actions(self.client, payload, step, retries=int(self.cfg.retry_incomplete_actions))
             else:
                 reply = self.client.complete(payload, step)
             content, finish = response_content(self.cfg, reply)
             event.update(finish_reason=finish, content_characters=len(content) if isinstance(content, str) else None)
             v2 = self.cfg.protocol_version == "ds-libero-direct-v2"
-            action = (parse_actions(content, finish, min(self.cfg.action_horizon, self.cfg.max_steps - step))
-                      if v2 else parse_action(content, finish))
-            event.update(valid=True, returned_model=reply.get("model"))
+            limit = min(self.cfg.action_horizon, self.cfg.max_steps - step)
+            dimension_error = None
+            try:
+                action = (parse_actions(content, finish, limit, classify_dimensions=self.cfg.zero_on_dimension_error)
+                          if v2 else parse_action(content, finish))
+            except ActionDimensionError as exc:
+                if not self.cfg.zero_on_dimension_error:
+                    raise
+                action = validate_actions([[0.0] * ACTION_WIDTH], limit)
+                dimension_error = {"decision_step": step, "kind": exc.kind, "detail": str(exc),
+                                   **exc.dimensions, "replacement_action": action[0].copy()}
+                event.update(error_status=exc.status, error=str(exc), action_source="dimension_guard",
+                             dimension_fallback=dimension_error, response_attempt=self.client.attempts)
+            event.update(valid=dimension_error is None, returned_model=reply.get("model"))
             event["actions" if v2 else "action"] = action
+            self.last_dimension_error = dimension_error
             if self.cfg.grasp_feedback:
                 self.previous_decision = (step, obs, action)
             if self.cfg.visual_history:

@@ -50,6 +50,7 @@ class Config:
     api_provider: str = "deepseek"
     sam3: dict = field(default_factory=dict)
     retry_incomplete_actions: bool = False
+    zero_on_dimension_error: bool = False
 
     def to_dict(self):
         values = asdict(self)
@@ -58,7 +59,8 @@ class Config:
         if self.api_provider == "deepseek":
             values.pop("api_provider")
         # Old profile hashes must remain replayable.
-        for key in ("grasp_feedback", "gripper_feedback_barrier", "geometry_contract", "expected_task_name", "retry_incomplete_actions"):
+        for key in ("grasp_feedback", "gripper_feedback_barrier", "geometry_contract", "expected_task_name",
+                    "retry_incomplete_actions", "zero_on_dimension_error"):
             if not values[key]:
                 values.pop(key)
         # Preserve the original v1 fingerprint and request contract.
@@ -100,6 +102,8 @@ class Config:
         cfg = cls(**values)
         if cfg.retry_incomplete_actions and (cfg.api_provider != "deepseek" or cfg.protocol_version != "ds-libero-direct-v2"):
             raise ExperimentError("retry_incomplete_actions requires the built-in DeepSeek v2 policy")
+        if cfg.zero_on_dimension_error and (cfg.api_provider != "deepseek" or cfg.protocol_version != "ds-libero-direct-v2"):
+            raise ExperimentError("zero_on_dimension_error requires the built-in DeepSeek v2 policy")
         if cfg.sam3:
             from .sam3_tools import settings
             if cfg.api_provider != "deepseek" or cfg.protocol_version != "ds-libero-direct-v2":

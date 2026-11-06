@@ -138,7 +138,7 @@ bash "$SIM" -u -B -m ds_libero.sam3_server check \
 # 离线冻结五任务，不调用模型。
 bash "$SIM" -B -m ds_libero microbench plan \
   --config configs/deepseek_sam3_220.json \
-  --policy-id deepseek-v4.1-flash-1017-sam3 --revision sam3-tools-v3-action-repair --out "$OUT"
+  --policy-id deepseek-v4.1-flash-1017-sam3 --revision sam3-tools-v4-zero-on-dimension-error --out "$OUT"
 
 # 使用既有 DEEPSEEK_API_KEY 或项目根目录 ds_API.txt。
 # 这一项会依次执行动作标定、真实 API+SAM3 检查、黑碗正式回合。
@@ -185,7 +185,11 @@ bash scripts/run_sam3_five.sh outputs/deepseek-sam3-220-all-001
 
 最多 2 轮工具调用后，启动独立动作请求：保留原始图像、状态、控制约定，将本次所有 SAM3 JSON 结果与叠加图作为带相机/目标标识的观测提供；不携带 `tools`、`tool_choice` 或工具对话消息，只开启 JSON mode。动作阶段明确说明感知已经完成。工具阶段若已返回合法动作，仍可提前结束。
 
-两份 220 步 DeepSeek 配置启用 `retry_incomplete_actions`。空白、非 JSON、动作行长度错误以及以 `length` 结束的动作回复共用一次纠错机会。在两种返回动作的位置都执行相同的检查，包括工具轮提前给出动作和独立动作请求。纠错反馈指出实际行号和长度，请模型基于同一观测重新选择一个完整的 `3 平移 + 3 旋转 + 1 夹爪` 动作。整批通过原有校验后才执行。每个控制决策的 SAM3 纠错次数受 `sam3.max_format_retries` 限制，设为 0 可关闭。普通 DeepSeek v2 配置通过 `retry_incomplete_actions: true` 启用一次纠错。
+两份 220 步 DeepSeek 配置启用 `zero_on_dimension_error`。`actions` 的预期形状是 `N × 7`，其中 `1 ≤ N ≤ min(action_horizon, 剩余控制步数)`。维度有误时，harness 用**一条** `[0,0,0,0,0,0,0]` 替换整批动作，推进一个 20 Hz 控制步。第七位 0 表示保持夹爪目标。下一次决策的观测字段 `previous_action_dimension_error` 包含上次步号、预期维度、收到的形状、替代指令和是否已执行。一次合法决策后清除此反馈，连续出错时每步更新。SAM3 提前给出动作和独立动作请求共用此判别器。
+
+`summary.json` 的 `dimension_fallback_decisions` 统计替代提案，`dimension_fallback_steps` 只统计已执行的替代步。后者也写入 `microbench.json` 和 `scores.csv`。原始模型输出仍按无效计入 `action_validity_rate`。预检只提议动作，若触发替代，会在 `result.json` 标记 `model_output_valid=false` 并把诊断传给同一任务的第一个正式决策，执行步数为 0。启用该规则的实验使用独立的协议指纹和新计划。
+
+`retry_incomplete_actions` 负责空白、非 JSON 和以 `length` 结束的动作回复。每个控制决策的 SAM3 格式重试受 `sam3.max_format_retries` 限制。关闭 `zero_on_dimension_error` 时，动作行缺项也可走原有重试策略。
 
 原始回复、纠错请求和后续回复分别记入请求与响应日志。`summary.json` 的 `action_output_recovery` 给出纠错请求次数、随后得到有效动作的决策数和触发原因。`events.jsonl` 记录控制步、被拒绝的 HTTP 尝试编号与错误细节。重复键、越界数值、非法夹爪值和损坏的工具调用仍触发原有拒绝规则。纠错机会耗尽后按最后回复评分。
 

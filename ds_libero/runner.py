@@ -7,6 +7,23 @@ from .errors import ExperimentError, InvalidAction, SimulationError
 from .protocol import validate_action, validate_actions
 
 
+def check_policy(env, policy, store):
+    """Record the proposed controller action on the initial observation."""
+    obs = env.reset()
+    refs = store.observe(0, obs)
+    if env.check_success():
+        raise ExperimentError("Initial state already succeeds")
+    proposed = policy.act(obs, [], 0, refs)
+    result = {"status": "pass", "scored": False, "task_success": None,
+              "proposed_action": proposed, "model_actions_executed": 0, "model_output_valid": True,
+              "note": "The API check evaluated the controller proposal on the initial observation."}
+    fallback = getattr(policy, "last_dimension_error", None)
+    if isinstance(fallback, dict):
+        result.update(model_output_valid=False, proposed_action_source="dimension_guard",
+                      action_dimension_feedback={**fallback, "source_phase": "api-check", "replacement_executed": False})
+    return result
+
+
 def run_episode(env, policy, store, cfg):
     start = time.perf_counter()
     steps = 0

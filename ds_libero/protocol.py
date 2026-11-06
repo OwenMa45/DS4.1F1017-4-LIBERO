@@ -3,10 +3,11 @@ import json
 import math
 from dataclasses import dataclass
 
-from .errors import ActionFormatError, InvalidAction
+from .errors import ActionDimensionError, ActionFormatError, InvalidAction
 
 
 CAMERAS = ("agentview", "robot0_eye_in_hand")
+ACTION_WIDTH = 7
 
 
 @dataclass(frozen=True)
@@ -42,7 +43,7 @@ Do not return explanations, markdown, additional keys, absolute poses, or multip
 def validate_action(action, *, row_index=None):
     if not isinstance(action, list):
         raise InvalidAction("action must be a JSON array of exactly seven numbers")
-    if len(action) != 7:
+    if len(action) != ACTION_WIDTH:
         name = "action" if row_index is None else f"actions[{row_index}]"
         raise ActionFormatError("wrong_action_width", f"{name} has {len(action)} entries, expected exactly seven numbers")
     if any(type(x) not in (int, float) for x in action):
@@ -180,24 +181,54 @@ actuation within one phase; use shorter chunks for alignment, contact and test
 lifts. Never pad a chunk to its maximum length when fresh feedback is needed.
 Respect max_actions_this_response, which shrinks near the total control-step limit.
 '''
-    if cfg.retry_incomplete_actions:
+    if cfg.retry_incomplete_actions or cfg.zero_on_dimension_error:
         prompt += ("\nCount each action as 3 translations + 3 rotations + 1 gripper command "
                    "in the order [dx,dy,dz,rx,ry,rz,gripper]. Include an explicit number for every slot, "
                    "including zero rotation or a zero gripper hold. A single complete row is valid.\n")
+    if cfg.zero_on_dimension_error:
+        prompt += ("If the actions array has invalid dimensions, the controller receives one "
+                   "seven-zero command. The next observation describes the rejected shape in "
+                   "previous_action_dimension_error. Use the fresh camera images and give complete rows.\n")
     if cfg.sam3:
         from .sam3_tools import augment_prompt
         prompt = augment_prompt(prompt, cfg.sam3)
     return prompt
 
 
+def validate_action_dimensions(actions, limit):
+    """Check the complete (rows, 7) shape before inspecting any control values."""
+    if limit < 1:
+        raise InvalidAction("No control steps remaining")
+    dims = {"allowed_rows": [1, limit], "expected_width": ACTION_WIDTH}
+    if not isinstance(actions, list):
+        dims["received_type"] = type(actions).__name__
+        raise ActionDimensionError("wrong_action_shape", "actions must be an array of action rows", dims)
+    dims["received_rows"] = len(actions)
+    if not 1 <= len(actions) <= limit:
+        raise ActionDimensionError("wrong_action_count", f"actions must contain 1..{limit} actions, got {len(actions)}", dims)
+    # At most action_horizon rows are described in an observation, even for a bad response.
+    widths = [len(row) if isinstance(row, list) else None for row in actions]
+    for index, (row, width) in enumerate(zip(actions, widths)):
+        if width is None:
+            raise ActionDimensionError("wrong_action_shape", f"actions[{index}] must be an array of seven numbers",
+                                       {**dims, "row_widths": widths, "row_index": index, "received_type": type(row).__name__})
+        if width != ACTION_WIDTH:
+            raise ActionDimensionError("wrong_action_width", f"actions[{index}] has {width} entries, expected exactly seven numbers",
+                                       {**dims, "row_widths": widths, "row_index": index})
+        for column, component in enumerate(row):
+            if isinstance(component, (list, dict)):
+                raise ActionDimensionError("wrong_action_shape", f"actions[{index}][{column}] must be a scalar",
+                                           {**dims, "row_widths": widths, "row_index": index, "column_index": column})
+
+
 def validate_actions(actions, limit):
     if not isinstance(actions, list) or not 1 <= len(actions) <= limit:
         raise InvalidAction(f"actions must contain 1..{limit} actions")
     # Validate the whole sequence before executing even its first element.
-    return [validate_action(action, row_index=i) for i, action in enumerate(actions)]
+    return [validate_action(row, row_index=i) for i, row in enumerate(actions)]
 
 
-def parse_actions(content, finish_reason, limit):
+def parse_actions(content, finish_reason, limit, *, classify_dimensions=False):
     if finish_reason == "length":
         raise ActionFormatError("truncated_action_content", "incomplete or unsupported response: finish_reason='length'")
     if finish_reason != "stop":
@@ -212,10 +243,13 @@ def parse_actions(content, finish_reason, limit):
         raise ActionFormatError("non_json_action_content", "model content is not a complete JSON object") from exc
     if not isinstance(obj, dict) or set(obj) != {"actions"}:
         raise InvalidAction("expected the sole top-level key 'actions'")
+    if classify_dimensions:
+        validate_action_dimensions(obj["actions"], limit)
     return validate_actions(obj["actions"], limit)
 
 
-def request_payload(cfg, task, obs, history, step, visual_history=(), control_feedback=None):
+def request_payload(cfg, task, obs, history, step, visual_history=(), control_feedback=None,
+                    *, previous_action_dimension_error=None):
     if cfg.geometry_contract:
         from .errors import ExperimentError
         from .geometry_contract import SCHEMA
@@ -227,6 +261,8 @@ def request_payload(cfg, task, obs, history, step, visual_history=(), control_fe
                    "proprioception": obs.state, "recent_history": history}
     if cfg.protocol_version == "ds-libero-direct-v2":
         observation["max_actions_this_response"] = min(cfg.action_horizon, cfg.max_steps - step)
+        if previous_action_dimension_error is not None:
+            observation["previous_action_dimension_error"] = previous_action_dimension_error
         if cfg.camera_geometry:
             if not obs.geometry:
                 from .errors import ExperimentError

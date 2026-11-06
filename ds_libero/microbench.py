@@ -22,7 +22,7 @@ from .errors import ExperimentError
 from .five_tasks import FIVE_TASKS, five_configs
 from .protocol import Observation, system_prompt, validate_actions
 from .report import build_report
-from .runner import run_episode
+from .runner import check_policy, run_episode
 
 
 BENCH_ID = "libero-five-v1"
@@ -98,9 +98,12 @@ def external_config(*, max_steps=220, action_horizon=8):
 
 
 def _spec(cfg):
+    environment = {key: getattr(cfg, key) for key in ENVIRONMENT_FIELDS}
+    if cfg.zero_on_dimension_error:
+        environment["zero_on_dimension_error"] = True
     return {"id": BENCH_ID, "libero_commit": LIBERO_COMMIT,
             "tasks": [asdict(t) for t in TASKS],
-            "environment": {key: getattr(cfg, key) for key in ENVIRONMENT_FIELDS},
+            "environment": environment,
             "success": "env.check_success after each executed action",
             "score": "equal task weights; score is null until all five trials are scored",
             "scope": "five fixed tasks, official initial state 0 and seed 0; not a full LIBERO score"}
@@ -210,21 +213,17 @@ def _phase(root, entry, phase, meta, factory, replay):
                 custom_policy = factory(context)
                 policy = _PolicyAdapter(custom_policy, context, cfg, store)
             else:
+                gate = {}
                 if phase == "episode":
-                    verify_gate(campaign / "api-check", "api-check", cfg, env.provenance)
-                policy = ModelPolicy(cfg, env.task, Client(cfg, store), store)
+                    gate = verify_gate(campaign / "api-check", "api-check", cfg, env.provenance)
+                policy = ModelPolicy(cfg, env.task, Client(cfg, store), store, gate.get("action_dimension_feedback"))
                 if cfg.sam3:
                     policy.sam3.verify_runtime(json.loads((root / "sam3_runtime.json").read_text(encoding="utf-8")))
                     if phase == "episode":
                         checked = json.loads((campaign / "api-check" / "manifest.json").read_text(encoding="utf-8"))
                         policy.sam3.verify_runtime(checked.get("sam3_worker"))
             if phase == "api-check":
-                obs = env.reset()
-                refs = store.observe(0, obs)
-                if env.check_success():
-                    raise ExperimentError("Initial state already succeeds")
-                proposed = policy.act(obs, [], 0, refs)
-                result.update(status="pass", proposed_action=proposed, model_actions_executed=0)
+                result = check_policy(env, policy, store)
             else:
                 result = run_episode(env, policy, store, cfg)
     except ExperimentError as exc:
@@ -407,6 +406,7 @@ class MicroBench:
                          "scored": row["scored"], "success": row["task_success"],
                          "reason": row["reason"], "control_steps": row["control_steps"],
                          "policy_decisions": row["policy_decisions"],
+                         "dimension_fallback_steps": row.get("dimension_fallback_steps"),
                          "action_validity_rate": row["valid_model_outputs"] / outputs if outputs else None,
                          "decision_latency_seconds": row["decision_latency_seconds"],
                          "task_wall_seconds": row["task_execution_wall_seconds"],
@@ -434,7 +434,7 @@ class MicroBench:
                             "Policy revision is user-declared; adapter file hashing does not pin weights or transitive dependencies."]}
         write_json(root / "microbench.json", report)
         fields = ("index", "task", "label", "status", "scored", "success", "reason", "control_steps",
-                  "policy_decisions", "action_validity_rate", "task_wall_seconds", "http_requests", "campaign_http_requests", "artifacts")
+                  "policy_decisions", "action_validity_rate", "dimension_fallback_steps", "task_wall_seconds", "http_requests", "campaign_http_requests", "artifacts")
         with (root / "scores.csv").open("w", encoding="utf-8", newline="") as handle:
             writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
             writer.writeheader()
