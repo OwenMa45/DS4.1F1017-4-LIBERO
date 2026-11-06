@@ -10,6 +10,7 @@
   "max_http_requests": 1980,
   "max_steps": 220,
   "action_horizon": 8,
+  "retry_incomplete_actions": true,
   "visual_history": 2,
   "camera_geometry": true,
   "grasp_feedback": true,

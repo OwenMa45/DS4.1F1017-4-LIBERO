@@ -82,6 +82,7 @@ def build_report(path, replay=True):
                            and e.get("attempt") not in completed_attempt_ids]
     request_count = len(attempts) + len(unfinished_attempts)
     decisions = [e for e in events if e.get("event") == "decision"]
+    action_retries = [e for e in events if e.get("event") in ("action_format_retry", "sam3_action_format_retry")]
     model_outputs = [e for e in decisions if e.get("valid") or e.get("error_status") == "invalid_output"]
     valid = sum(bool(e.get("valid")) for e in model_outputs)
     steps = [e for e in events if e.get("event") == "step"]
@@ -133,6 +134,13 @@ def build_report(path, replay=True):
                "latency_note": "Task execution wall time includes API, backoff, simulation and logging after reset. Command wall also includes setup/reset/cleanup, excludes report/GIF generation. HTTP/decision times overlap task time; do not add them. Replay has no task execution latency.",
                "replay_timing": "20 Hz simulated control time; API waiting time is excluded",
                "warnings": warnings}
+    if manifest["config"].get("retry_incomplete_actions") or action_retries:
+        retried_steps = {e["step"] for e in action_retries}
+        summary["action_output_recovery"] = {
+            "retries_requested": len(action_retries),
+            "recovered_decisions": sum(bool(e.get("valid")) and e["step"] in retried_steps for e in decisions),
+            "by_reason": {reason: sum(e["reason"] == reason for e in action_retries)
+                          for reason in sorted({e["reason"] for e in action_retries})}}
     if manifest["config"].get("sam3"):
         summary["sam3"] = {
             "action_format_retries": sum(e.get("event") == "sam3_action_format_retry" for e in events),

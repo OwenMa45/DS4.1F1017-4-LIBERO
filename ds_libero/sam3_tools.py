@@ -16,6 +16,7 @@ import urllib.parse
 import urllib.request
 
 from .artifacts import write_json
+from .client import action_format_problem, complete_deepseek_actions, deepseek_choice
 from .config import digest
 from .errors import APIError, ExperimentError, InvalidAction
 from .protocol import CAMERAS, _unique_object
@@ -227,34 +228,7 @@ class Sam3Tool:
             self.store.event(event)
 
 
-def _choice(reply):
-    try:
-        choice = reply["choices"][0]
-        message, finish = choice["message"], choice["finish_reason"]
-        if not isinstance(message, dict) or message.get("role", "assistant") != "assistant":
-            raise TypeError()
-        return message, finish
-    except (KeyError, IndexError, TypeError) as exc:
-        raise InvalidAction("Malformed DeepSeek tool response") from exc
-
-
-def _format_problem(message, finish):
-    # Retry serialization failures only. Valid JSON with illegal actions, duplicate
-    # keys, truncated replies and unexpected tool calls still fail normal validation.
-    if finish != "stop" or message.get("tool_calls"):
-        return None
-    content = message.get("content")
-    if content is None or isinstance(content, str) and not content.strip():
-        return "blank_action_content"
-    if isinstance(content, str):
-        try:
-            json.loads(content, object_pairs_hook=_unique_object)
-        except ValueError:
-            return "non_json_action_content"
-    return None
-
-
-def _action_reply(client, base_payload, observations, step, options):
+def _action_reply(client, base_payload, observations, step, options, *, rejected=None):
     # Start a fresh, tool-free JSON request. Do not mix JSON mode/tool_choice=none
     # with tool-protocol messages, or reinterpret reasoning/DSML as robot actions.
     payload = copy.deepcopy(base_payload)
@@ -277,21 +251,7 @@ def _action_reply(client, base_payload, observations, step, options):
         content.extend(copy.deepcopy(parts))
     payload["messages"].append({"role": "user", "content": content})
     client.store.event({"event": "sam3_action_phase", "step": step, "perception_calls": len(observations)})
-    for retry in range(options["max_format_retries"] + 1):
-        reply = client.complete(payload, step)
-        message, finish = _choice(reply)
-        if message.get("tool_calls"):
-            raise InvalidAction("Tool call returned during the tool-free action phase")
-        problem = _format_problem(message, finish)
-        if problem is None or retry == options["max_format_retries"]:
-            return reply
-        client.store.event({"event": "sam3_action_format_retry", "step": step,
-                            "retry": retry + 1, "reason": problem})
-        payload["messages"].append({"role": "user", "content":
-            "The previous response did not contain a complete JSON action object. "
-            "Perception is complete and the robot has not moved. Return the action JSON "
-            "directly in content, without tool calls, protocol markup, prose or markdown."})
-    raise AssertionError("unreachable")
+    return complete_deepseek_actions(client, payload, step, options["max_format_retries"], rejected=rejected)
 
 
 def complete_with_sam3(client, payload, obs, step, tool):
@@ -309,15 +269,22 @@ def complete_with_sam3(client, payload, obs, step, tool):
         # DeepSeek thinking rejects required/named choices. The prompt and
         # require_call validation enforce our experiment's perception contract.
         reply = client.complete(payload, step)
-        message, finish = _choice(reply)
+        message, finish = deepseek_choice(reply)
         calls = message.get("tool_calls")
         if not calls:
             if finish == "tool_calls":
                 raise InvalidAction("Empty tool_calls response")
             if finish == "stop" and options["require_call"] and not calls_made:
                 raise InvalidAction("SAM3 experiment requires a perception call before actions")
-            if calls_made and _format_problem(message, finish):
-                return _action_reply(client, base_payload, observations, step, options)
+            if calls_made or (client.cfg.retry_incomplete_actions and not options["require_call"]):
+                problem = action_format_problem(client.cfg, message, finish, step)
+                if problem is not None:
+                    # An invalid early action counts against the same repair allowance.
+                    # Older profiles start a fresh JSON phase on blank/non-JSON content.
+                    rejected = problem if client.cfg.retry_incomplete_actions else None
+                    if rejected is not None and options["max_format_retries"] == 0:
+                        return reply
+                    return _action_reply(client, base_payload, observations, step, options, rejected=rejected)
             return reply  # Existing action parser checks finish reason and all actions.
         if finish != "tool_calls":
             raise InvalidAction("Unexpected, truncated or over-budget tool call response")

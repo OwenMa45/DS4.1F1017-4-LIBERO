@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from .artifacts import utc_now
-from .errors import APIError, BudgetExhausted, ExperimentError, InvalidAction
+from .errors import APIError, ActionFormatError, BudgetExhausted, ExperimentError, InvalidAction
 from .protocol import parse_action, parse_actions, request_payload
 
 
@@ -214,6 +214,61 @@ def response_content(cfg, reply):
         raise InvalidAction("API response has no complete assistant choice") from exc
 
 
+def deepseek_choice(reply):
+    try:
+        choice = reply["choices"][0]
+        message, finish = choice["message"], choice["finish_reason"]
+        if not isinstance(message, dict) or message.get("role", "assistant") != "assistant":
+            raise TypeError()
+        return message, finish
+    except (KeyError, IndexError, TypeError) as exc:
+        raise InvalidAction("Malformed DeepSeek assistant choice") from exc
+
+
+def action_format_problem(cfg, message, finish, step):
+    """Use the controller's actual parser, including the shrinking chunk limit."""
+    try:
+        parse_actions(message.get("content"), finish, min(cfg.action_horizon, cfg.max_steps - step))
+    except ActionFormatError as exc:
+        if cfg.retry_incomplete_actions or exc.kind in ("blank_action_content", "non_json_action_content"):
+            return exc
+    except InvalidAction:
+        pass  # The normal caller will reject this reply, with its original diagnostic.
+    return None
+
+
+def complete_deepseek_actions(client, payload, step, retries, *, rejected=None):
+    """Request actions from the same observation, sharing one bounded repair allowance."""
+    origin = "tool_round" if rejected is not None else "action_phase"
+    remaining = retries
+    while True:
+        if rejected is not None:
+            if remaining == 0:
+                raise rejected
+            remaining -= 1
+            event = "sam3_action_format_retry" if client.cfg.sam3 else "action_format_retry"
+            client.store.event({"event": event, "step": step, "retry": retries - remaining,
+                                "reason": rejected.kind, "detail": str(rejected), "origin": origin,
+                                "rejected_attempt": client.attempts})
+            feedback = (f"The validator rejected the previous reply. {rejected}. The robot is still at "
+                        f"control step {step}. Use the same observations and give one complete next action "
+                        "in a JSON object with the sole key actions. Put the action in a nested array. "
+                        "Count 3 translations + 3 rotations + 1 gripper in the order [dx,dy,dz,rx,ry,rz,gripper]. "
+                        "Choose -1 to open, 0 to hold, or 1 to close in the seventh slot. "
+                        "Write only the JSON in content.")
+            payload = {**payload, "messages": [*payload["messages"], {"role": "user", "content": feedback}]}
+        reply = client.complete(payload, step)
+        message, finish = deepseek_choice(reply)
+        if message.get("tool_calls"):
+            raise InvalidAction("Tool call returned during the tool-free action phase")
+        if remaining == 0:
+            return reply  # ModelPolicy still validates the whole chunk before returning it.
+        rejected = action_format_problem(client.cfg, message, finish, step)
+        if rejected is None:
+            return reply
+        origin = "action_phase"
+
+
 class ModelPolicy:
     def __init__(self, cfg, task, client, store):
         self.cfg, self.task, self.client, self.store = cfg, task, client, store
@@ -238,11 +293,13 @@ class ModelPolicy:
                                                for s, _, refs in self.visual_history]
             payload = request_payload(self.cfg, self.task, obs, history, step,
                 [(s, o) for s, o, _ in self.visual_history], feedback)
-            if self.sam3 is None:
-                reply = self.client.complete(payload, step)
-            else:
+            if self.sam3 is not None:
                 from .sam3_tools import complete_with_sam3
                 reply = complete_with_sam3(self.client, payload, obs, step, self.sam3)
+            elif self.cfg.retry_incomplete_actions:
+                reply = complete_deepseek_actions(self.client, payload, step, retries=1)
+            else:
+                reply = self.client.complete(payload, step)
             content, finish = response_content(self.cfg, reply)
             event.update(finish_reason=finish, content_characters=len(content) if isinstance(content, str) else None)
             v2 = self.cfg.protocol_version == "ds-libero-direct-v2"

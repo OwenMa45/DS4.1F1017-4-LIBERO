@@ -12,5 +12,5 @@ bash "$sim" -B -m ds_libero check-config --config "$config"
 # Real SAM3 forward pass on a blank image. No DeepSeek/API charge or robot motion.
 bash "$sim" -u -B -m ds_libero.sam3_server check --config "$config" --out "${out}-sam3-check"
 bash "$sim" -B -m ds_libero microbench plan --config "$config" \
-  --policy-id deepseek-v4.1-flash-1017-sam3 --revision sam3-tools-v2-action-phase --out "$out"
+  --policy-id deepseek-v4.1-flash-1017-sam3 --revision sam3-tools-v3-action-repair --out "$out"
 exec bash "$sim" -u -B -m ds_libero microbench run "$out"

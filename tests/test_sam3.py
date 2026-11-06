@@ -153,6 +153,68 @@ class ToolLoopTests(unittest.TestCase):
         self.assertEqual([p.get("tool_choice") for p in sent], ["auto", "auto", None])
         self.assertEqual([m["role"] for m in sent[-1]["messages"]], ["system", "user", "user"])
 
+    def test_exp02_six_value_rows_get_one_correction_on_both_action_paths(self):
+        drawer = [[0, .5, 0, 0, 0, 0], [0, .25, .45, 0, 0, 0],
+                  [0, 0, .45, -.05, .39, .11], [0, 0, .3, -.025, .19, .055]]
+        book = [[.16, -.16, .03, 0, 0, -.6]] * 4
+        cfg = config(max_steps=8, action_horizon=8, retry_incomplete_actions=True)
+        replacement = [.15, 0, .1, 0, 0, .3, 1]
+        for rows, calls, origin in ((drawer, 2, 'action_phase'), (book, 1, 'tool_round')):
+            with self.subTest(origin=origin):
+                replies = [tool_reply([(str(i), 'agentview', 'target')]) for i in range(calls)]
+                replies += [reply(json.dumps({'actions': rows})), reply(json.dumps({'actions': [replacement]}))]
+                result, sent, tool, store = self.run_policy(replies, cfg=cfg)
+                self.assertEqual((result['control_steps'], result['status']), (1, 'success'))
+                self.assertEqual([e['action'] for e in store.events if e['event'] == 'step'], [replacement])
+                self.assertEqual(len(tool.seen), calls)
+                self.assertEqual(len(sent), calls + 2)
+                self.assertEqual(sent[-1]['messages'][1], sent[0]['messages'][1])
+                self.assertNotIn('tools', sent[-1])
+                self.assertIn('actions[0] has 6 entries', sent[-1]['messages'][-1]['content'])
+                self.assertIn('rx,ry,rz,gripper', sent[-1]['messages'][-1]['content'])
+                retry, = [e for e in store.events if e['event'] == 'sam3_action_format_retry']
+                self.assertEqual((retry['origin'], retry['reason'], retry['rejected_attempt']),
+                                 (origin, 'wrong_action_width', calls + 1))
+
+    def test_incomplete_chunk_never_executes_prefix_or_exceeds_repair_or_http_limit(self):
+        short = reply(json.dumps({'actions': [ACTION, [0, .4, .5]]}))
+        for retries, budget, expected, attempts in ((1, 5, 'invalid_output', 3),
+                                                    (0, 5, 'invalid_output', 2),
+                                                    (1, 2, 'budget_exhausted', 2)):
+            with self.subTest(retries=retries, budget=budget):
+                cfg = config(retry_incomplete_actions=True, max_http_requests=budget)
+                tool = FakeTool({'max_format_retries': retries})
+                result, sent, tool, store = self.run_policy([tool_reply(), short, short], cfg=cfg, tool=tool)
+                self.assertEqual((result['status'], result['control_steps']), (expected, 0))
+                self.assertEqual((len(sent), len(tool.seen)), (attempts, 1))
+                self.assertFalse(any(e['event'] == 'step_started' for e in store.events))
+                if attempts == 3:
+                    self.assertIn('actions[1] has 3 entries', sent[-1]['messages'][-1]['content'])
+
+    def test_direct_v2_repairs_length_and_audits_the_extra_model_request(self):
+        cfg = config(sam3={}, retry_incomplete_actions=True)
+        with tempfile.TemporaryDirectory() as temp:
+            store = Store(Path(temp) / 'episode', 'run', cfg)
+            result, sent, tool, _ = self.run_policy([reply('{"actions":[', finish='length'),
+                reply(json.dumps({'actions': [ACTION]}))], cfg=cfg, store=store)
+            self.assertEqual((result['status'], len(sent), len(tool.seen)), ('success', 2, 0))
+            self.assertEqual(sent[0]['messages'], sent[1]['messages'][:-1])
+            store.finish(result)
+            summary = build_report(store.path, replay=False)
+            self.assertEqual((summary['http_requests'], summary['executed_action_count']), (2, 1))
+            self.assertEqual(summary['action_output_recovery'], {'retries_requested': 1,
+                'recovered_decisions': 1, 'by_reason': {'truncated_action_content': 1}})
+
+    def test_new_recovery_keeps_unsafe_values_and_truncated_tool_calls_terminal(self):
+        cfg = config(retry_incomplete_actions=True)
+        for responses in ([tool_reply(), reply('{"actions":[[0,0,0,0,0,0,0.5]]}')],
+                          [tool_reply(), reply('{"actions":[[2,0,0,0,0,0,-1]]}')],
+                          [tool_reply(), reply('{"actions":[],"actions":[]}')],
+                          [tool_reply(finish='length')]):
+            count = len(responses)
+            result, sent, _, _ = self.run_policy(responses, cfg=cfg)
+            self.assertEqual((result['status'], result['control_steps'], len(sent)), ('invalid_output', 0, count))
+
     def test_illegal_actions_truncation_and_duplicate_keys_are_not_repaired(self):
         for response in (reply('{"actions":[[2,0,0,0,0,0,-1]]}'),
                          reply('{"actions":[],"actions":[]}'), reply(" ", finish="length")):
@@ -289,7 +351,7 @@ class ConfigurationTests(unittest.TestCase):
             self.assertEqual(base["microbench"]["protocol_sha256"], sam["microbench"]["protocol_sha256"])
             self.assertNotEqual(base["episodes"][0]["config_sha256"], sam["episodes"][0]["config_sha256"])
             self.assertEqual(sam["max_http_requests_per_episode_including_api_check"], 1992)
-            self.assertEqual(base["max_http_requests_per_episode_including_api_check"], 1983)
+            self.assertEqual(base["max_http_requests_per_episode_including_api_check"], 1986)
             self.assertEqual(len(sam["episodes"]), 5)
 
     def test_local_paths_package_parent_checkpoint_selection_and_ambiguity(self):

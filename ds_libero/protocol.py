@@ -3,7 +3,7 @@ import json
 import math
 from dataclasses import dataclass
 
-from .errors import InvalidAction
+from .errors import ActionFormatError, InvalidAction
 
 
 CAMERAS = ("agentview", "robot0_eye_in_hand")
@@ -39,9 +39,12 @@ Do not return explanations, markdown, additional keys, absolute poses, or multip
 """
 
 
-def validate_action(action):
-    if not isinstance(action, list) or len(action) != 7:
+def validate_action(action, *, row_index=None):
+    if not isinstance(action, list):
         raise InvalidAction("action must be a JSON array of exactly seven numbers")
+    if len(action) != 7:
+        name = "action" if row_index is None else f"actions[{row_index}]"
+        raise ActionFormatError("wrong_action_width", f"{name} has {len(action)} entries, expected exactly seven numbers")
     if any(type(x) not in (int, float) for x in action):
         raise InvalidAction("action cannot contain booleans, strings, or nested arrays")
     try:
@@ -177,6 +180,10 @@ actuation within one phase; use shorter chunks for alignment, contact and test
 lifts. Never pad a chunk to its maximum length when fresh feedback is needed.
 Respect max_actions_this_response, which shrinks near the total control-step limit.
 '''
+    if cfg.retry_incomplete_actions:
+        prompt += ("\nCount each action as 3 translations + 3 rotations + 1 gripper command "
+                   "in the order [dx,dy,dz,rx,ry,rz,gripper]. Include an explicit number for every slot, "
+                   "including zero rotation or a zero gripper hold. A single complete row is valid.\n")
     if cfg.sam3:
         from .sam3_tools import augment_prompt
         prompt = augment_prompt(prompt, cfg.sam3)
@@ -187,18 +194,22 @@ def validate_actions(actions, limit):
     if not isinstance(actions, list) or not 1 <= len(actions) <= limit:
         raise InvalidAction(f"actions must contain 1..{limit} actions")
     # Validate the whole sequence before executing even its first element.
-    return [validate_action(action) for action in actions]
+    return [validate_action(action, row_index=i) for i, action in enumerate(actions)]
 
 
 def parse_actions(content, finish_reason, limit):
+    if finish_reason == "length":
+        raise ActionFormatError("truncated_action_content", "incomplete or unsupported response: finish_reason='length'")
     if finish_reason != "stop":
         raise InvalidAction(f"incomplete or unsupported response: finish_reason={finish_reason!r}")
-    if not isinstance(content, str) or not content.strip():
+    if content is None or (isinstance(content, str) and not content.strip()):
+        raise ActionFormatError("blank_action_content", "model returned empty/non-text content")
+    if not isinstance(content, str):
         raise InvalidAction("model returned empty/non-text content")
     try:
         obj = json.loads(content, object_pairs_hook=_unique_object)
     except (ValueError, TypeError) as exc:
-        raise InvalidAction("model content is not a complete JSON object") from exc
+        raise ActionFormatError("non_json_action_content", "model content is not a complete JSON object") from exc
     if not isinstance(obj, dict) or set(obj) != {"actions"}:
         raise InvalidAction("expected the sole top-level key 'actions'")
     return validate_actions(obj["actions"], limit)

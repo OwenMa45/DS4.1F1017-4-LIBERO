@@ -49,6 +49,7 @@ class Config:
     expected_task_name: str = ""
     api_provider: str = "deepseek"
     sam3: dict = field(default_factory=dict)
+    retry_incomplete_actions: bool = False
 
     def to_dict(self):
         values = asdict(self)
@@ -57,7 +58,7 @@ class Config:
         if self.api_provider == "deepseek":
             values.pop("api_provider")
         # Old profile hashes must remain replayable.
-        for key in ("grasp_feedback", "gripper_feedback_barrier", "geometry_contract", "expected_task_name"):
+        for key in ("grasp_feedback", "gripper_feedback_barrier", "geometry_contract", "expected_task_name", "retry_incomplete_actions"):
             if not values[key]:
                 values.pop(key)
         # Preserve the original v1 fingerprint and request contract.
@@ -77,6 +78,8 @@ class Config:
             from .sam3_tools import settings
             options = settings(self.sam3)
             rounds += options["max_tool_rounds"] + options["max_format_retries"]
+        elif self.retry_incomplete_actions:
+            rounds += 1
         return rounds * (self.max_retries + 1)
 
     @classmethod
@@ -95,6 +98,8 @@ class Config:
             if type(value) is not type(getattr(default, key)):
                 raise ExperimentError(f"Wrong type for config field {key}")
         cfg = cls(**values)
+        if cfg.retry_incomplete_actions and (cfg.api_provider != "deepseek" or cfg.protocol_version != "ds-libero-direct-v2"):
+            raise ExperimentError("retry_incomplete_actions requires the built-in DeepSeek v2 policy")
         if cfg.sam3:
             from .sam3_tools import settings
             if cfg.api_provider != "deepseek" or cfg.protocol_version != "ds-libero-direct-v2":
